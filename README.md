@@ -1,36 +1,245 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Help Desk Management System
 
-## Getting Started
+A help desk system for managing support tickets. Users can create tickets, assign them to team members, and track their progress.
 
-First, run the development server:
+## What This Project Does
+
+This is a web application where:
+- **Employees** can create support tickets when they have problems
+- **Agents** can view and manage tickets assigned to them
+- **Admins** can manage users, departments, and settings
+
+## Features
+
+- Create and track support tickets
+- Assign tickets to team members
+- Add comments to tickets for collaboration
+- Organize tickets by categories and departments
+- Different user roles with different permissions
+
+## Technologies Used
+
+- **Next.js** - The web framework (like React but with extra features)
+- **TypeScript** - JavaScript with type checking (helps prevent errors)
+- **Prisma** - Tool to interact with the database
+- **PostgreSQL** - The database where all data is stored
+- **Tailwind CSS** - For styling the user interface
+- **NextAuth** - For handling user login/logout
+
+## What You Need Before Starting
+
+1. **Node.js** (version 18 or higher) - Download from [nodejs.org](https://nodejs.org)
+2. **PostgreSQL** - A database program. You can install it locally or use a cloud service like Supabase
+3. **Git** - For cloning the repository (optional if you have the code already)
+
+## Step-by-Step Setup Guide
+
+### Step 1: Get the Code
+
+If you have the code already, skip this step. Otherwise:
+
+```bash
+git clone <repository-url>
+cd help-desk-management-system
+```
+
+### Step 2: Install Dependencies
+
+This downloads all the libraries the project needs:
+
+```bash
+npm install
+```
+
+*This might take a few minutes. You'll see lots of text scrolling by - that's normal!*
+
+### Step 3: Set Up Your Database
+
+You need a PostgreSQL database running. Here are two options:
+
+**Option A: Use a local PostgreSQL installation**
+1. Install PostgreSQL on your computer
+2. Create a new database called `helpdesk_db`
+3. Remember your username and password
+
+**Option B: Use Supabase (easier, free cloud option)**
+1. Go to [supabase.com](https://supabase.com) and create a free account
+2. Create a new project
+3. Go to Settings → Database to get your connection string
+
+### Step 4: Configure Environment Variables
+
+Environment variables are settings that your app needs but shouldn't be shared publicly (like passwords).
+
+1. Copy the example file:
+```bash
+cp .env.example .env
+```
+
+2. Open the `.env` file in a text editor and update it:
+
+```env
+# Database connection - replace with your actual database details
+DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/helpdesk_db?schema=public"
+
+# NextAuth settings
+NEXTAUTH_SECRET="any-random-string-here"
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+**What to put in DATABASE_URL:**
+- If using local PostgreSQL: `postgresql://postgres:YOUR_PASSWORD@localhost:5432/helpdesk_db?schema=public`
+- If using Supabase: Copy the connection string from Supabase dashboard
+
+**What to put in NEXTAUTH_SECRET:**
+- Any random string works for development
+- For production, generate a secure one with: `openssl rand -base64 32`
+
+### Step 5: Set Up the Database Tables
+
+Run this command to create all the tables in your database:
+
+```bash
+npx prisma migrate dev
+```
+
+*This reads the `prisma/schema.prisma` file and creates the matching tables in your database.*
+
+### Step 6: Start the Application
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+You should see something like:
+```
+✓ Ready in 2.3s
+○ Local: http://localhost:3000
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Understanding the API
 
-## Learn More
+The application has API endpoints that the frontend uses to get and send data. Here's what they do:
 
-To learn more about Next.js, take a look at the following resources:
+### Authentication (Login/Logout)
+- `POST /api/auth/signin` - User logs in
+- `POST /api/auth/signout` - User logs out
+- `GET /api/auth/session` - Check if user is logged in
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Tickets (The main feature)
+- `GET /api/tickets` - Get list of tickets (what you see depends on your role)
+- `POST /api/tickets` - Create a new ticket
+- `GET /api/tickets/[id]` - Get details of one specific ticket
+- `PATCH /api/tickets/[id]` - Update a ticket (change status, assign to someone, etc.)
+- `DELETE /api/tickets/[id]` - Delete a ticket (only admins can do this)
+- `GET /api/tickets/[id]/comments` - Get all comments on a ticket
+- `POST /api/tickets/[id]/comments` - Add a new comment to a ticket
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Departments
+- `GET /api/departments` - Get all departments
+- `POST /api/departments` - Create a new department (only admins)
+- `GET /api/departments/[id]` - Get details of one department
+- `PATCH /api/departments/[id]` - Update a department (only admins)
+- `DELETE /api/departments/[id]` - Delete a department (only admins)
 
-## Deploy on Vercel
+### Users
+- `GET /api/users` - Get all users (only admins and agents)
+- `POST /api/users` - Create a new user (only admins)
+- `GET /api/users/[id]` - Get details of one user
+- `PATCH /api/users/[id]` - Update a user
+- `DELETE /api/users/[id]` - Delete a user (only admins)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Categories
+- `GET /api/categories` - Get all categories
+- `POST /api/categories` - Create a new category (only admins)
+- `GET /api/categories/[id]` - Get details of one category
+- `PATCH /api/categories/[id]` - Update a category (only admins)
+- `DELETE /api/categories/[id]` - Delete a category (only admins)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## User Roles Explained
+
+Different users have different permissions:
+
+- **ADMIN** - Can do everything: manage users, departments, categories, and all tickets
+- **AGENT** - Can view and manage tickets in their department, can see other users
+- **EMPLOYEE** - Can only create tickets and view their own tickets, can update their own profile
+
+## Database Structure
+
+The application stores data in these main tables:
+
+- **Users** - All the people who use the system
+- **Departments** - Different teams or groups (like IT, HR, Support)
+- **Categories** - Types of tickets (like Hardware, Software, Network)
+- **Tickets** - The actual support requests
+- **Comments** - Messages added to tickets
+
+You can see the full structure in the `prisma/schema.prisma` file.
+
+## Useful Commands for Development
+
+### View or Edit Database Visually
+```bash
+npx prisma studio
+```
+*This opens a visual tool where you can see and edit all data in your database.*
+
+### Update Database Structure
+If you change the `prisma/schema.prisma` file, run:
+```bash
+npx prisma migrate dev
+```
+*This updates your database to match the new schema.*
+
+### Reset the Database (Warning: Deletes all data!)
+```bash
+npx prisma migrate reset
+```
+*Use this only if you want to start fresh with an empty database.*
+
+## Troubleshooting
+
+### "Database connection failed" error
+- Make sure your PostgreSQL database is running
+- Check that your DATABASE_URL in `.env` is correct
+- Verify your database username and password
+
+### "Module not found" errors
+- Run `npm install` again to make sure all dependencies are installed
+
+### Migration errors
+- Make sure your database exists
+- Check that you have the right permissions to create tables
+
+### Port already in use
+If you see "port 3000 is already in use", either:
+- Close the other application using port 3000, or
+- Run `npm run dev -- -p 3001` to use port 3001 instead
+
+## Getting Help
+
+If you're stuck:
+1. Check the error message in your terminal
+2. Make sure you followed all the setup steps
+3. Try searching for the error online
+4. Ask a senior developer or your mentor
+
+## Deployment (Putting It Online)
+
+When you're ready to put this on the internet for real users:
+
+The easiest way is using [Vercel](https://vercel.com) (it's free for small projects):
+
+1. Push your code to GitHub
+2. Go to Vercel and click "Import Project"
+3. Connect your GitHub repository
+4. Add your environment variables (DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL)
+5. Click Deploy
+
+**Important:** For production, you'll need a production database (not your local one). Services like Supabase, Neon, or Railway offer free PostgreSQL databases that work well with Vercel.
+
+## License
+
+This project is licensed under the MIT License - you're free to use and modify it.
