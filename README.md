@@ -57,15 +57,11 @@ npm install
 
 You need a PostgreSQL database running. Here are two options:
 
-**Option A: Use a local PostgreSQL installation**
+ Use a local PostgreSQL installation**
 1. Install PostgreSQL on your computer
 2. Create a new database called `helpdesk_db`
 3. Remember your username and password
 
-**Option B: Use Supabase (easier, free cloud option)**
-1. Go to [supabase.com](https://supabase.com) and create a free account
-2. Create a new project
-3. Go to Settings → Database to get your connection string
 
 ### Step 4: Configure Environment Variables
 
@@ -224,22 +220,5 @@ If you're stuck:
 1. Check the error message in your terminal
 2. Make sure you followed all the setup steps
 3. Try searching for the error online
-4. Ask a senior developer or your mentor
+4. Ask a me or fuad
 
-## Deployment (Putting It Online)
-
-When you're ready to put this on the internet for real users:
-
-The easiest way is using [Vercel](https://vercel.com) (it's free for small projects):
-
-1. Push your code to GitHub
-2. Go to Vercel and click "Import Project"
-3. Connect your GitHub repository
-4. Add your environment variables (DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL)
-5. Click Deploy
-
-**Important:** For production, you'll need a production database (not your local one). Services like Supabase, Neon, or Railway offer free PostgreSQL databases that work well with Vercel.
-
-## License
-
-This project is licensed under the MIT License - you're free to use and modify it.
