@@ -1,7 +1,3 @@
 {
-    "cSpell.words": [
-        "helpdesk",
-        "NEXTAUTH",
-        "Supabase"
-    ]
+    "typescript.autoClosingTags": false
 }
