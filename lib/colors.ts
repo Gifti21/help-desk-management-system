@@ -1,35 +1,4 @@
-/*
-IMPORT EXAMPLES:
-
-// Import individual color constants
-import { TEAL_PRIMARY, PAGE_BACKGROUND, BUTTONS } from '@/lib/colors';
-
-// Import the entire colors object
-import { colors } from '@/lib/colors';
-
-// Import CSS variables for use in stylesheets
-import { cssVariables } from '@/lib/colors';
-
-USAGE EXAMPLES:
-
-// Using individual constants
-const buttonColor = TEAL_PRIMARY;
-const bgColor = PAGE_BACKGROUND;
-
-// Using the colors object
-const primaryButton = colors.buttons.primary;
-const heroStart = colors.heroGradient.start;
-
-// Using in React components
-<button style={{ backgroundColor: BUTTONS.primary, color: BUTTONS.primaryText }}>
-  Click me
-</button>
-
-// Using in CSS/Tailwind
-<div style={{ background: `linear-gradient(${HERO_GRADIENT.direction}, ${HERO_GRADIENT.start}, ${HERO_GRADIENT.middle}, ${HERO_GRADIENT.end})` }}>
-  Hero Section
-</div>
-*/
+export const FONT_FAMILY = '"Inter", sans-serif';
 
 export const colors = {
   // HERO GRADIENT

@@ -11,17 +11,18 @@ const updateCategorySchema = z.object({
 // GET /api/categories/[id] - Get a specific category
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const { id } = await params;
     
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const category = await prisma.category.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         tickets: {
           include: {
@@ -58,10 +59,11 @@ export async function GET(
 // PATCH /api/categories/[id] - Update a category (admin only)
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const { id } = await params;
     
     if (!session?.user || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -71,7 +73,7 @@ export async function PATCH(
     const validatedData = updateCategorySchema.parse(body);
 
     const category = await prisma.category.update({
-      where: { id: params.id },
+      where: { id },
       data: validatedData
     });
 
@@ -88,17 +90,18 @@ export async function PATCH(
 // DELETE /api/categories/[id] - Delete a category (admin only)
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const { id } = await params;
     
     if (!session?.user || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await prisma.category.delete({
-      where: { id: params.id }
+      where: { id }
     });
 
     return NextResponse.json({ message: "Category deleted" });
