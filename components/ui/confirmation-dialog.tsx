@@ -2,6 +2,9 @@
 
 import React from 'react';
 import { AlertTriangle, X } from 'lucide-react';
+import { useTheme } from '../providers/ThemeProvider';
+import { darkModeColors } from '@/lib/dark-mode-color';
+import { colors } from '@/lib/colors';
 
 interface ConfirmationDialogProps {
   isOpen: boolean;
@@ -24,29 +27,39 @@ export function ConfirmationDialog({
   cancelLabel = 'Cancel',
   variant = 'danger',
 }: ConfirmationDialogProps) {
+  const { colors: theme, isDark } = useTheme();
+
   if (!isOpen) return null;
 
   const getVariantStyles = () => {
     switch (variant) {
       case 'danger':
         return {
-          icon: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400',
-          button: 'bg-[var(--error)] text-[var(--error-foreground)] hover:opacity-90',
+          iconBg: isDark ? 'rgba(239, 68, 68, 0.1)' : '#FEE2E2',
+          iconColor: isDark ? '#FCA5A5' : '#DC2626',
+          buttonBg: '#EF4444',
+          buttonText: '#FFFFFF',
         };
       case 'warning':
         return {
-          icon: 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400',
-          button: 'bg-[var(--warning)] text-[var(--warning-foreground)] hover:opacity-90',
+          iconBg: isDark ? 'rgba(251, 146, 60, 0.1)' : '#FEF3C7',
+          iconColor: isDark ? '#FCD34D' : '#D97706',
+          buttonBg: '#F59E0B',
+          buttonText: '#000000',
         };
       case 'default':
         return {
-          icon: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
-          button: 'bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)]',
+          iconBg: isDark ? 'rgba(45, 212, 191, 0.1)' : '#DBEAFE',
+          iconColor: isDark ? darkModeColors.accent.primary : colors.tealPrimary,
+          buttonBg: isDark ? darkModeColors.accent.primary : colors.tealPrimary,
+          buttonText: isDark ? '#0F172A' : '#16332B',
         };
       default:
         return {
-          icon: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400',
-          button: 'bg-[var(--error)] text-[var(--error-foreground)] hover:opacity-90',
+          iconBg: isDark ? 'rgba(239, 68, 68, 0.1)' : '#FEE2E2',
+          iconColor: isDark ? '#FCA5A5' : '#DC2626',
+          buttonBg: '#EF4444',
+          buttonText: '#FFFFFF',
         };
     }
   };
@@ -62,26 +75,56 @@ export function ConfirmationDialog({
       />
 
       {/* Dialog */}
-      <div className="relative bg-[var(--card)] border border-[var(--card-border)] rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 animate-[scaleIn_0.2s_ease-out]">
+      <div
+        className="relative rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 animate-[scaleIn_0.2s_ease-out]"
+        style={{
+          backgroundColor: theme.card,
+          borderColor: theme.cardBorder,
+          border: '1px solid',
+        }}
+      >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1 rounded-lg hover:bg-[var(--accent)] text-[var(--foreground-muted)] hover:text-[var(--accent-foreground)] transition-colors"
+          className="absolute top-4 right-4 p-1 rounded-lg hover:opacity-80 transition-colors"
+          style={{
+            color: isDark ? darkModeColors.text.secondary : colors.bodyTextGrey,
+          }}
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="flex flex-col items-center text-center">
-          <div className={`w-14 h-14 rounded-full ${styles.icon} flex items-center justify-center mb-4`}>
+          <div
+            className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
+            style={{
+              backgroundColor: styles.iconBg,
+              color: styles.iconColor,
+            }}
+          >
             <AlertTriangle className="w-7 h-7" />
           </div>
 
-          <h3 className="text-lg font-bold text-[var(--card-foreground)] mb-2">{title}</h3>
-          <p className="text-sm text-[var(--foreground-muted)] mb-6 max-w-sm">{message}</p>
+          <h3
+            className="text-lg font-bold mb-2"
+            style={{ color: theme.foreground }}
+          >
+            {title}
+          </h3>
+          <p
+            className="text-sm mb-6 max-w-sm"
+            style={{ color: isDark ? darkModeColors.text.secondary : colors.bodyTextGrey }}
+          >
+            {message}
+          </p>
 
           <div className="flex gap-3 w-full">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 text-sm font-medium text-[var(--foreground)] bg-[var(--secondary)] hover:bg-[var(--secondary-hover)] rounded-xl transition-colors"
+              className="flex-1 px-4 py-2.5 text-sm font-medium rounded-xl transition-colors"
+              style={{
+                backgroundColor: isDark ? darkModeColors.background.tertiary : colors.lightTealBg,
+                color: theme.foreground,
+              }}
             >
               {cancelLabel}
             </button>
@@ -90,7 +133,11 @@ export function ConfirmationDialog({
                 onConfirm();
                 onClose();
               }}
-              className={`flex-1 px-4 py-2.5 text-sm font-medium rounded-xl transition-colors ${styles.button}`}
+              className="flex-1 px-4 py-2.5 text-sm font-medium rounded-xl transition-colors hover:opacity-90"
+              style={{
+                backgroundColor: styles.buttonBg,
+                color: styles.buttonText,
+              }}
             >
               {confirmLabel}
             </button>

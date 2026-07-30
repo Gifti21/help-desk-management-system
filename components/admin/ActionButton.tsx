@@ -72,7 +72,7 @@ export function ActionButton({
             },
             ghost: {
                 backgroundColor: 'transparent',
-                color: theme.foregroundSecondary,
+                color: isDark ? theme.foreground : '#334155', // Dark gray for light mode, white for dark mode
             }
         };
 
