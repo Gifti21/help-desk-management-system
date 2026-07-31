@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { PageLayout } from '../../../components/admin/PageLayout';
 import { TopBar } from '../../../components/admin/TopBar';
 import { StatCard } from '../../../components/admin/StatCard';
@@ -8,152 +8,580 @@ import { ActionButton } from '../../../components/admin/ActionButton';
 import { DataTable } from '../../../components/admin/DataTable';
 import { SearchFilter } from '../../../components/admin/SearchFilter';
 import { ConfirmationDialog } from '../../../components/ui/confirmation-dialog';
-import { Input } from '../../../components/ui/input';
-import { useTheme } from '../../../components/providers/ThemeProvider';
 import { useToast } from '../../../components/ui/toast';
+import { useTheme } from '../../../components/providers/ThemeProvider';
+import { Input } from '../../../components/ui/input';
 import { fonts } from '@/lib/fonts';
-import { Users, Shield, UserX, Plus, Eye, Edit2, UserCog, Ban, X, Save, CheckCircle, Trash2, Download } from 'lucide-react';
+import {
+    Ticket,
+    AlertTriangle,
+    Users,
+    Download,
+    Eye,
+    UserPlus,
+    Trash2,
+    X,
+    Check,
+    RotateCcw,
+    Edit2
+} from 'lucide-react';
 
-const initialMockUsers = [
-    { id: 'user-1', name: 'Alemayehu Tadesse', email: 'alemayehu.tadesse@besys.com.et', role: 'ADMIN', department: 'IT Support', phone: '+251 91 234 5678', location: 'Addis Ababa, Ethiopia', status: 'active', lastActive: 'Active 2m ago', createdAt: '2024-01-15' },
-    { id: 'user-2', name: 'Selam Yohannes', email: 'selam.yohannes@besys.com.et', role: 'AGENT', department: 'Customer Support', phone: '+251 91 345 6789', location: 'Bahir Dar, Ethiopia', status: 'active', lastActive: 'Active 15m ago', createdAt: '2024-02-20' },
-    { id: 'user-3', name: 'Dawit Hailu', email: 'dawit.hailu@besys.com.et', role: 'AGENT', department: 'Operations', phone: '+251 91 456 7890', location: 'Hawassa, Ethiopia', status: 'active', lastActive: 'Active 1h ago', createdAt: '2024-03-10' },
-    { id: 'user-4', name: 'Tigist Bekele', email: 'tigist.bekele@besys.com.et', role: 'EMPLOYEE', department: 'HR', phone: '+251 91 567 8901', location: 'Mekelle, Ethiopia', status: 'inactive', lastActive: 'Active 2d ago', createdAt: '2024-01-25' },
-    { id: 'user-5', name: 'Bereket Mekonnen', email: 'bereket.mekonnen@besys.com.et', role: 'EMPLOYEE', department: 'Finance', phone: '+251 91 678 9012', location: 'Dire Dawa, Ethiopia', status: 'active', lastActive: 'Active 30m ago', createdAt: '2024-04-05' }
+// Ethiopian mock ticket data
+const initialMockTickets = [
+    {
+        id: '#HD-4892',
+        title: 'Network connectivity issue in Bole office',
+        description: 'Unable to access internal servers from Bole branch. Multiple users affected since morning.',
+        requester: 'Alemayehu Tadesse',
+        assignee: 'Selam Yohannes',
+        department: 'IT Support',
+        category: 'Network',
+        status: 'IN_PROGRESS',
+        priority: 'HIGH',
+        createdAt: '2024-07-15T10:30:00Z'
+    },
+    {
+        id: '#HD-4888',
+        title: 'Printer not working - 3rd floor',
+        description: 'HP LaserJet printer on 3rd floor is showing paper jam error but there is no paper stuck.',
+        requester: 'Tigist Bekele',
+        assignee: 'Dawit Hailu',
+        department: 'Operations',
+        category: 'Hardware',
+        status: 'OPEN',
+        priority: 'MEDIUM',
+        createdAt: '2024-07-14T14:20:00Z'
+    },
+    {
+        id: '#HD-4875',
+        title: 'Access request for new employee',
+        description: 'New employee Meron Assefa needs access to ERP system and email account setup.',
+        requester: 'Hanna Solomon',
+        assignee: '',
+        department: 'HR',
+        category: 'Access',
+        status: 'OPEN',
+        priority: 'URGENT',
+        createdAt: '2024-07-10T08:45:00Z'
+    },
+    {
+        id: '#HD-4850',
+        title: 'Email account issue - Cannot send emails',
+        description: 'User reports emails are stuck in outbox and not being sent.',
+        requester: 'Bereket Mekonnen',
+        assignee: 'Selam Yohannes',
+        department: 'IT Support',
+        category: 'Software',
+        status: 'RESOLVED',
+        priority: 'MEDIUM',
+        createdAt: '2024-07-08T11:15:00Z'
+    },
+    {
+        id: '#HD-4820',
+        title: 'Security audit completed',
+        description: 'Annual security audit has been completed. All systems passed compliance checks.',
+        requester: 'Yonas Desta',
+        assignee: 'Dawit Hailu',
+        department: 'Security',
+        category: 'Security',
+        status: 'CLOSED',
+        priority: 'LOW',
+        createdAt: '2024-07-05T09:00:00Z'
+    }
 ];
 
-export default function UsersPage() {
+const mockAgents = [
+    { id: '1', name: 'Selam Yohannes', department: 'IT Support' },
+    { id: '2', name: 'Dawit Hailu', department: 'Operations' },
+    { id: '3', name: 'Meseret Kebede', department: 'HR' },
+    { id: '4', name: 'Abebech Wolde', department: 'IT Support' }
+];
+
+export default function TicketsPage() {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('ALL');
+    const [priorityFilter, setPriorityFilter] = useState('ALL');
+    const [departmentFilter, setDepartmentFilter] = useState('ALL');
+    const [categoryFilter, setCategoryFilter] = useState('ALL');
+    const [tickets, setTickets] = useState(initialMockTickets);
+
+    // Modals state
+    const [viewModal, setViewModal] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
+    const [assignModal, setAssignModal] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
+    const [statusModal, setStatusModal] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
+    const [priorityModal, setPriorityModal] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
+    const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
+    const [closeDialog, setCloseDialog] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
+    const [reopenDialog, setReopenDialog] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
+
     const { colors: theme } = useTheme();
     const { toast } = useToast();
-    const [users, setUsers] = useState(initialMockUsers);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [roleFilter, setRoleFilter] = useState('ALL');
-    const [statusFilter, setStatusFilter] = useState('ALL');
-    const [departmentFilter, setDepartmentFilter] = useState('ALL');
-    const [viewModal, setViewModal] = useState<{ isOpen: boolean; user: any }>({ isOpen: false, user: null });
-    const [addModal, setAddModal] = useState(false);
-    const [editModal, setEditModal] = useState<{ isOpen: boolean; user: any }>({ isOpen: false, user: null });
-    const [roleModal, setRoleModal] = useState<{ isOpen: boolean; user: any }>({ isOpen: false, user: null });
-    const [disableDialog, setDisableDialog] = useState<{ isOpen: boolean; user: any }>({ isOpen: false, user: null });
-    const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; user: any }>({ isOpen: false, user: null });
-    const [formData, setFormData] = useState({ name: '', email: '', phone: '', role: 'EMPLOYEE', department: '', location: '', status: 'active' });
 
-    const filteredUsers = users.filter(user => {
-        const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesRole = roleFilter === 'ALL' || user.role === roleFilter;
-        const matchesStatus = statusFilter === 'ALL' || user.status === statusFilter;
-        const matchesDepartment = departmentFilter === 'ALL' || user.department === departmentFilter;
-        return matchesSearch && matchesRole && matchesStatus && matchesDepartment;
+    const filteredTickets = tickets.filter(ticket => {
+        const matchesSearch = ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            ticket.requester.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchesStatus = statusFilter === 'ALL' || ticket.status === statusFilter;
+        const matchesPriority = priorityFilter === 'ALL' || ticket.priority === priorityFilter;
+        const matchesDepartment = departmentFilter === 'ALL' || ticket.department === departmentFilter;
+        const matchesCategory = categoryFilter === 'ALL' || ticket.category === categoryFilter;
+
+        return matchesSearch && matchesStatus && matchesPriority && matchesDepartment && matchesCategory;
     });
 
-    const handleAddUser = () => {
-        if (!formData.name || !formData.email || !formData.department || !formData.phone || !formData.location) { toast('Please fill all required fields', 'error'); return; }
-        const newUser = { id: `user-${Date.now()}`, name: formData.name, email: formData.email, phone: formData.phone, department: formData.department, location: formData.location, role: 'EMPLOYEE', status: 'active', lastActive: 'Just created', createdAt: new Date().toISOString().split('T')[0] };
-        setUsers(prev => [...prev, newUser]);
-        setAddModal(false);
-        setFormData({ name: '', email: '', phone: '', role: 'EMPLOYEE', department: '', location: '', status: 'active' });
-        toast(`User ${formData.name} added successfully`, 'success');
+    // Continue in next part...
+
+    // Handler functions
+    const handleAssign = (ticketId: string, agentName: string) => {
+        setTickets(prev => prev.map(t =>
+            t.id === ticketId ? { ...t, assignee: agentName } : t
+        ));
+        setAssignModal({ isOpen: false, ticket: null });
+        toast(`Ticket ${ticketId} assigned to ${agentName}`, 'success');
     };
 
-    const handleEditUser = () => {
-        if (!editModal.user || !formData.name || !formData.email || !formData.department || !formData.phone || !formData.location) { toast('Please fill all required fields', 'error'); return; }
-        setUsers(prev => prev.map(u => u.id === editModal.user.id ? { ...u, name: formData.name, email: formData.email, phone: formData.phone, department: formData.department, location: formData.location, status: formData.status } : u));
-        setEditModal({ isOpen: false, user: null });
-        toast(`User ${formData.name} updated successfully`, 'success');
+    const handleStatusChange = (ticketId: string, newStatus: string) => {
+        setTickets(prev => prev.map(t =>
+            t.id === ticketId ? { ...t, status: newStatus } : t
+        ));
+        setStatusModal({ isOpen: false, ticket: null });
+        toast(`Ticket ${ticketId} status updated to ${newStatus.replace('_', ' ')}`, 'success');
     };
 
-    const handleRoleChange = (userId: string, newRole: string) => {
-        setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
-        setRoleModal({ isOpen: false, user: null });
-        toast(`Role updated to ${newRole}`, 'success');
+    const handlePriorityChange = (ticketId: string, newPriority: string) => {
+        setTickets(prev => prev.map(t =>
+            t.id === ticketId ? { ...t, priority: newPriority } : t
+        ));
+        setPriorityModal({ isOpen: false, ticket: null });
+        toast(`Ticket ${ticketId} priority updated to ${newPriority}`, 'success');
     };
 
-    const handleDisableUser = () => {
-        if (!disableDialog.user) return;
-        const newStatus = disableDialog.user.status === 'active' ? 'inactive' : 'active';
-        setUsers(prev => prev.map(u => u.id === disableDialog.user.id ? { ...u, status: newStatus } : u));
-        setDisableDialog({ isOpen: false, user: null });
-        toast(`User ${newStatus === 'inactive' ? 'disabled' : 'enabled'} successfully`, 'success');
+    const handleClose = () => {
+        if (!closeDialog.ticket) return;
+        setTickets(prev => prev.map(t =>
+            t.id === closeDialog.ticket.id ? { ...t, status: 'CLOSED' } : t
+        ));
+        setCloseDialog({ isOpen: false, ticket: null });
+        toast(`Ticket ${closeDialog.ticket.id} closed successfully`, 'success');
     };
 
-    const handleDeleteUser = (userId: string) => {
-        setUsers(prev => prev.filter(u => u.id !== userId));
-        toast('User deleted successfully', 'success');
+    const handleReopen = () => {
+        if (!reopenDialog.ticket) return;
+        setTickets(prev => prev.map(t =>
+            t.id === reopenDialog.ticket.id ? { ...t, status: 'OPEN' } : t
+        ));
+        setReopenDialog({ isOpen: false, ticket: null });
+        toast(`Ticket ${reopenDialog.ticket.id} reopened successfully`, 'success');
     };
 
-    const handleExportData = () => {
-        const headers = ['ID', 'Name', 'Email', 'Role', 'Department', 'Phone', 'Location', 'Status', 'Last Active', 'Created'];
-        const csvData = filteredUsers.map(user => [
-            user.id,
-            user.name,
-            user.email,
-            user.role,
-            user.department,
-            user.phone,
-            user.location,
-            user.status,
-            user.lastActive,
-            user.createdAt
-        ]);
-        const csvContent = [headers, ...csvData].map(row => row.join(',')).join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `users-export-${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        toast('User data exported successfully', 'success');
+    const handleDelete = () => {
+        if (!deleteDialog.ticket) return;
+        setTickets(prev => prev.filter(t => t.id !== deleteDialog.ticket.id));
+        setDeleteDialog({ isOpen: false, ticket: null });
+        toast(`Ticket ${deleteDialog.ticket.id} deleted successfully`, 'success');
     };
 
-    const openAddModal = () => { setFormData({ name: '', email: '', phone: '', role: 'EMPLOYEE', department: '', location: '', status: 'active' }); setAddModal(true); };
-    const openEditModal = (user: any) => { setFormData({ name: user.name, email: user.email, phone: user.phone, role: user.role, department: user.department, location: user.location, status: user.status }); setEditModal({ isOpen: true, user }); };
+    const handleExport = () => {
+        const csvData = [
+            ['Ticket ID', 'Title', 'Category', 'Department', 'Priority', 'Status', 'Assignee', 'Requester', 'Created'],
+            ...filteredTickets.map(t => [
+                t.id, t.title, t.category, t.department, t.priority, t.status,
+                t.assignee || 'Unassigned', t.requester, new Date(t.createdAt).toLocaleDateString()
+            ])
+        ].map(row => row.join(',')).join('\n');
 
-    const getRoleBadge = (role: string) => {
-        const roleColors: Record<string, { bg: string; text: string }> = { 'ADMIN': { bg: '#dbeafe', text: '#1e40af' }, 'AGENT': { bg: '#e0e7ff', text: '#5b21b6' }, 'EMPLOYEE': { bg: '#f3f4f6', text: '#6b7280' } };
-        const color = roleColors[role] || roleColors['EMPLOYEE'];
-        return <span className="px-2 py-1 text-xs font-medium rounded border" style={{ backgroundColor: color.bg, color: color.text, fontSize: fonts.caption.small.size }}><Shield className="h-3 w-3 inline mr-1" />{role}</span>;
+        const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'tickets-export.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
-    const getStatusBadge = (status: string) => status === 'active' ? <span className="px-2 py-1 text-xs font-medium rounded border" style={{ backgroundColor: '#dcfce7', color: '#15803d', fontSize: fonts.caption.small.size }}><CheckCircle className="h-3 w-3 inline mr-1" />Active</span> : <span className="px-2 py-1 text-xs font-medium rounded border" style={{ backgroundColor: '#fee2e2', color: '#dc2626', fontSize: fonts.caption.small.size }}><Ban className="h-3 w-3 inline mr-1" />Inactive</span>;
+    const getStatusBadge = (status: string) => {
+        const statusColors: Record<string, { bg: string; text: string }> = {
+            'OPEN': { bg: '#dbeafe', text: '#1e40af' },
+            'IN_PROGRESS': { bg: '#fef3c7', text: '#d97706' },
+            'RESOLVED': { bg: '#dcfce7', text: '#15803d' },
+            'CLOSED': { bg: theme.backgroundTertiary, text: theme.foregroundMuted }
+        };
+        const statusColor = statusColors[status] || statusColors['OPEN'];
+        return (
+            <span className="px-2 py-1 text-xs font-medium rounded border" style={{ backgroundColor: statusColor.bg, color: statusColor.text, fontSize: fonts.caption.small.size }}>
+                {status.replace('_', ' ')}
+            </span>
+        );
+    };
 
-    const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase();
+    const getPriorityBadge = (priority: string) => {
+        const priorityColors: Record<string, { bg: string; text: string }> = {
+            'URGENT': { bg: '#fecaca', text: '#991b1b' },
+            'HIGH': { bg: '#fee2e2', text: '#dc2626' },
+            'MEDIUM': { bg: '#fed7aa', text: '#ea580c' },
+            'LOW': { bg: '#dcfce7', text: '#15803d' }
+        };
+        const priorityColor = priorityColors[priority] || priorityColors['MEDIUM'];
+        return (
+            <span className="px-2 py-1 text-xs font-medium rounded border" style={{ backgroundColor: priorityColor.bg, color: priorityColor.text, fontSize: fonts.caption.small.size }}>
+                {priority}
+            </span>
+        );
+    };
 
-    const userColumns = [
-        { key: 'name', title: 'Name', render: (value: string, row: any) => <div className="flex items-center"><div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: theme.accent }}><span className="font-semibold" style={{ color: theme.accentForeground, fontSize: fonts.body.sm.size }}>{getInitials(value)}</span></div><div><p className="font-medium" style={{ color: theme.foreground, fontSize: fonts.body.regular.size }}>{value}</p><p style={{ color: theme.foregroundMuted, fontSize: fonts.body.xs.size }}>{row.email}</p></div></div> },
-        { key: 'role', title: 'Role', render: (value: string) => getRoleBadge(value) },
-        { key: 'department', title: 'Department', render: (value: string) => <span style={{ color: theme.foreground, fontSize: fonts.body.sm.size }}>{value}</span> },
-        { key: 'status', title: 'Status', render: (value: string) => getStatusBadge(value) },
-        { key: 'lastActive', title: 'Last Active', render: (value: string) => <span style={{ color: theme.foregroundMuted, fontSize: fonts.body.xs.size }}>{value}</span> },
-        { key: 'actions', title: 'Actions', render: (_: any, row: any) => <div className="flex items-center space-x-1"><ActionButton variant="ghost" size="sm" icon={Eye} onClick={() => setViewModal({ isOpen: true, user: row })}>View</ActionButton><ActionButton variant="ghost" size="sm" icon={Edit2} onClick={() => openEditModal(row)}>Edit</ActionButton><ActionButton variant="ghost" size="sm" icon={UserCog} onClick={() => setRoleModal({ isOpen: true, user: row })}>Role</ActionButton><ActionButton variant="ghost" size="sm" icon={Ban} onClick={() => setDisableDialog({ isOpen: true, user: row })}>{row.status === 'active' ? 'Disable' : 'Enable'}</ActionButton><ActionButton variant="ghost" size="sm" icon={Trash2} onClick={() => setDeleteDialog({ isOpen: true, user: row })}>Delete</ActionButton></div> }
+    const ticketColumns = [
+        {
+            key: 'id',
+            title: 'Ticket ID',
+            render: (value: string) => (
+                <span className="font-mono font-medium" style={{ color: theme.primary, fontSize: fonts.body.sm.size }}>{value}</span>
+            )
+        },
+        {
+            key: 'title',
+            title: 'Title',
+            render: (value: string, row: any) => (
+                <div>
+                    <h3 className="font-medium" style={{ fontSize: fonts.body.regular.size, fontWeight: fonts.fontWeight.medium, color: theme.foreground }}>{value}</h3>
+                    <div className="flex items-center space-x-3 mt-1" style={{ fontSize: fonts.caption.regular.size, color: theme.foregroundMuted }}>
+                        <span>{row.category}</span>
+                        <span>•</span>
+                        <span>{row.department}</span>
+                    </div>
+                </div>
+            )
+        },
+        {
+            key: 'requester',
+            title: 'Requester',
+            render: (value: string) => <span style={{ fontSize: fonts.body.sm.size, color: theme.foreground }}>{value}</span>
+        },
+        {
+            key: 'assignee',
+            title: 'Assignee',
+            render: (value: string) => (
+                <span style={{ fontSize: fonts.body.sm.size, color: value ? theme.foreground : theme.foregroundMuted }}>
+                    {value || 'Unassigned'}
+                </span>
+            )
+        },
+        {
+            key: 'priority',
+            title: 'Priority',
+            render: (value: string) => getPriorityBadge(value)
+        },
+        {
+            key: 'status',
+            title: 'Status',
+            render: (value: string) => getStatusBadge(value)
+        },
+        {
+            key: 'createdAt',
+            title: 'Created',
+            render: (value: string) => (
+                <span style={{ fontSize: fonts.body.xs.size, color: theme.foregroundMuted }}>
+                    {new Date(value).toLocaleDateString()}
+                </span>
+            )
+        },
+        {
+            key: 'actions',
+            title: 'Actions',
+            render: (_value: any, row: any) => (
+                <div className="flex items-center space-x-1">
+                    <ActionButton variant="ghost" size="sm" icon={Eye} onClick={() => setViewModal({ isOpen: true, ticket: row })}>
+                        View
+                    </ActionButton>
+                    <ActionButton variant="ghost" size="sm" icon={UserPlus} onClick={() => setAssignModal({ isOpen: true, ticket: row })}>
+                        Assign
+                    </ActionButton>
+                    <ActionButton variant="ghost" size="sm" icon={Edit2} onClick={() => setStatusModal({ isOpen: true, ticket: row })}>
+                        Status
+                    </ActionButton>
+                    {row.status === 'CLOSED' ? (
+                        <ActionButton variant="ghost" size="sm" icon={RotateCcw} onClick={() => setReopenDialog({ isOpen: true, ticket: row })}>
+                            Reopen
+                        </ActionButton>
+                    ) : (
+                        <ActionButton variant="ghost" size="sm" icon={Check} onClick={() => setCloseDialog({ isOpen: true, ticket: row })}>
+                            Close
+                        </ActionButton>
+                    )}
+                    <ActionButton variant="ghost" size="sm" icon={Trash2} onClick={() => setDeleteDialog({ isOpen: true, ticket: row })}>
+                        Delete
+                    </ActionButton>
+                </div>
+            )
+        }
     ];
 
     const filters = [
-        { label: 'Role', value: roleFilter, onChange: setRoleFilter, options: [{ label: 'All Roles', value: 'ALL' }, { label: 'Admin', value: 'ADMIN' }, { label: 'Agent', value: 'AGENT' }, { label: 'Employee', value: 'EMPLOYEE' }] },
-        { label: 'Status', value: statusFilter, onChange: setStatusFilter, options: [{ label: 'All Status', value: 'ALL' }, { label: 'Active', value: 'active' }, { label: 'Inactive', value: 'inactive' }] },
-        { label: 'Department', value: departmentFilter, onChange: setDepartmentFilter, options: [{ label: 'All Departments', value: 'ALL' }, { label: 'IT Support', value: 'IT Support' }, { label: 'Customer Support', value: 'Customer Support' }, { label: 'Operations', value: 'Operations' }, { label: 'HR', value: 'HR' }, { label: 'Finance', value: 'Finance' }] }
+        {
+            label: 'Status',
+            value: statusFilter,
+            onChange: setStatusFilter,
+            options: [
+                { label: 'All Status', value: 'ALL' },
+                { label: 'Open', value: 'OPEN' },
+                { label: 'In Progress', value: 'IN_PROGRESS' },
+                { label: 'Resolved', value: 'RESOLVED' },
+                { label: 'Closed', value: 'CLOSED' }
+            ]
+        },
+        {
+            label: 'Priority',
+            value: priorityFilter,
+            onChange: setPriorityFilter,
+            options: [
+                { label: 'All Priority', value: 'ALL' },
+                { label: 'Urgent', value: 'URGENT' },
+                { label: 'High', value: 'HIGH' },
+                { label: 'Medium', value: 'MEDIUM' },
+                { label: 'Low', value: 'LOW' }
+            ]
+        },
+        {
+            label: 'Department',
+            value: departmentFilter,
+            onChange: setDepartmentFilter,
+            options: [
+                { label: 'All Departments', value: 'ALL' },
+                { label: 'IT Support', value: 'IT Support' },
+                { label: 'Operations', value: 'Operations' },
+                { label: 'HR', value: 'HR' },
+                { label: 'Security', value: 'Security' }
+            ]
+        },
+        {
+            label: 'Category',
+            value: categoryFilter,
+            onChange: setCategoryFilter,
+            options: [
+                { label: 'All Categories', value: 'ALL' },
+                { label: 'Hardware', value: 'Hardware' },
+                { label: 'Software', value: 'Software' },
+                { label: 'Network', value: 'Network' },
+                { label: 'Access', value: 'Access' },
+                { label: 'Security', value: 'Security' }
+            ]
+        }
     ];
+
+    const totalTickets = tickets.length;
+    const openTickets = tickets.filter((t: any) => t.status === 'OPEN').length;
+    const inProgressTickets = tickets.filter((t: any) => t.status === 'IN_PROGRESS').length;
+    const unassignedTickets = tickets.filter((t: any) => !t.assignee).length;
 
     return (
         <PageLayout>
-            <TopBar title="User Management" subtitle="Manage user accounts, roles, and permissions" actions={<div className="flex gap-2"><ActionButton variant="outline" size="sm" icon={Download} onClick={handleExportData}>Export Data</ActionButton><ActionButton variant="primary" size="sm" icon={Plus} onClick={openAddModal}>Add User</ActionButton></div>} />
+            <TopBar
+                title="Ticket Management"
+                subtitle="View, assign, update, and manage all support tickets (Admin View Only - No Ticket Creation)"
+                actions={
+                    <ActionButton variant="outline" size="sm" icon={Download} onClick={handleExport}>
+                        Export
+                    </ActionButton>
+                }
+            />
+
             <div className="p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <StatCard title="Total Users" value={users.length.toString()} icon={Users} iconColor={theme.primary} />
-                    <StatCard title="Active Users" value={users.filter(u => u.status === 'active').length.toString()} icon={CheckCircle} iconColor="#15803d" />
-                    <StatCard title="Admins" value={users.filter(u => u.role === 'ADMIN').length.toString()} icon={Shield} iconColor="#2563eb" />
-                    <StatCard title="Inactive" value={users.filter(u => u.status === 'inactive').length.toString()} icon={UserX} iconColor="#dc2626" />
+                    <StatCard title="Total Tickets" value={totalTickets.toString()} icon={Ticket} iconColor={theme.primary} />
+                    <StatCard title="Open Tickets" value={openTickets.toString()} icon={AlertTriangle} iconColor="#f59e0b" />
+                    <StatCard title="In Progress" value={inProgressTickets.toString()} icon={Users} iconColor="#2FD9C4" />
+                    <StatCard title="Unassigned" value={unassignedTickets.toString()} icon={AlertTriangle} iconColor="#dc2626" />
                 </div>
-                <SearchFilter searchValue={searchTerm} onSearchChange={setSearchTerm} searchPlaceholder="Search by name or email..." filters={filters} />
-                <DataTable title={`All Users (${filteredUsers.length})`} columns={userColumns} data={filteredUsers} emptyMessage="No users found matching your filters." />
+
+                <SearchFilter
+                    searchValue={searchTerm}
+                    onSearchChange={setSearchTerm}
+                    searchPlaceholder="Search by ticket ID, title, or requester..."
+                    filters={filters}
+                />
+
+                <DataTable
+                    title={`All Tickets (${filteredTickets.length})`}
+                    columns={ticketColumns}
+                    data={filteredTickets}
+                    emptyMessage="No tickets found matching your filters."
+                />
             </div>
 
-            {viewModal.isOpen && viewModal.user && <div className="fixed inset-0 z-[9998] flex items-center justify-center"><div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setViewModal({ isOpen: false, user: null })} /><div className="relative rounded-2xl shadow-2xl w-full max-w-2xl mx-4 p-6" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder, border: '1px solid' }}><button onClick={() => setViewModal({ isOpen: false, user: null })} className="absolute top-4 right-4 p-1 rounded-lg" style={{ color: theme.foregroundMuted }}><X className="w-5 h-5" /></button><div className="mb-6"><div className="flex items-center mb-4"><div className="w-16 h-16 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: theme.accent }}><span className="text-2xl font-bold" style={{ color: theme.accentForeground }}>{getInitials(viewModal.user.name)}</span></div><div><h3 className="text-xl font-bold" style={{ color: theme.foreground }}>{viewModal.user.name}</h3><p style={{ color: theme.foregroundMuted, fontSize: fonts.body.sm.size }}>{viewModal.user.email}</p></div></div><div className="grid grid-cols-2 gap-4 mb-4"><div><p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Role</p><div className="mt-1">{getRoleBadge(viewModal.user.role)}</div></div><div><p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Status</p><div className="mt-1">{getStatusBadge(viewModal.user.status)}</div></div><div><p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Department</p><p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.user.department}</p></div><div><p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Phone</p><p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.user.phone}</p></div><div><p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Last Active</p><p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.user.lastActive}</p></div><div><p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Created</p><p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.user.createdAt}</p></div></div></div></div></div>}
-            {addModal && <div className="fixed inset-0 z-[9998] flex items-center justify-center"><div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setAddModal(false)} /><div className="relative rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder, border: '1px solid' }}><button onClick={() => setAddModal(false)} className="absolute top-4 right-4 p-1 rounded-lg" style={{ color: theme.foregroundMuted }}><X className="w-5 h-5" /></button><h3 className="text-lg font-bold mb-4 flex items-center" style={{ color: theme.foreground }}><Plus className="h-5 w-5 mr-2" />Add New User</h3><div className="space-y-4"><div><label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>Full Name <span style={{ color: theme.error }}>*</span></label><Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Enter full name" style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} /></div><div><label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>Email <span style={{ color: theme.error }}>*</span></label><Input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="user@besys.com.et" style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} /></div><div><label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>Phone <span style={{ color: theme.error }}>*</span></label><Input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="+251 91 234 5678" style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} /></div><div><label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>Location <span style={{ color: theme.error }}>*</span></label><Input value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} placeholder="City, Ethiopia" style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} /></div><div><label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>Department <span style={{ color: theme.error }}>*</span></label><Input value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })} placeholder="Enter department" style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} /></div><div className="p-3 rounded-lg" style={{ backgroundColor: theme.backgroundSecondary }}><p style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted, marginBottom: '8px' }}>Default Role</p><div className="flex items-center"><Shield className="h-4 w-4 mr-2" style={{ color: theme.primary }} /><span style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>EMPLOYEE</span></div><p style={{ fontSize: fonts.body.xs.size, color: theme.foregroundMuted, marginTop: '8px' }}>New users are assigned EMPLOYEE role by default. Use "Assign Role" after creation to change.</p></div></div><div className="flex gap-3 mt-6"><ActionButton variant="outline" size="md" onClick={() => setAddModal(false)}>Cancel</ActionButton><ActionButton variant="primary" size="md" icon={Save} onClick={handleAddUser}>Add User</ActionButton></div></div></div>}
-            {editModal.isOpen && editModal.user && <div className="fixed inset-0 z-[9998] flex items-center justify-center"><div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setEditModal({ isOpen: false, user: null })} /><div className="relative rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder, border: '1px solid' }}><button onClick={() => setEditModal({ isOpen: false, user: null })} className="absolute top-4 right-4 p-1 rounded-lg" style={{ color: theme.foregroundMuted }}><X className="w-5 h-5" /></button><h3 className="text-lg font-bold mb-4 flex items-center" style={{ color: theme.foreground }}><Edit2 className="h-5 w-5 mr-2" />Edit User</h3><div className="space-y-4"><div><label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>Full Name <span style={{ color: theme.error }}>*</span></label><Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} /></div><div><label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>Email <span style={{ color: theme.error }}>*</span></label><Input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} /></div><div><label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>Phone <span style={{ color: theme.error }}>*</span></label><Input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} /></div><div><label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>Location <span style={{ color: theme.error }}>*</span></label><Input value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} /></div><div><label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>Department <span style={{ color: theme.error }}>*</span></label><Input value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })} style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} /></div><div className="p-3 rounded-lg" style={{ backgroundColor: theme.backgroundSecondary }}><p style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted, marginBottom: '8px' }}>Current Role (Read-Only)</p>{getRoleBadge(editModal.user.role)}<p style={{ fontSize: fonts.body.xs.size, color: theme.foregroundMuted, marginTop: '8px' }}>Role cannot be edited here. Use "Assign Role" button to change user role.</p></div></div><div className="flex gap-3 mt-6"><ActionButton variant="outline" size="md" onClick={() => setEditModal({ isOpen: false, user: null })}>Cancel</ActionButton><ActionButton variant="primary" size="md" icon={Save} onClick={handleEditUser}>Save Changes</ActionButton></div></div></div>}
-            {roleModal.isOpen && roleModal.user && <div className="fixed inset-0 z-[9998] flex items-center justify-center"><div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setRoleModal({ isOpen: false, user: null })} /><div className="relative rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder, border: '1px solid' }}><button onClick={() => setRoleModal({ isOpen: false, user: null })} className="absolute top-4 right-4 p-1 rounded-lg" style={{ color: theme.foregroundMuted }}><X className="w-5 h-5" /></button><h3 className="text-lg font-bold mb-4" style={{ color: theme.foreground }}>Assign Role - {roleModal.user.name}</h3><div className="space-y-2">{['ADMIN', 'AGENT', 'EMPLOYEE'].map(role => <button key={role} onClick={() => handleRoleChange(roleModal.user.id, role)} className="w-full p-3 rounded-lg text-left transition-colors flex items-center justify-between" style={{ backgroundColor: roleModal.user.role === role ? theme.accent : theme.backgroundSecondary }}><div className="flex items-center"><Shield className="h-4 w-4 mr-2" style={{ color: theme.foreground }} /><span style={{ color: theme.foreground }}>{role}</span></div>{roleModal.user.role === role && <CheckCircle className="h-4 w-4" style={{ color: theme.primary }} />}</button>)}</div></div></div>}
-            <ConfirmationDialog isOpen={disableDialog.isOpen} onClose={() => setDisableDialog({ isOpen: false, user: null })} onConfirm={handleDisableUser} variant={disableDialog.user?.status === 'active' ? 'warning' : 'default'} title={disableDialog.user?.status === 'active' ? 'Disable User' : 'Enable User'} message={disableDialog.user?.status === 'active' ? `Are you sure you want to disable ${disableDialog.user?.name}? They will not be able to access the system.` : `Enable ${disableDialog.user?.name} to restore their access to the system?`} confirmLabel={disableDialog.user?.status === 'active' ? 'Disable User' : 'Enable User'} />
-            <ConfirmationDialog isOpen={deleteDialog.isOpen} onClose={() => setDeleteDialog({ isOpen: false, user: null })} onConfirm={() => { if (deleteDialog.user) handleDeleteUser(deleteDialog.user.id); setDeleteDialog({ isOpen: false, user: null }); }} variant="danger" title="Delete User" message={`Are you sure you want to permanently delete ${deleteDialog.user?.name}? This action cannot be undone.`} confirmLabel="Delete User" />
+            {/* View Ticket Modal */}
+            {viewModal.isOpen && viewModal.ticket && (
+                <div className="fixed inset-0 z-[9998] flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setViewModal({ isOpen: false, ticket: null })} />
+                    <div className="relative rounded-2xl shadow-2xl w-full max-w-2xl mx-4 p-6 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder, border: '1px solid' }}>
+                        <button onClick={() => setViewModal({ isOpen: false, ticket: null })} className="absolute top-4 right-4 p-1 rounded-lg transition-colors" style={{ color: theme.foregroundMuted }}>
+                            <X className="w-5 h-5" />
+                        </button>
+                        <div className="mb-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold" style={{ color: theme.foreground }}>{viewModal.ticket.id}</h3>
+                                <div className="flex items-center space-x-2">
+                                    {getStatusBadge(viewModal.ticket.status)}
+                                    {getPriorityBadge(viewModal.ticket.priority)}
+                                </div>
+                            </div>
+                            <h2 className="text-lg font-semibold mb-4" style={{ color: theme.foreground }}>{viewModal.ticket.title}</h2>
+                            <div className="space-y-3 mb-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Category</p>
+                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.ticket.category}</p>
+                                    </div>
+                                    <div>
+                                        <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Department</p>
+                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.ticket.department}</p>
+                                    </div>
+                                    <div>
+                                        <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Requester</p>
+                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.ticket.requester}</p>
+                                    </div>
+                                    <div>
+                                        <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Assignee</p>
+                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.ticket.assignee || 'Unassigned'}</p>
+                                    </div>
+                                    <div>
+                                        <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Created</p>
+                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{new Date(viewModal.ticket.createdAt).toLocaleString()}</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }} className="mb-2">Description</p>
+                                    <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground, lineHeight: '1.6' }}>{viewModal.ticket.description}</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <ActionButton variant="outline" size="md" icon={UserPlus} onClick={() => { setViewModal({ isOpen: false, ticket: null }); setAssignModal({ isOpen: true, ticket: viewModal.ticket }); }}>
+                                    Assign
+                                </ActionButton>
+                                <ActionButton variant="outline" size="md" icon={Edit2} onClick={() => { setViewModal({ isOpen: false, ticket: null }); setStatusModal({ isOpen: true, ticket: viewModal.ticket }); }}>
+                                    Change Status
+                                </ActionButton>
+                                <ActionButton variant="outline" size="md" icon={Edit2} onClick={() => { setViewModal({ isOpen: false, ticket: null }); setPriorityModal({ isOpen: true, ticket: viewModal.ticket }); }}>
+                                    Change Priority
+                                </ActionButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Assign Modal */}
+            {assignModal.isOpen && assignModal.ticket && (
+                <div className="fixed inset-0 z-[9998] flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setAssignModal({ isOpen: false, ticket: null })} />
+                    <div className="relative rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder, border: '1px solid' }}>
+                        <button onClick={() => setAssignModal({ isOpen: false, ticket: null })} className="absolute top-4 right-4 p-1 rounded-lg transition-colors" style={{ color: theme.foregroundMuted }}>
+                            <X className="w-5 h-5" />
+                        </button>
+                        <h3 className="text-lg font-bold mb-4 flex items-center" style={{ color: theme.foreground }}>
+                            <UserPlus className="h-5 w-5 mr-2" />
+                            Assign Ticket {assignModal.ticket.id}
+                        </h3>
+                        <div className="space-y-3 mb-6">
+                            {mockAgents.map(agent => (
+                                <button
+                                    key={agent.id}
+                                    onClick={() => handleAssign(assignModal.ticket.id, agent.name)}
+                                    className="w-full p-3 rounded-lg text-left transition-colors"
+                                    style={{ backgroundColor: theme.backgroundSecondary, color: theme.foreground }}
+                                >
+                                    <p className="font-medium">{agent.name}</p>
+                                    <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>{agent.department}</p>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Status Change Modal */}
+            {statusModal.isOpen && statusModal.ticket && (
+                <div className="fixed inset-0 z-[9998] flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setStatusModal({ isOpen: false, ticket: null })} />
+                    <div className="relative rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder, border: '1px solid' }}>
+                        <button onClick={() => setStatusModal({ isOpen: false, ticket: null })} className="absolute top-4 right-4 p-1 rounded-lg transition-colors" style={{ color: theme.foregroundMuted }}>
+                            <X className="w-5 h-5" />
+                        </button>
+                        <h3 className="text-lg font-bold mb-4" style={{ color: theme.foreground }}>Change Status - {statusModal.ticket.id}</h3>
+                        <div className="space-y-2">
+                            {['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].map(status => (
+                                <button
+                                    key={status}
+                                    onClick={() => handleStatusChange(statusModal.ticket.id, status)}
+                                    className="w-full p-3 rounded-lg text-left transition-colors flex items-center justify-between"
+                                    style={{ backgroundColor: statusModal.ticket.status === status ? theme.accent : theme.backgroundSecondary }}
+                                >
+                                    <span style={{ color: theme.foreground }}>{status.replace('_', ' ')}</span>
+                                    {statusModal.ticket.status === status && <Check className="h-4 w-4" style={{ color: theme.primary }} />}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Priority Change Modal */}
+            {priorityModal.isOpen && priorityModal.ticket && (
+                <div className="fixed inset-0 z-[9998] flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setPriorityModal({ isOpen: false, ticket: null })} />
+                    <div className="relative rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder, border: '1px solid' }}>
+                        <button onClick={() => setPriorityModal({ isOpen: false, ticket: null })} className="absolute top-4 right-4 p-1 rounded-lg transition-colors" style={{ color: theme.foregroundMuted }}>
+                            <X className="w-5 h-5" />
+                        </button>
+                        <h3 className="text-lg font-bold mb-4" style={{ color: theme.foreground }}>Change Priority - {priorityModal.ticket.id}</h3>
+                        <div className="space-y-2">
+                            {['URGENT', 'HIGH', 'MEDIUM', 'LOW'].map(priority => (
+                                <button
+                                    key={priority}
+                                    onClick={() => handlePriorityChange(priorityModal.ticket.id, priority)}
+                                    className="w-full p-3 rounded-lg text-left transition-colors flex items-center justify-between"
+                                    style={{ backgroundColor: priorityModal.ticket.priority === priority ? theme.accent : theme.backgroundSecondary }}
+                                >
+                                    <span style={{ color: theme.foreground }}>{priority}</span>
+                                    {priorityModal.ticket.priority === priority && <Check className="h-4 w-4" style={{ color: theme.primary }} />}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Confirmation Dialogs */}
+            <ConfirmationDialog
+                isOpen={deleteDialog.isOpen}
+                onClose={() => setDeleteDialog({ isOpen: false, ticket: null })}
+                onConfirm={handleDelete}
+                variant="danger"
+                title="Delete Ticket"
+                message={`Are you sure you want to delete ticket "${deleteDialog.ticket?.id}"? This action cannot be undone.`}
+                confirmLabel="Delete Ticket"
+            />
+
+            <ConfirmationDialog
+                isOpen={closeDialog.isOpen}
+                onClose={() => setCloseDialog({ isOpen: false, ticket: null })}
+                onConfirm={handleClose}
+                variant="warning"
+                title="Close Ticket"
+                message={`Are you sure you want to close ticket "${closeDialog.ticket?.id}"? You can reopen it later if needed.`}
+                confirmLabel="Close Ticket"
+            />
+
+            <ConfirmationDialog
+                isOpen={reopenDialog.isOpen}
+                onClose={() => setReopenDialog({ isOpen: false, ticket: null })}
+                onConfirm={handleReopen}
+                variant="default"
+                title="Reopen Ticket"
+                message={`Reopen ticket "${reopenDialog.ticket?.id}" and set status back to OPEN?`}
+                confirmLabel="Reopen Ticket"
+            />
         </PageLayout>
     );
 }

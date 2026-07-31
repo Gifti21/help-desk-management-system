@@ -22,6 +22,7 @@ import {
     Trash2,
     X,
     Check,
+    CheckCircle,
     RotateCcw,
     Edit2
 } from 'lucide-react';
@@ -476,26 +477,102 @@ export default function TicketsPage() {
                 <div className="fixed inset-0 z-[9998] flex items-center justify-center">
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setAssignModal({ isOpen: false, ticket: null })} />
                     <div className="relative rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder, border: '1px solid' }}>
-                        <button onClick={() => setAssignModal({ isOpen: false, ticket: null })} className="absolute top-4 right-4 p-1 rounded-lg transition-colors" style={{ color: theme.foregroundMuted }}>
-                            <X className="w-5 h-5" />
+                        <button onClick={() => setAssignModal({ isOpen: false, ticket: null })} className="absolute top-4 right-4 p-1 rounded-lg transition-colors hover:opacity-80" style={{ color: theme.foregroundMuted }}>
+                            <X className="w-5 w-5" />
                         </button>
-                        <h3 className="text-lg font-bold mb-4 flex items-center" style={{ color: theme.foreground }}>
+                        <h3 className="text-lg font-bold mb-2 flex items-center" style={{ color: theme.foreground }}>
                             <UserPlus className="h-5 w-5 mr-2" />
                             Assign Ticket {assignModal.ticket.id}
                         </h3>
-                        <div className="space-y-3 mb-6">
-                            {mockAgents.map(agent => (
-                                <button
-                                    key={agent.id}
-                                    onClick={() => handleAssign(assignModal.ticket.id, agent.name)}
-                                    className="w-full p-3 rounded-lg text-left transition-colors"
-                                    style={{ backgroundColor: theme.backgroundSecondary, color: theme.foreground }}
-                                >
-                                    <p className="font-medium">{agent.name}</p>
-                                    <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>{agent.department}</p>
-                                </button>
-                            ))}
-                        </div>
+
+                        {/* Check if ticket can be assigned/reassigned */}
+                        {assignModal.ticket.assignee && assignModal.ticket.status !== 'CLOSED' && assignModal.ticket.status !== 'RESOLVED' ? (
+                            <div>
+                                <div className="mb-4 p-3 rounded-lg" style={{ backgroundColor: theme.accent, border: `1px solid ${theme.primary}` }}>
+                                    <p style={{ fontSize: fonts.body.sm.size, color: theme.foreground }}>
+                                        <strong>Currently assigned to:</strong> {assignModal.ticket.assignee}
+                                    </p>
+                                    <p style={{ fontSize: fonts.body.xs.size, color: theme.foregroundMuted, marginTop: '4px' }}>
+                                        This ticket is already assigned and active. Only closed or resolved tickets can be reassigned.
+                                    </p>
+                                </div>
+                                <ActionButton variant="outline" size="md" onClick={() => setAssignModal({ isOpen: false, ticket: null })} className="w-full">
+                                    Close
+                                </ActionButton>
+                            </div>
+                        ) : (
+                            <>
+                                <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, marginBottom: '8px' }}>
+                                    Department: <strong>{assignModal.ticket.department}</strong> | Category: <strong>{assignModal.ticket.category}</strong>
+                                </p>
+                                <p style={{ fontSize: fonts.body.xs.size, color: theme.foregroundMuted, marginBottom: '16px' }}>
+                                    {assignModal.ticket.assignee ? `Previously assigned to: ${assignModal.ticket.assignee}` : 'Select an agent from matching department'}
+                                </p>
+
+                                {/* Filter agents by department */}
+                                {(() => {
+                                    const matchingAgents = mockAgents.filter(agent => agent.department === assignModal.ticket.department);
+                                    const otherAgents = mockAgents.filter(agent => agent.department !== assignModal.ticket.department);
+
+                                    return (
+                                        <div className="space-y-4">
+                                            {matchingAgents.length > 0 && (
+                                                <div>
+                                                    <p style={{ fontSize: fonts.body.sm.size, color: theme.primary, fontWeight: 600, marginBottom: '8px' }}>
+                                                        Recommended (Same Department)
+                                                    </p>
+                                                    <div className="space-y-2">
+                                                        {matchingAgents.map(agent => (
+                                                            <button
+                                                                key={agent.id}
+                                                                onClick={() => handleAssign(assignModal.ticket.id, agent.name)}
+                                                                className="w-full p-3 rounded-lg text-left transition-all duration-200 flex items-center justify-between hover:opacity-90"
+                                                                style={{
+                                                                    backgroundColor: theme.backgroundSecondary,
+                                                                    border: `2px solid ${theme.primary}`
+                                                                }}
+                                                            >
+                                                                <div>
+                                                                    <p className="font-medium" style={{ color: theme.foreground }}>{agent.name}</p>
+                                                                    <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>{agent.department}</p>
+                                                                </div>
+                                                                <CheckCircle className="h-5 w-5" style={{ color: theme.primary }} />
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {otherAgents.length > 0 && (
+                                                <div>
+                                                    <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, fontWeight: 600, marginBottom: '8px' }}>
+                                                        Other Agents
+                                                    </p>
+                                                    <div className="space-y-2">
+                                                        {otherAgents.map(agent => (
+                                                            <button
+                                                                key={agent.id}
+                                                                onClick={() => handleAssign(assignModal.ticket.id, agent.name)}
+                                                                className="w-full p-3 rounded-lg text-left transition-all duration-200 flex items-center justify-between hover:opacity-90"
+                                                                style={{
+                                                                    backgroundColor: theme.backgroundSecondary,
+                                                                    border: '2px solid transparent'
+                                                                }}
+                                                            >
+                                                                <div>
+                                                                    <p className="font-medium" style={{ color: theme.foreground }}>{agent.name}</p>
+                                                                    <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>{agent.department}</p>
+                                                                </div>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })()}
+                            </>
+                        )}
                     </div>
                 </div>
             )}
