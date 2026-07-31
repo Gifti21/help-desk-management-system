@@ -177,10 +177,11 @@ export function CrudModal({
     // Initialize form data
     useEffect(() => {
         if (isOpen) {
-            setFormData(initialData);
+            setFormData(initialData || {});
             setErrors({});
         }
-    }, [isOpen, initialData]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
     // Handle input changes
     const handleInputChange = (key: string, value: string) => {

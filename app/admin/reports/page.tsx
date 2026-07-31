@@ -11,9 +11,7 @@ import { useToast } from '../../../components/ui/toast';
 import { useTheme } from '../../../components/providers/ThemeProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
 import { fonts } from '@/lib/fonts';
-import { BarChart } from '../../../components/charts/bar-chart';
-import { PieChart } from '../../../components/charts/pie-chart';
-import { LineChart } from '../../../components/charts/line-chart';
+import { BarChart, DonutChart, LineChart } from '../../../components/charts';
 import { ReportFilters } from '../../../components/reports/ReportFilters';
 import { ExportButtons } from '../../../components/reports/ExportButtons';
 import {
@@ -623,7 +621,7 @@ export default function ReportsPage() {
                 <div className="flex items-center space-x-2">
                     <div
                         className="w-8 h-8 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: theme.primary, color: theme.primaryForeground }}
+                        style={{ backgroundColor: theme.primary, color: '#FFFFFF' }}
                     >
                         <span style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.semibold }}>
                             {value.split(' ').map(n => n[0]).join('')}
@@ -1015,7 +1013,13 @@ export default function ReportsPage() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <LineChart data={dynamicMonthlyTrendData} height={250} />
+                            <LineChart
+                                categories={dynamicMonthlyTrendData.map(d => d.label)}
+                                series={[{ name: 'Tickets', data: dynamicMonthlyTrendData.map(d => d.value) }]}
+                                height={250}
+                                xAxisTitle="Months"
+                                yAxisTitle="Number of Tickets"
+                            />
                         </CardContent>
                     </Card>
 
@@ -1040,7 +1044,11 @@ export default function ReportsPage() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <PieChart data={dynamicStatusDistributionData} />
+                                <DonutChart
+                                    series={dynamicStatusDistributionData.map(d => d.value)}
+                                    labels={dynamicStatusDistributionData.map(d => d.name)}
+                                    colors={dynamicStatusDistributionData.map(d => d.color)}
+                                />
                             </CardContent>
                         </Card>
 
@@ -1063,7 +1071,13 @@ export default function ReportsPage() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <BarChart data={dynamicPriorityDistributionData} horizontal />
+                                <BarChart
+                                    categories={dynamicPriorityDistributionData.map(d => d.name)}
+                                    series={[{ name: 'Tickets', data: dynamicPriorityDistributionData.map(d => d.value) }]}
+                                    horizontal
+                                    xAxisTitle="Number of Tickets"
+                                    yAxisTitle="Priority"
+                                />
                             </CardContent>
                         </Card>
                     </div>
@@ -1091,7 +1105,13 @@ export default function ReportsPage() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <BarChart data={dynamicDepartmentPerformanceData} height={280} />
+                            <BarChart
+                                categories={dynamicDepartmentPerformanceData.map(d => d.name)}
+                                series={[{ name: 'Tickets', data: dynamicDepartmentPerformanceData.map(d => d.value) }]}
+                                height={280}
+                                xAxisTitle="Departments"
+                                yAxisTitle="Number of Tickets"
+                            />
                         </CardContent>
                     </Card>
 

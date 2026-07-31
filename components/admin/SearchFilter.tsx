@@ -5,6 +5,7 @@ import { Card, CardContent } from '../ui/card';
 import { Input } from '../ui/input';
 import { useTheme } from '../providers/ThemeProvider';
 import { fonts } from '@/lib/fonts';
+import { spacing } from '@/lib/spacing';
 import { Search } from 'lucide-react';
 
 interface FilterOption {
@@ -33,31 +34,32 @@ export function SearchFilter({
     const { colors: theme } = useTheme();
 
     return (
-        <Card
-            className="shadow-sm mb-6 transition-colors"
-            style={{
-                backgroundColor: theme.card,
-                borderColor: theme.cardBorder
-            }}
-        >
-            <CardContent className="p-4">
-                <div className="flex flex-wrap items-center gap-4">
-                    <div className="relative flex-1 min-w-64">
+        <Card className="shadow-sm transition-colors" style={{ marginBottom: spacing.page.gap }}>
+            <CardContent style={{ padding: spacing.searchBar.padding }}>
+                <div className="flex flex-wrap items-center" style={{ gap: spacing.searchBar.gap }}>
+                    <div className="relative flex-1" style={{ minWidth: '256px' }}>
                         <Search
-                            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4"
-                            style={{ color: theme.foregroundMuted }}
+                            className="absolute h-5 w-5 pointer-events-none"
+                            style={{
+                                color: theme.foregroundMuted,
+                                left: '12px',
+                                top: '50%',
+                                transform: 'translateY(-50%)'
+                            }}
                         />
                         <Input
                             placeholder={searchPlaceholder}
                             value={searchValue}
                             onChange={(e) => onSearchChange(e.target.value)}
-                            className="pl-10 transition-colors"
+                            className="transition-colors"
                             style={{
                                 fontSize: fonts.input.regular.size,
-                                backgroundColor: theme.backgroundSecondary,
-                                borderColor: theme.border,
-                                color: theme.foreground,
-                                fontFamily: fonts.fontFamily.primary
+                                paddingLeft: '44px',
+                                paddingRight: spacing.base,
+                                paddingTop: '10px',
+                                paddingBottom: '10px',
+                                fontFamily: fonts.fontFamily.primary,
+                                height: '40px'
                             }}
                         />
                     </div>
@@ -67,13 +69,14 @@ export function SearchFilter({
                             key={filter.label}
                             value={filter.value}
                             onChange={(e) => filter.onChange(e.target.value)}
-                            className="px-3 py-2 rounded-md border transition-colors"
+                            className="rounded-md border transition-colors"
                             style={{
                                 fontSize: fonts.input.regular.size,
                                 backgroundColor: theme.card,
                                 borderColor: theme.border,
                                 color: theme.foreground,
-                                fontFamily: fonts.fontFamily.primary
+                                fontFamily: fonts.fontFamily.primary,
+                                padding: spacing.searchBar.padding
                             }}
                         >
                             {filter.options.map((option) => (

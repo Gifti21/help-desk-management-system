@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { X, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react';
+import { useTheme } from '../providers/ThemeProvider';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -73,33 +74,70 @@ const iconMap = {
 
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
   const Icon = iconMap[toast.type];
+  const { isDark } = useTheme();
 
   const getToastStyles = () => {
     switch (toast.type) {
       case 'success':
-        return 'bg-[var(--success)] text-[var(--success-foreground)] border-[var(--success)]';
+        return {
+          backgroundColor: '#10B981',
+          color: '#FFFFFF',
+          borderColor: '#10B981',
+        };
       case 'error':
-        return 'bg-[var(--error)] text-[var(--error-foreground)] border-[var(--error)]';
+        return {
+          backgroundColor: '#EF4444',
+          color: '#FFFFFF',
+          borderColor: '#EF4444',
+        };
       case 'warning':
-        return 'bg-[var(--warning)] text-[var(--warning-foreground)] border-[var(--warning)]';
+        return {
+          backgroundColor: '#F59E0B',
+          color: '#000000',
+          borderColor: '#F59E0B',
+        };
       case 'info':
-        return 'bg-[var(--info)] text-[var(--info-foreground)] border-[var(--info)]';
+        return {
+          backgroundColor: '#3B82F6',
+          color: '#FFFFFF',
+          borderColor: '#3B82F6',
+        };
       default:
-        return 'bg-[var(--card)] text-[var(--card-foreground)] border-[var(--card-border)]';
+        return {
+          backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
+          color: isDark ? '#F1F5F9' : '#0F172A',
+          borderColor: isDark ? '#334155' : '#E2E8F0',
+        };
     }
   };
 
+  const styles = getToastStyles();
+
   return (
     <div
-      className={`flex items-start gap-3 px-4 py-3 rounded-lg border shadow-lg animate-[slideIn_0.3s_ease-out] ${getToastStyles()}`}
+      className="flex items-start gap-3 px-4 py-3 rounded-lg border shadow-lg animate-[slideIn_0.3s_ease-out]"
+      style={{
+        backgroundColor: styles.backgroundColor,
+        color: styles.color,
+        borderColor: styles.borderColor,
+      }}
     >
       <Icon className="w-5 h-5 mt-0.5 shrink-0" />
       <p className="text-sm font-medium flex-1">{toast.message}</p>
       <button
         onClick={onDismiss}
-        className="shrink-0 p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+        className="shrink-0 p-0.5 rounded transition-colors"
+        style={{
+          opacity: 0.7,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = toast.type === 'warning' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }}
       >
-        <X className="w-4 h-4 opacity-70" />
+        <X className="w-4 h-4" />
       </button>
     </div>
   );

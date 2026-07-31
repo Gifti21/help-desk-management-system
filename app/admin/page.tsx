@@ -11,14 +11,16 @@ import { Card } from '../../components/ui/card';
 import { useTheme } from '../../components/providers/ThemeProvider';
 import { useToast } from '../../components/ui/toast';
 import { fonts } from '@/lib/fonts';
+import { DonutChart } from '../../components/charts/DonutChart';
+import { BarChart } from '../../components/charts/BarChart';
+import { LineChart } from '../../components/charts/LineChart';
 import {
     Ticket,
     AlertTriangle,
     CheckCircle,
     Clock,
     Download,
-    RefreshCw,
-    MoreHorizontal
+    RefreshCw
 } from 'lucide-react';
 
 // Mock data
@@ -60,7 +62,7 @@ const mockTickets = [
 
 export default function AdminDashboard() {
     const [searchTerm, setSearchTerm] = useState('');
-    const { colors: theme } = useTheme();
+    const { colors: theme, isDark } = useTheme();
     const { toast } = useToast();
 
     const getStatusBadge = (status: string) => {
@@ -234,15 +236,6 @@ export default function AdminDashboard() {
                     {value}
                 </span>
             )
-        },
-        {
-            key: 'actions',
-            title: 'Actions',
-            render: () => (
-                <ActionButton variant="ghost" size="sm">
-                    <MoreHorizontal className="h-4 w-4" />
-                </ActionButton>
-            )
         }
     ];
 
@@ -301,38 +294,6 @@ export default function AdminDashboard() {
         </>
     );
 
-    // DonutChart component
-    const DonutChart = () => (
-        <div className="relative w-40 h-40 mx-auto">
-            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="35" fill="none" stroke={theme.backgroundTertiary} strokeWidth="8" />
-                <circle cx="50" cy="50" r="35" fill="none" stroke={theme.primary} strokeWidth="8" strokeDasharray="132 88" strokeDashoffset="0" />
-                <circle cx="50" cy="50" r="35" fill="none" stroke="#f59e0b" strokeWidth="8" strokeDasharray="55 165" strokeDashoffset="-132" />
-                <circle cx="50" cy="50" r="35" fill="none" stroke="#ef4444" strokeWidth="8" strokeDasharray="33 187" strokeDashoffset="-187" />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div
-                    className="font-bold"
-                    style={{
-                        fontSize: fonts.heading.md.size,
-                        fontWeight: fonts.heading.md.weight,
-                        color: theme.foreground
-                    }}
-                >
-                    142
-                </div>
-                <div
-                    style={{
-                        fontSize: fonts.body.sm.size,
-                        color: theme.foregroundMuted
-                    }}
-                >
-                    Active
-                </div>
-            </div>
-        </div>
-    );
-
     return (
         <PageLayout>
             <TopBar
@@ -347,37 +308,25 @@ export default function AdminDashboard() {
                     <StatCard
                         title="Total Tickets"
                         value="2,842"
-                        subtitle="vs 2,520 last month"
                         icon={Ticket}
-                        trend="+12.5%"
-                        trendColor="#15803d"
                     />
                     <StatCard
                         title="Open Tickets"
                         value="142"
-                        subtitle="Critical backlog: 12"
                         icon={AlertTriangle}
                         iconColor="#ea580c"
-                        trend="-2.2%"
-                        trendColor="#dc2626"
                     />
                     <StatCard
                         title="Closed Today"
                         value="64"
-                        subtitle="Efficiency rate: 84%"
                         icon={CheckCircle}
                         iconColor="#15803d"
-                        trend="+18%"
-                        trendColor="#15803d"
                     />
                     <StatCard
                         title="Overdue"
                         value="28"
-                        subtitle="Average delay: 4.2h"
                         icon={Clock}
                         iconColor="#dc2626"
-                        trend="+5.1%"
-                        trendColor="#dc2626"
                     />
                 </div>
 
@@ -401,7 +350,12 @@ export default function AdminDashboard() {
                             >
                                 Tickets by Status
                             </h3>
-                            <DonutChart />
+                            <DonutChart
+                                series={[132, 55, 33]}
+                                labels={['Resolved', 'Pending', 'Overdue']}
+                                colors={[theme.primary, '#f59e0b', '#ef4444']}
+                                height={240}
+                            />
                             <div className="mt-6 space-y-3">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
@@ -446,35 +400,12 @@ export default function AdminDashboard() {
                             >
                                 Tickets by Department
                             </h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foreground }}>IT Services</span>
-                                        <span style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.semibold, color: theme.foreground }}>842</span>
-                                    </div>
-                                    <div className="w-full rounded-full h-2" style={{ backgroundColor: theme.backgroundTertiary }}>
-                                        <div className="h-2 rounded-full" style={{ width: '100%', backgroundColor: theme.primary }} />
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foreground }}>HR & Ops</span>
-                                        <span style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.semibold, color: theme.foreground }}>428</span>
-                                    </div>
-                                    <div className="w-full rounded-full h-2" style={{ backgroundColor: theme.backgroundTertiary }}>
-                                        <div className="h-2 rounded-full" style={{ width: '51%', backgroundColor: theme.primary }} />
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foreground }}>Finance</span>
-                                        <span style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.semibold, color: theme.foreground }}>310</span>
-                                    </div>
-                                    <div className="w-full rounded-full h-2" style={{ backgroundColor: theme.backgroundTertiary }}>
-                                        <div className="h-2 rounded-full" style={{ width: '37%', backgroundColor: theme.primary }} />
-                                    </div>
-                                </div>
-                            </div>
+                            <BarChart
+                                categories={['IT Services', 'HR & Ops', 'Finance']}
+                                series={[{ name: 'Tickets', data: [842, 428, 310] }]}
+                                height={240}
+                                horizontal={true}
+                            />
                         </div>
                     </Card>
 
@@ -496,25 +427,11 @@ export default function AdminDashboard() {
                             >
                                 Tickets by Month
                             </h3>
-                            <div className="space-y-3">
-                                {[
-                                    { month: 'Oct', value: 320, max: 350 },
-                                    { month: 'Sep', value: 280, max: 350 },
-                                    { month: 'Aug', value: 350, max: 350 },
-                                    { month: 'Jul', value: 245, max: 350 },
-                                    { month: 'Jun', value: 290, max: 350 }
-                                ].map((data, idx) => (
-                                    <div key={idx}>
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span style={{ fontSize: fonts.body.xs.size, fontWeight: fonts.fontWeight.medium, color: theme.foreground }}>{data.month}</span>
-                                            <span style={{ fontSize: fonts.body.xs.size, fontWeight: fonts.fontWeight.semibold, color: theme.foreground }}>{data.value}</span>
-                                        </div>
-                                        <div className="w-full rounded-full h-1.5" style={{ backgroundColor: theme.backgroundTertiary }}>
-                                            <div className="h-1.5 rounded-full" style={{ width: `${(data.value / data.max) * 100}%`, backgroundColor: theme.primary }} />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                            <LineChart
+                                categories={['Jun', 'Jul', 'Aug', 'Sep', 'Oct']}
+                                series={[{ name: 'Tickets', data: [290, 245, 350, 280, 320] }]}
+                                height={240}
+                            />
                         </div>
                     </Card>
                 </div>

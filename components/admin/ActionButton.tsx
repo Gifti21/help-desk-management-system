@@ -4,10 +4,11 @@ import React from 'react';
 import { Button } from '../ui/button';
 import { useTheme } from '../providers/ThemeProvider';
 import { fonts } from '@/lib/fonts';
+import { spacing } from '@/lib/spacing';
 import { LucideIcon } from 'lucide-react';
 
 interface ActionButtonProps {
-    variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+    variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'success' | 'danger' | 'warning' | 'info';
     size?: 'sm' | 'md' | 'lg';
     icon?: LucideIcon;
     children: React.ReactNode;
@@ -32,7 +33,8 @@ export function ActionButton({
             fontFamily: fonts.fontFamily.primary,
             borderRadius: '6px',
             transition: 'all 0.2s ease-in-out',
-            border: 'none'
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            opacity: disabled ? 0.6 : 1,
         };
 
         const sizeStyles = {
@@ -40,30 +42,32 @@ export function ActionButton({
                 fontSize: fonts.button.sm.size,
                 fontWeight: fonts.button.sm.weight,
                 lineHeight: fonts.button.sm.lineHeight,
-                padding: '8px 12px'
+                padding: spacing.button.paddingSm
             },
             md: {
                 fontSize: fonts.button.regular.size,
                 fontWeight: fonts.button.regular.weight,
                 lineHeight: fonts.button.regular.lineHeight,
-                padding: '10px 16px'
+                padding: spacing.button.paddingMd
             },
             lg: {
                 fontSize: fonts.button.lg.size,
                 fontWeight: fonts.button.lg.weight,
                 lineHeight: fonts.button.lg.lineHeight,
-                padding: '12px 20px'
+                padding: spacing.button.paddingLg
             }
         };
 
         const variantStyles = {
             primary: {
-                backgroundColor: disabled ? theme.backgroundTertiary : theme.primary,
-                color: disabled ? theme.foregroundMuted : (isDark ? '#0F172A' : '#16332B'),
+                backgroundColor: theme.primary,
+                color: isDark ? '#0F172A' : '#16332B',
+                border: 'none',
             },
             secondary: {
-                backgroundColor: theme.secondary,
-                color: theme.secondaryForeground,
+                backgroundColor: isDark ? 'rgba(148, 163, 184, 0.1)' : '#F1F5F9',
+                color: theme.foreground,
+                border: 'none',
             },
             outline: {
                 backgroundColor: 'transparent',
@@ -72,7 +76,28 @@ export function ActionButton({
             },
             ghost: {
                 backgroundColor: 'transparent',
-                color: isDark ? theme.foreground : '#334155', // Dark gray for light mode, white for dark mode
+                color: isDark ? '#94A3B8' : '#334155',
+                border: 'none',
+            },
+            success: {
+                backgroundColor: 'transparent',
+                color: '#10B981',
+                border: 'none',
+            },
+            danger: {
+                backgroundColor: 'transparent',
+                color: '#EF4444',
+                border: 'none',
+            },
+            warning: {
+                backgroundColor: 'transparent',
+                color: '#F59E0B',
+                border: 'none',
+            },
+            info: {
+                backgroundColor: 'transparent',
+                color: '#3B82F6',
+                border: 'none',
             }
         };
 
@@ -87,10 +112,10 @@ export function ActionButton({
         <Button
             onClick={onClick}
             disabled={disabled}
-            className={`flex items-center ${className}`}
+            className={`flex items-center hover:opacity-90 ${className}`}
             style={getButtonStyles()}
         >
-            {Icon && <Icon className="h-4 w-4 mr-2" />}
+            {Icon && <Icon className="h-4 w-4" style={{ marginRight: spacing.xs }} />}
             {children}
         </Button>
     );

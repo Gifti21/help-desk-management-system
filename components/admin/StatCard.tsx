@@ -4,6 +4,7 @@ import React from 'react';
 import { Card, CardContent } from '../ui/card';
 import { colors } from '@/lib/colors';
 import { fonts } from '@/lib/fonts';
+import { spacing } from '@/lib/spacing';
 import { darkModeColors } from '@/lib/dark-mode-color';
 import { useTheme } from '../providers/ThemeProvider';
 import { LucideIcon } from 'lucide-react';
@@ -37,27 +38,29 @@ export function StatCard({
                 borderColor: isDark ? darkModeColors.border.primary : colors.borderGrey
             }}
         >
-            <CardContent className="p-6">
+            <CardContent style={{ padding: spacing.card.padding }}>
                 <div className="flex items-center justify-between">
                     <div className="flex-1">
                         <h3
-                            className="uppercase tracking-wide mb-1"
+                            className="uppercase tracking-wide"
                             style={{
                                 fontSize: fonts.caption.regular.size,
                                 fontWeight: fonts.caption.regular.weight,
                                 color: isDark ? darkModeColors.text.secondary : colors.bodyTextGrey,
-                                letterSpacing: fonts.caption.regular.letterSpacing
+                                letterSpacing: fonts.caption.regular.letterSpacing,
+                                marginBottom: spacing.xs
                             }}
                         >
                             {title}
                         </h3>
                         <p
-                            className="font-bold mb-1"
+                            className="font-bold"
                             style={{
                                 fontSize: fonts.heading.md.size,
                                 fontWeight: fonts.heading.md.weight,
                                 color: isDark ? darkModeColors.text.primary : colors.primaryText,
-                                lineHeight: fonts.heading.md.lineHeight
+                                lineHeight: fonts.heading.md.lineHeight,
+                                marginBottom: spacing.xs
                             }}
                         >
                             {value}
@@ -76,8 +79,12 @@ export function StatCard({
                         )}
                     </div>
                     <div
-                        className="w-12 h-12 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: isDark ? darkModeColors.background.tertiary : colors.lightTealBg }}
+                        className="rounded-lg flex items-center justify-center"
+                        style={{
+                            backgroundColor: isDark ? darkModeColors.background.tertiary : colors.lightTealBg,
+                            width: '48px',
+                            height: '48px'
+                        }}
                     >
                         <Icon className="h-6 w-6" style={{ color: iconColor }} />
                     </div>

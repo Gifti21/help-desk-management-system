@@ -1,32 +1,75 @@
 import React from 'react';
+import { useTheme } from '../providers/ThemeProvider';
+import { spacing } from '@/lib/spacing';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> { }
 
-export function Card({ className = '', ...props }: CardProps) {
+export function Card({ className = '', style, ...props }: CardProps) {
+    const { colors: theme } = useTheme();
+
     return (
         <div
-            className={`rounded-lg border border-[var(--card-border)] bg-[var(--card)] text-[var(--card-foreground)] shadow-sm transition-colors ${className}`}
+            className={`rounded-lg border shadow-sm transition-colors ${className}`}
+            style={{
+                backgroundColor: theme.card,
+                borderColor: theme.cardBorder,
+                ...style
+            }}
             {...props}
         />
     );
 }
 
 export function CardHeader({ className = '', ...props }: CardProps) {
-    return <div className={`flex flex-col space-y-1.5 p-6 ${className}`} {...props} />;
+    return (
+        <div
+            className={`flex flex-col ${className}`}
+            style={{ padding: spacing.card.padding, paddingBottom: spacing.card.gapSmall }}
+            {...props}
+        />
+    );
 }
 
 export function CardTitle({ className = '', ...props }: CardProps) {
-    return <h3 className={`text-2xl font-semibold leading-none tracking-tight text-[var(--card-foreground)] ${className}`} {...props} />;
+    const { colors: theme } = useTheme();
+
+    return (
+        <h3
+            className={`text-2xl font-semibold leading-none tracking-tight ${className}`}
+            style={{ color: theme.foreground }}
+            {...props}
+        />
+    );
 }
 
 export function CardDescription({ className = '', ...props }: CardProps) {
-    return <p className={`text-sm text-[var(--foreground-muted)] ${className}`} {...props} />;
+    const { colors: theme } = useTheme();
+
+    return (
+        <p
+            className={`text-sm ${className}`}
+            style={{ color: theme.foregroundMuted, marginTop: spacing.xs }}
+            {...props}
+        />
+    );
 }
 
 export function CardContent({ className = '', ...props }: CardProps) {
-    return <div className={`p-6 pt-0 ${className}`} {...props} />;
+    return (
+        <div
+            className={`${className}`}
+            style={{ padding: spacing.card.padding, paddingTop: 0 }}
+            {...props}
+        />
+    );
 }
 
 export function CardFooter({ className = '', ...props }: CardProps) {
-    return <div className={`flex items-center p-6 pt-0 ${className}`} {...props} />;
+    return (
+        <div
+            className={`flex items-center ${className}`}
+            style={{ padding: spacing.card.padding, paddingTop: 0, gap: spacing.button.gap }}
+            {...props}
+        />
+    );
 }

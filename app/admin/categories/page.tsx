@@ -24,7 +24,10 @@ import {
     Download,
     X,
     Calendar,
-    Save
+    Save,
+    MoreVertical,
+    ChevronLeft,
+    ChevronRight
 } from 'lucide-react';
 
 // Mock category data with Ethiopian context
@@ -91,13 +94,16 @@ export default function CategoriesPage() {
     const [statusFilter, setStatusFilter] = useState('All Status');
     const [priorityFilter, setPriorityFilter] = useState('All Priority');
     const [categories, setCategories] = useState(mockCategories);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [actionsMenuOpen, setActionsMenuOpen] = useState<string | null>(null);
+    const itemsPerPage = 4;
     const [addModal, setAddModal] = useState(false);
     const [editModal, setEditModal] = useState<{ isOpen: boolean; category: any }>({ isOpen: false, category: null });
     const [viewModal, setViewModal] = useState<{ isOpen: boolean; category: any }>({ isOpen: false, category: null });
     const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; category: any }>({ isOpen: false, category: null });
     const [formData, setFormData] = useState({ name: '', description: '', priority: 'MEDIUM', status: 'active' });
 
-    const { colors: theme } = useTheme();
+    const { colors: theme, isDark } = useTheme();
     const { toast } = useToast();
 
     // Filter categories
@@ -108,6 +114,17 @@ export default function CategoriesPage() {
         const matchesPriority = priorityFilter === 'All Priority' || cat.priority === priorityFilter.toUpperCase();
         return matchesSearch && matchesStatus && matchesPriority;
     });
+
+    // Pagination
+    const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedCategories = filteredCategories.slice(startIndex, endIndex);
+
+    // Reset to page 1 when filters change
+    const handleFilterChange = () => {
+        setCurrentPage(1);
+    };
 
     // Handle CRUD operations
     const handleAddCategory = () => {
@@ -274,16 +291,57 @@ export default function CategoriesPage() {
             key: 'actions',
             title: 'Actions',
             render: (value: any, row: any) => (
-                <div className="flex items-center space-x-1">
-                    <ActionButton variant="ghost" size="sm" icon={Eye} onClick={() => setViewModal({ isOpen: true, category: row })}>
-                        View
-                    </ActionButton>
-                    <ActionButton variant="ghost" size="sm" icon={Edit} onClick={() => openEditModal(row)}>
-                        Edit
-                    </ActionButton>
-                    <ActionButton variant="ghost" size="sm" icon={Trash2} onClick={() => setDeleteDialog({ isOpen: true, category: row })}>
-                        Delete
-                    </ActionButton>
+                <div className="relative">
+                    <button
+                        onClick={() => setActionsMenuOpen(actionsMenuOpen === row.id ? null : row.id)}
+                        className="p-2 rounded hover:opacity-70 transition-colors"
+                        style={{ color: theme.foreground }}
+                    >
+                        <MoreVertical className="h-5 w-5" />
+                    </button>
+
+                    {actionsMenuOpen === row.id && (
+                        <>
+                            <div
+                                className="fixed inset-0 z-[9997]"
+                                onClick={() => setActionsMenuOpen(null)}
+                            />
+                            <div
+                                className="absolute right-0 mt-2 w-48 rounded-lg shadow-xl z-[9998] py-2"
+                                style={{
+                                    backgroundColor: theme.card,
+                                    border: `1px solid ${theme.cardBorder}`
+                                }}
+                            >
+                                <button
+                                    onClick={() => { setViewModal({ isOpen: true, category: row }); setActionsMenuOpen(null); }}
+                                    className="w-full px-4 py-2 text-left flex items-center hover:opacity-80 transition-colors"
+                                    style={{ color: '#3B82F6' }}
+                                >
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View
+                                </button>
+
+                                <button
+                                    onClick={() => { openEditModal(row); setActionsMenuOpen(null); }}
+                                    className="w-full px-4 py-2 text-left flex items-center hover:opacity-80 transition-colors"
+                                    style={{ color: theme.foreground }}
+                                >
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Edit
+                                </button>
+
+                                <button
+                                    onClick={() => { setDeleteDialog({ isOpen: true, category: row }); setActionsMenuOpen(null); }}
+                                    className="w-full px-4 py-2 text-left flex items-center hover:opacity-80 transition-colors"
+                                    style={{ color: '#EF4444' }}
+                                >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                </button>
+                            </div>
+                        </>
+                    )}
                 </div>
             )
         }
@@ -372,7 +430,7 @@ export default function CategoriesPage() {
                 {/* Search and Filters */}
                 <SearchFilter
                     searchValue={searchTerm}
-                    onSearchChange={setSearchTerm}
+                    onSearchChange={(value) => { setSearchTerm(value); handleFilterChange(); }}
                     searchPlaceholder="Search categories..."
                     filters={filters}
                 />
@@ -381,9 +439,64 @@ export default function CategoriesPage() {
                 <DataTable
                     title={`Categories (${filteredCategories.length})`}
                     columns={categoryColumns}
-                    data={filteredCategories}
+                    data={paginatedCategories}
                     emptyMessage="No categories found matching your criteria."
                 />
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between px-4 py-3 rounded-lg" style={{ backgroundColor: theme.card, border: `1px solid ${theme.cardBorder}` }}>
+                        <div style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>
+                            Showing {startIndex + 1} to {Math.min(endIndex, filteredCategories.length)} of {filteredCategories.length} categories
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <ActionButton
+                                variant="outline"
+                                size="sm"
+                                icon={ChevronLeft}
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1}
+                            >
+                                Previous
+                            </ActionButton>
+                            <div className="flex items-center gap-1">
+                                {(() => {
+                                    const maxVisiblePages = 4;
+                                    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+                                    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+                                    if (endPage - startPage < maxVisiblePages - 1) {
+                                        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                                    }
+
+                                    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(page => (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            className="w-8 h-8 rounded flex items-center justify-center transition-colors"
+                                            style={{
+                                                backgroundColor: currentPage === page ? theme.primary : 'transparent',
+                                                color: currentPage === page ? (isDark ? '#0F172A' : '#16332B') : theme.foreground,
+                                                fontSize: fonts.body.sm.size
+                                            }}
+                                        >
+                                            {page}
+                                        </button>
+                                    ));
+                                })()}
+                            </div>
+                            <ActionButton
+                                variant="outline"
+                                size="sm"
+                                icon={ChevronRight}
+                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                disabled={currentPage === totalPages}
+                            >
+                                Next
+                            </ActionButton>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Add Category Modal */}

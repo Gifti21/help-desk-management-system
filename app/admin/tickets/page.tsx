@@ -24,7 +24,11 @@ import {
     Check,
     CheckCircle,
     RotateCcw,
-    Edit2
+    Edit2,
+    MoreVertical,
+    ChevronLeft,
+    ChevronRight,
+    RefreshCw
 } from 'lucide-react';
 
 // Ethiopian mock ticket data
@@ -105,17 +109,21 @@ export default function TicketsPage() {
     const [departmentFilter, setDepartmentFilter] = useState('ALL');
     const [categoryFilter, setCategoryFilter] = useState('ALL');
     const [tickets, setTickets] = useState(initialMockTickets);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [actionsMenuOpen, setActionsMenuOpen] = useState<string | null>(null);
+    const itemsPerPage = 4;
 
     // Modals state
     const [viewModal, setViewModal] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
     const [assignModal, setAssignModal] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
+    const [reassignModal, setReassignModal] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
     const [statusModal, setStatusModal] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
     const [priorityModal, setPriorityModal] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
     const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
     const [closeDialog, setCloseDialog] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
     const [reopenDialog, setReopenDialog] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
 
-    const { colors: theme } = useTheme();
+    const { colors: theme, isDark } = useTheme();
     const { toast } = useToast();
 
     const filteredTickets = tickets.filter(ticket => {
@@ -131,7 +139,16 @@ export default function TicketsPage() {
         return matchesSearch && matchesStatus && matchesPriority && matchesDepartment && matchesCategory;
     });
 
-    // Continue in next part...
+    // Pagination
+    const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedTickets = filteredTickets.slice(startIndex, endIndex);
+
+    // Reset to page 1 when filters change
+    const handleFilterChange = () => {
+        setCurrentPage(1);
+    };
 
     // Handler functions
     const handleAssign = (ticketId: string, agentName: string) => {
@@ -139,6 +156,7 @@ export default function TicketsPage() {
             t.id === ticketId ? { ...t, assignee: agentName } : t
         ));
         setAssignModal({ isOpen: false, ticket: null });
+        setReassignModal({ isOpen: false, ticket: null });
         toast(`Ticket ${ticketId} assigned to ${agentName}`, 'success');
     };
 
@@ -292,28 +310,98 @@ export default function TicketsPage() {
             key: 'actions',
             title: 'Actions',
             render: (_value: any, row: any) => (
-                <div className="flex items-center space-x-1">
-                    <ActionButton variant="ghost" size="sm" icon={Eye} onClick={() => setViewModal({ isOpen: true, ticket: row })}>
-                        View
-                    </ActionButton>
-                    <ActionButton variant="ghost" size="sm" icon={UserPlus} onClick={() => setAssignModal({ isOpen: true, ticket: row })}>
-                        Assign
-                    </ActionButton>
-                    <ActionButton variant="ghost" size="sm" icon={Edit2} onClick={() => setStatusModal({ isOpen: true, ticket: row })}>
-                        Status
-                    </ActionButton>
-                    {row.status === 'CLOSED' ? (
-                        <ActionButton variant="ghost" size="sm" icon={RotateCcw} onClick={() => setReopenDialog({ isOpen: true, ticket: row })}>
-                            Reopen
-                        </ActionButton>
-                    ) : (
-                        <ActionButton variant="ghost" size="sm" icon={Check} onClick={() => setCloseDialog({ isOpen: true, ticket: row })}>
-                            Close
-                        </ActionButton>
+                <div className="relative">
+                    <button
+                        onClick={() => setActionsMenuOpen(actionsMenuOpen === row.id ? null : row.id)}
+                        className="p-2 rounded hover:opacity-70 transition-colors"
+                        style={{ color: theme.foreground }}
+                    >
+                        <MoreVertical className="h-5 w-5" />
+                    </button>
+
+                    {/* Actions Dropdown Menu */}
+                    {actionsMenuOpen === row.id && (
+                        <>
+                            <div
+                                className="fixed inset-0 z-[9997]"
+                                onClick={() => setActionsMenuOpen(null)}
+                            />
+                            <div
+                                className="absolute right-0 mt-2 w-48 rounded-lg shadow-xl z-[9998] py-2"
+                                style={{
+                                    backgroundColor: theme.card,
+                                    border: `1px solid ${theme.cardBorder}`
+                                }}
+                            >
+                                <button
+                                    onClick={() => { setViewModal({ isOpen: true, ticket: row }); setActionsMenuOpen(null); }}
+                                    className="w-full px-4 py-2 text-left flex items-center hover:opacity-80 transition-colors"
+                                    style={{ color: '#3B82F6' }}
+                                >
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View
+                                </button>
+
+                                {!row.assignee ? (
+                                    <button
+                                        onClick={() => { setAssignModal({ isOpen: true, ticket: row }); setActionsMenuOpen(null); }}
+                                        className="w-full px-4 py-2 text-left flex items-center hover:opacity-80 transition-colors"
+                                        style={{ color: theme.primary }}
+                                    >
+                                        <UserPlus className="h-4 w-4 mr-2" />
+                                        Assign
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => { setReassignModal({ isOpen: true, ticket: row }); setActionsMenuOpen(null); }}
+                                        className="w-full px-4 py-2 text-left flex items-center hover:opacity-80 transition-colors"
+                                        style={{ color: theme.primary }}
+                                    >
+                                        <RefreshCw className="h-4 w-4 mr-2" />
+                                        Reassign
+                                    </button>
+                                )}
+
+                                <button
+                                    onClick={() => { setStatusModal({ isOpen: true, ticket: row }); setActionsMenuOpen(null); }}
+                                    className="w-full px-4 py-2 text-left flex items-center hover:opacity-80 transition-colors"
+                                    style={{ color: theme.foreground }}
+                                >
+                                    <Edit2 className="h-4 w-4 mr-2" />
+                                    Change Status
+                                </button>
+
+                                {row.status === 'CLOSED' ? (
+                                    <button
+                                        onClick={() => { setReopenDialog({ isOpen: true, ticket: row }); setActionsMenuOpen(null); }}
+                                        className="w-full px-4 py-2 text-left flex items-center hover:opacity-80 transition-colors"
+                                        style={{ color: '#F59E0B' }}
+                                    >
+                                        <RotateCcw className="h-4 w-4 mr-2" />
+                                        Reopen
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => { setCloseDialog({ isOpen: true, ticket: row }); setActionsMenuOpen(null); }}
+                                        className="w-full px-4 py-2 text-left flex items-center hover:opacity-80 transition-colors"
+                                        style={{ color: '#10B981' }}
+                                    >
+                                        <Check className="h-4 w-4 mr-2" />
+                                        Close
+                                    </button>
+                                )}
+
+                                <button
+                                    onClick={() => { setDeleteDialog({ isOpen: true, ticket: row }); setActionsMenuOpen(null); }}
+                                    className="w-full px-4 py-2 text-left flex items-center hover:opacity-80 transition-colors"
+                                    style={{ color: '#EF4444' }}
+                                >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                </button>
+                            </div>
+                        </>
                     )}
-                    <ActionButton variant="ghost" size="sm" icon={Trash2} onClick={() => setDeleteDialog({ isOpen: true, ticket: row })}>
-                        Delete
-                    </ActionButton>
                 </div>
             )
         }
@@ -398,7 +486,7 @@ export default function TicketsPage() {
 
                 <SearchFilter
                     searchValue={searchTerm}
-                    onSearchChange={setSearchTerm}
+                    onSearchChange={(value) => { setSearchTerm(value); handleFilterChange(); }}
                     searchPlaceholder="Search by ticket ID, title, or requester..."
                     filters={filters}
                 />
@@ -406,9 +494,64 @@ export default function TicketsPage() {
                 <DataTable
                     title={`All Tickets (${filteredTickets.length})`}
                     columns={ticketColumns}
-                    data={filteredTickets}
+                    data={paginatedTickets}
                     emptyMessage="No tickets found matching your filters."
                 />
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between px-4 py-3 rounded-lg" style={{ backgroundColor: theme.card, border: `1px solid ${theme.cardBorder}` }}>
+                        <div style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>
+                            Showing {startIndex + 1} to {Math.min(endIndex, filteredTickets.length)} of {filteredTickets.length} tickets
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <ActionButton
+                                variant="outline"
+                                size="sm"
+                                icon={ChevronLeft}
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1}
+                            >
+                                Previous
+                            </ActionButton>
+                            <div className="flex items-center gap-1">
+                                {(() => {
+                                    const maxVisiblePages = 4;
+                                    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+                                    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+                                    if (endPage - startPage < maxVisiblePages - 1) {
+                                        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                                    }
+
+                                    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(page => (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            className="w-8 h-8 rounded flex items-center justify-center transition-colors"
+                                            style={{
+                                                backgroundColor: currentPage === page ? theme.primary : 'transparent',
+                                                color: currentPage === page ? (isDark ? '#0F172A' : '#16332B') : theme.foreground,
+                                                fontSize: fonts.body.sm.size
+                                            }}
+                                        >
+                                            {page}
+                                        </button>
+                                    ));
+                                })()}
+                            </div>
+                            <ActionButton
+                                variant="outline"
+                                size="sm"
+                                icon={ChevronRight}
+                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                disabled={currentPage === totalPages}
+                            >
+                                Next
+                            </ActionButton>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* View Ticket Modal */}
@@ -599,6 +742,102 @@ export default function TicketsPage() {
                                 </button>
                             ))}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Reassign Modal */}
+            {reassignModal.isOpen && reassignModal.ticket && (
+                <div className="fixed inset-0 z-[9998] flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setReassignModal({ isOpen: false, ticket: null })} />
+                    <div className="relative rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder, border: '1px solid' }}>
+                        <button onClick={() => setReassignModal({ isOpen: false, ticket: null })} className="absolute top-4 right-4 p-1 rounded-lg transition-colors hover:opacity-80" style={{ color: theme.foregroundMuted }}>
+                            <X className="w-5 h-5" />
+                        </button>
+                        <h3 className="text-lg font-bold mb-2 flex items-center" style={{ color: theme.foreground }}>
+                            <RefreshCw className="h-5 w-5 mr-2" />
+                            Reassign Ticket {reassignModal.ticket.id}
+                        </h3>
+                        <div className="mb-4 p-3 rounded-lg" style={{ backgroundColor: theme.accent, border: `1px solid ${theme.primary}` }}>
+                            <p style={{ fontSize: fonts.body.sm.size, color: theme.foreground }}>
+                                <strong>Currently assigned to:</strong> {reassignModal.ticket.assignee}
+                            </p>
+                            <p style={{ fontSize: fonts.body.xs.size, color: theme.foregroundMuted, marginTop: '4px' }}>
+                                Reassign this ticket to another available agent.
+                            </p>
+                        </div>
+                        <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, marginBottom: '16px' }}>
+                            Department: <strong>{reassignModal.ticket.department}</strong> | Category: <strong>{reassignModal.ticket.category}</strong>
+                        </p>
+
+                        {/* Filter agents by department */}
+                        {(() => {
+                            const matchingAgents = mockAgents.filter(agent => agent.department === reassignModal.ticket.department && agent.name !== reassignModal.ticket.assignee);
+                            const otherAgents = mockAgents.filter(agent => agent.department !== reassignModal.ticket.department && agent.name !== reassignModal.ticket.assignee);
+
+                            return (
+                                <div className="space-y-4">
+                                    {matchingAgents.length > 0 && (
+                                        <div>
+                                            <p style={{ fontSize: fonts.body.sm.size, color: theme.primary, fontWeight: 600, marginBottom: '8px' }}>
+                                                Recommended (Same Department)
+                                            </p>
+                                            <div className="space-y-2">
+                                                {matchingAgents.map(agent => (
+                                                    <button
+                                                        key={agent.id}
+                                                        onClick={() => handleAssign(reassignModal.ticket.id, agent.name)}
+                                                        className="w-full p-3 rounded-lg text-left transition-all duration-200 flex items-center justify-between hover:opacity-90"
+                                                        style={{
+                                                            backgroundColor: theme.backgroundSecondary,
+                                                            border: `2px solid ${theme.primary}`
+                                                        }}
+                                                    >
+                                                        <div>
+                                                            <p className="font-medium" style={{ color: theme.foreground }}>{agent.name}</p>
+                                                            <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>{agent.department}</p>
+                                                        </div>
+                                                        <CheckCircle className="h-5 w-5" style={{ color: theme.primary }} />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {otherAgents.length > 0 && (
+                                        <div>
+                                            <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, fontWeight: 600, marginBottom: '8px' }}>
+                                                Other Agents
+                                            </p>
+                                            <div className="space-y-2">
+                                                {otherAgents.map(agent => (
+                                                    <button
+                                                        key={agent.id}
+                                                        onClick={() => handleAssign(reassignModal.ticket.id, agent.name)}
+                                                        className="w-full p-3 rounded-lg text-left transition-all duration-200 flex items-center justify-between hover:opacity-90"
+                                                        style={{
+                                                            backgroundColor: theme.backgroundSecondary,
+                                                            border: '2px solid transparent'
+                                                        }}
+                                                    >
+                                                        <div>
+                                                            <p className="font-medium" style={{ color: theme.foreground }}>{agent.name}</p>
+                                                            <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>{agent.department}</p>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {matchingAgents.length === 0 && otherAgents.length === 0 && (
+                                        <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, textAlign: 'center', padding: '16px' }}>
+                                            No other agents available for reassignment.
+                                        </p>
+                                    )}
+                                </div>
+                            );
+                        })()}
                     </div>
                 </div>
             )}

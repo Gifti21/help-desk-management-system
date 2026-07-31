@@ -3,6 +3,8 @@
 import React from 'react';
 import { colors } from '@/lib/colors';
 import { fonts } from '@/lib/fonts';
+import { spacing } from '@/lib/spacing';
+import { darkModeColors } from '@/lib/dark-mode-color';
 import { useTheme } from '../providers/ThemeProvider';
 
 interface PageLayoutProps {
@@ -16,12 +18,15 @@ export function PageLayout({ children }: PageLayoutProps) {
         <div
             className="transition-colors"
             style={{
-                backgroundColor: isDark ? '#0A0E27' : colors.pageBackground,
+                backgroundColor: isDark ? darkModeColors.background.primary : colors.pageBackground,
                 fontFamily: fonts.fontFamily.primary,
-                minHeight: '100%'
+                minHeight: '100%',
+                padding: spacing.page.padding
             }}
         >
-            {children}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.page.gap }}>
+                {children}
+            </div>
         </div>
     );
 }
