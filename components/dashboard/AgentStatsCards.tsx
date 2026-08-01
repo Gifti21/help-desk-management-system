@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   CheckCircle2,
 } from "lucide-react";
+import { FONT_FAMILY } from "@/lib/fonts";
 
 interface AgentStatsCardsProps {
   tickets: Ticket[];
@@ -55,6 +56,7 @@ export const AgentStatsCards: React.FC<AgentStatsCardsProps> = ({
         style={{
           backgroundColor: "var(--card)",
           borderColor: "var(--border)",
+          fontFamily: FONT_FAMILY.primary,
         }}
       >
         <div className="flex items-center justify-between">
@@ -86,6 +88,7 @@ export const AgentStatsCards: React.FC<AgentStatsCardsProps> = ({
         style={{
           backgroundColor: "var(--card)",
           borderColor: "var(--border)",
+          fontFamily: FONT_FAMILY.primary,
         }}
       >
         <div className="flex items-center justify-between">
@@ -114,6 +117,7 @@ export const AgentStatsCards: React.FC<AgentStatsCardsProps> = ({
         style={{
           backgroundColor: "var(--card)",
           borderColor: "var(--border)",
+          fontFamily: FONT_FAMILY.primary,
         }}
       >
         <div className="flex items-center justify-between">
@@ -142,6 +146,7 @@ export const AgentStatsCards: React.FC<AgentStatsCardsProps> = ({
         style={{
           backgroundColor: "var(--card)",
           borderColor: "var(--border)",
+          fontFamily: FONT_FAMILY.primary,
         }}
       >
         <div className="flex items-center justify-between">

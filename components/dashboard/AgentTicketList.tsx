@@ -143,13 +143,13 @@ export function AgentTicketList({
                       <p className="font-semibold text-slate-900 dark:text-slate-100">{t.ticketNumber}</p>
                       <p className="line-clamp-1 text-xs text-slate-500 dark:text-slate-400">{t.title}</p>
                     </td>
-                    <td className="px-6 py-4 font-medium text-slate-800 dark:text-slate-200">{t.creatorName}</td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{t.category}</td>
+                    <td className="px-6 py-4 font-medium text-slate-800 dark:text-slate-200">{String(t.creatorName || '')}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{String(t.category || '')}</td>
                     <td className="px-6 py-4">
-                      <StatusBadge priority={t.priority} />
+                      <StatusBadge type="priority" value={t.priority} />
                     </td>
                     <td className="px-6 py-4">
-                      <StatusBadge status={t.status} />
+                      <StatusBadge type="status" value={t.status} />
                     </td>
                     <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">{formatDate(t.updatedAt)}</td>
                     <td className="px-6 py-4 text-right">

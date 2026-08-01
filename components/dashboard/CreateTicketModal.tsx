@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { X, PlusCircle } from "lucide-react";
 import { Priority } from "@/types/ticket";
 import { useTickets } from "@/context/TicketContext";
+import { BUTTONS } from "@/lib/colors";
 
 interface CreateTicketModalProps {
   isOpen: boolean;
@@ -175,7 +176,8 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg bg-[#0E2621] text-white font-bold hover:bg-[#163831] shadow-xs transition-colors"
+              style={{ backgroundColor: BUTTONS.primary }}
+              className="px-4 py-2 rounded-lg text-slate-900 font-extrabold hover:opacity-95 shadow-xs transition-opacity cursor-pointer"
             >
               Log Ticket
             </button>

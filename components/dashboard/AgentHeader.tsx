@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { ShieldCheck, ChevronRight, RefreshCw } from "lucide-react";
+import { FONT_FAMILY, BODY_SM } from "@/lib/fonts";
 
 interface AgentHeaderProps {
   agentName?: string;
@@ -16,7 +17,10 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
   isRefreshing = false,
 }) => {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+    <div 
+      className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4"
+      style={{ fontFamily: FONT_FAMILY.primary }}
+    >
       <div className="space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
@@ -26,7 +30,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
             <ShieldCheck className="w-3 h-3" /> {agentName}
           </span>
         </div>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-slate-500" style={{ fontSize: BODY_SM.size }}>
           Manage assigned tickets, perform status updates, add resolution notes, and close completed requests.
         </p>
       </div>
