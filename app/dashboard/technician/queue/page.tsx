@@ -6,7 +6,7 @@ import { TicketTable } from "@/components/tickets/TicketTable";
 import { TicketDrawer } from "@/components/dashboard/TicketDrawer";
 import { useTickets } from "@/context/TicketContext";
 import { Ticket } from "@/types/ticket";
-import { Inbox, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 export default function AssignedQueuePage() {
   const { tickets, updateTicketStatus, updateTicketPriority, addComment } = useTickets();
@@ -47,8 +47,10 @@ export default function AssignedQueuePage() {
       {/* Queue Header */}
       <div className="border-b border-slate-200 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Support Agent Ticket Queue</h1>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+              Support Agent Assigned Tickets
+            </h1>
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" /> Bontu Queue
             </span>
@@ -82,11 +84,13 @@ export default function AssignedQueuePage() {
         />
       </div>
 
-      {/* Ticket List Table */}
-      <TicketTable
-        tickets={filteredTickets}
-        onSelectTicket={(ticket: Ticket) => setSelectedTicketId(ticket.id)}
-      />
+      {/* Ticket List Table Container */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+        <TicketTable
+          tickets={filteredTickets}
+          onSelectTicket={(ticket: Ticket) => setSelectedTicketId(ticket.id)}
+        />
+      </div>
 
       {/* Detail Inspection Drawer */}
       <TicketDrawer

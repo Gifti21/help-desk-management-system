@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Search, RotateCcw, UserCheck, Layers } from "lucide-react";
+import { BUTTONS } from "@/lib/colors";
 
 interface TicketFiltersProps {
   searchValue: string;
@@ -39,9 +40,10 @@ export const TicketFilters: React.FC<TicketFiltersProps> = ({
           <div className="inline-flex rounded-lg bg-slate-100 p-1 border border-slate-200 shrink-0">
             <button
               onClick={() => onScopeChange("ALL")}
+              style={scope === "ALL" ? { backgroundColor: BUTTONS.primary } : undefined}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${
                 scope === "ALL"
-                  ? "bg-[#0E2621] text-white shadow-xs"
+                  ? "text-slate-900 shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
@@ -50,13 +52,14 @@ export const TicketFilters: React.FC<TicketFiltersProps> = ({
             </button>
             <button
               onClick={() => onScopeChange("ASSIGNED_TO_ME")}
+              style={scope === "ASSIGNED_TO_ME" ? { backgroundColor: BUTTONS.primary } : undefined}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${
                 scope === "ASSIGNED_TO_ME"
-                  ? "bg-[#0E2621] text-white shadow-xs"
+                  ? "text-slate-900 shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              <UserCheck className="w-3.5 h-3.5 text-[#2FD9C4]" />
+              <UserCheck className="w-3.5 h-3.5 text-slate-900" />
               <span>Assigned to Me</span>
             </button>
           </div>
@@ -70,7 +73,8 @@ export const TicketFilters: React.FC<TicketFiltersProps> = ({
             placeholder="Search title, ticket # (TICK-1024), or requester..."
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-10 pr-4 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0E2621] transition-colors"
+            style={{ focusBorderColor: BUTTONS.primary } as any}
+            className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-10 pr-4 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-colors"
           />
         </div>
 
@@ -80,7 +84,7 @@ export const TicketFilters: React.FC<TicketFiltersProps> = ({
           <select
             value={status}
             onChange={(e) => onStatusChange(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:outline-none focus:border-[#0E2621]"
+            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:outline-none"
           >
             <option value="ALL">All Statuses</option>
             <option value="OPEN">Open</option>
@@ -94,7 +98,7 @@ export const TicketFilters: React.FC<TicketFiltersProps> = ({
           <select
             value={department}
             onChange={(e) => onDepartmentChange(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:outline-none focus:border-[#0E2621]"
+            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:outline-none"
           >
             <option value="ALL">All Departments</option>
             <option value="IT Support">IT Support</option>
@@ -108,7 +112,7 @@ export const TicketFilters: React.FC<TicketFiltersProps> = ({
           <select
             value={priority}
             onChange={(e) => onPriorityChange(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:outline-none focus:border-[#0E2621]"
+            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:outline-none"
           >
             <option value="ALL">All Priorities</option>
             <option value="LOW">Low</option>
