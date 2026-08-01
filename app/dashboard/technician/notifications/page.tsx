@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { 
@@ -12,18 +12,37 @@ import {
   Filter
 } from "lucide-react";
 import { useTickets, AppNotification } from "@/context/TicketContext";
+import { BUTTONS } from "@/lib/colors";
 
 export default function TechnicianNotificationsPage() {
   const { 
     notifications, 
-    unreadNotificationsCount, 
     markNotificationsAsRead, 
     markSingleNotificationAsRead 
   } = useTickets();
   
   const [activeTab, setActiveTab] = useState<"ALL" | "UNREAD">("ALL");
 
-  const filteredNotifications = notifications.filter((item) => {
+  // Deduplicate notifications to prevent identical cards from rendering multiple times
+  const uniqueNotifications = useMemo(() => {
+    const seen = new Set<string>();
+    return notifications.filter((item) => {
+      // Create a unique fingerprint for each distinct notification
+      const identifier = `${item.id}-${item.title}-${item.message}`;
+      if (seen.has(identifier)) {
+        return false;
+      }
+      seen.add(identifier);
+      return true;
+    });
+  }, [notifications]);
+
+  // Compute accurate unread count from the deduplicated list
+  const unreadCount = useMemo(() => {
+    return uniqueNotifications.filter((item) => !item.read).length;
+  }, [uniqueNotifications]);
+
+  const filteredNotifications = uniqueNotifications.filter((item) => {
     if (activeTab === "UNREAD") return !item.read;
     return true;
   });
@@ -48,9 +67,9 @@ export default function TechnicianNotificationsPage() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">Notifications & System Alerts</h1>
-            {unreadNotificationsCount > 0 && (
+            {unreadCount > 0 && (
               <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300">
-                {unreadNotificationsCount} Unread
+                {unreadCount} Unread
               </span>
             )}
           </div>
@@ -59,7 +78,7 @@ export default function TechnicianNotificationsPage() {
           </p>
         </div>
 
-        {unreadNotificationsCount > 0 && (
+        {unreadCount > 0 && (
           <Button 
             variant="outline" 
             size="sm" 
@@ -77,23 +96,31 @@ export default function TechnicianNotificationsPage() {
         <Filter className="w-4 h-4 text-slate-500 mr-1" />
         <button
           onClick={() => setActiveTab("ALL")}
+          style={{
+            backgroundColor: activeTab === "ALL" ? BUTTONS.primary : "transparent",
+            color: activeTab === "ALL" ? BUTTONS.primaryText : "#475569",
+          }}
           className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-colors ${
             activeTab === "ALL"
-              ? "bg-[#0E2621] text-white"
-              : "text-slate-600 hover:text-slate-900 bg-white border border-slate-200"
+              ? ""
+              : "hover:text-slate-900 bg-white border border-slate-200"
           }`}
         >
-          All Notifications ({notifications.length})
+          All Notifications ({uniqueNotifications.length})
         </button>
         <button
           onClick={() => setActiveTab("UNREAD")}
+          style={{
+            backgroundColor: activeTab === "UNREAD" ? BUTTONS.primary : "transparent",
+            color: activeTab === "UNREAD" ? BUTTONS.primaryText : "#475569",
+          }}
           className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-colors ${
             activeTab === "UNREAD"
-              ? "bg-[#0E2621] text-white"
-              : "text-slate-600 hover:text-slate-900 bg-white border border-slate-200"
+              ? ""
+              : "hover:text-slate-900 bg-white border border-slate-200"
           }`}
         >
-          Unread ({unreadNotificationsCount})
+          Unread ({unreadCount})
         </button>
       </div>
 

@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useMemo } from 'react';
 import { NotificationItem } from '@/components/notifications/NotificationItem';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -18,6 +19,18 @@ export function NotificationList({
 }: NotificationListProps) {
   const { notifications, loading, unreadCount, markAsRead, markAllAsRead, refreshNotifications } =
     useNotifications();
+
+  // Strict deduplication by ID to guarantee zero duplicate keys or rows
+  const uniqueNotifications = useMemo(() => {
+    const seenIds = new Set<string>();
+    return notifications.filter((item) => {
+      if (seenIds.has(item.id)) {
+        return false;
+      }
+      seenIds.add(item.id);
+      return true;
+    });
+  }, [notifications]);
 
   return (
     <section className="space-y-4">
@@ -43,7 +56,7 @@ export function NotificationList({
         <div className="flex justify-center py-12">
           <Spinner className="h-8 w-8 text-emerald-600" />
         </div>
-      ) : notifications.length === 0 ? (
+      ) : uniqueNotifications.length === 0 ? (
         <EmptyState
           title="No notifications"
           description="Ticket updates will appear here when activity occurs."
@@ -51,7 +64,7 @@ export function NotificationList({
         />
       ) : (
         <div className="space-y-3">
-          {notifications.map((notification) => (
+          {uniqueNotifications.map((notification) => (
             <NotificationItem
               key={notification.id}
               notification={notification}

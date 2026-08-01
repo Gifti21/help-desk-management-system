@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { NOTIFICATION_TYPE_LABELS } from '@/constants/notificationTypes';
 import { formatDate } from '@/utils/formatDate';
 import type { Notification } from '@/types/notification';
+import { BUTTONS } from '@/lib/colors';
 
 interface NotificationItemProps {
   notification: Notification;
@@ -48,7 +49,10 @@ export function NotificationItem({
             {notification.message}
           </p>
           <p className="mt-2 text-[10px] font-mono text-slate-400 font-medium">
-            <span className="text-emerald-700 font-semibold">
+            <span 
+              className="font-semibold"
+              style={{ color: BUTTONS.primary }}
+            >
               {NOTIFICATION_TYPE_LABELS[notification.type]}
             </span>{' '}
             · {formatDate(notification.createdAt)}
@@ -57,7 +61,8 @@ export function NotificationItem({
 
         {!notification.read ? (
           <span
-            className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-600 ring-4 ring-emerald-50"
+            className="mt-1.5 h-2 w-2 shrink-0 rounded-full ring-4 ring-emerald-50"
+            style={{ backgroundColor: BUTTONS.primary }}
             aria-label="Unread notification"
           />
         ) : null}
