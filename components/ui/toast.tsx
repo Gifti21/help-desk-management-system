@@ -74,7 +74,6 @@ const iconMap = {
 
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
   const Icon = iconMap[toast.type];
-  const { isDark } = useTheme();
 
   const getToastStyles = () => {
     switch (toast.type) {
@@ -104,9 +103,9 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
         };
       default:
         return {
-          backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
-          color: isDark ? '#F1F5F9' : '#0F172A',
-          borderColor: isDark ? '#334155' : '#E2E8F0',
+          backgroundColor: '#FFFFFF',
+          color: '#0F172A',
+          borderColor: '#E2E8F0',
         };
     }
   };

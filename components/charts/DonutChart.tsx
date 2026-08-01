@@ -14,7 +14,7 @@ interface DonutChartProps {
 }
 
 export function DonutChart({ series, labels, colors, height = 280 }: DonutChartProps) {
-    const { colors: theme, isDark } = useTheme();
+    const { colors: theme } = useTheme();
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
@@ -115,7 +115,7 @@ export function DonutChart({ series, labels, colors, height = 280 }: DonutChartP
         },
         tooltip: {
             enabled: true,
-            theme: isDark ? 'dark' : 'light',
+            theme: 'light',
             style: {
                 fontSize: '14px',
                 fontFamily: 'inherit'

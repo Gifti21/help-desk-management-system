@@ -26,7 +26,7 @@ export function ActionButton({
     className = '',
     disabled = false
 }: ActionButtonProps) {
-    const { colors: theme, isDark } = useTheme();
+    const { colors: theme } = useTheme();
 
     const getButtonStyles = () => {
         const baseStyle = {
@@ -61,11 +61,11 @@ export function ActionButton({
         const variantStyles = {
             primary: {
                 backgroundColor: theme.primary,
-                color: isDark ? '#0F172A' : '#16332B',
+                color: '#16332B',
                 border: 'none',
             },
             secondary: {
-                backgroundColor: isDark ? 'rgba(148, 163, 184, 0.1)' : '#F1F5F9',
+                backgroundColor: '#F1F5F9',
                 color: theme.foreground,
                 border: 'none',
             },
@@ -76,7 +76,7 @@ export function ActionButton({
             },
             ghost: {
                 backgroundColor: 'transparent',
-                color: isDark ? '#94A3B8' : '#334155',
+                color: '#334155',
                 border: 'none',
             },
             success: {

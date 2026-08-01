@@ -66,7 +66,7 @@ export default function AdminDashboard() {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
-    const { colors: theme, isDark } = useTheme();
+    const { colors: theme } = useTheme();
     const { toast } = useToast();
 
     // Reset to page 1 when search term changes

@@ -4,7 +4,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { colors } from '@/lib/colors';
 import { fonts } from '@/lib/fonts';
-import { darkModeColors } from '@/lib/dark-mode-color';
 import { useTheme } from '../providers/ThemeProvider';
 
 interface Column {
@@ -22,14 +21,12 @@ interface DataTableProps {
 }
 
 export function DataTable({ title, columns, data, actions, emptyMessage = 'No data available' }: DataTableProps) {
-    const { isDark } = useTheme();
-
     return (
         <Card
             className="shadow-sm transition-colors"
             style={{
-                backgroundColor: isDark ? darkModeColors.card.background : 'white',
-                borderColor: isDark ? darkModeColors.border.primary : colors.borderGrey
+                backgroundColor: 'white',
+                borderColor: colors.borderGrey
             }}
         >
             {(title || actions) && (
@@ -40,7 +37,7 @@ export function DataTable({ title, columns, data, actions, emptyMessage = 'No da
                                 style={{
                                     fontSize: fonts.heading.sm.size,
                                     fontWeight: fonts.heading.sm.weight,
-                                    color: isDark ? darkModeColors.text.primary : colors.primaryText,
+                                    color: colors.primaryText,
                                     lineHeight: fonts.heading.sm.lineHeight
                                 }}
                             >
@@ -58,8 +55,8 @@ export function DataTable({ title, columns, data, actions, emptyMessage = 'No da
                         <thead>
                             <tr
                                 style={{
-                                    borderBottom: `1px solid ${isDark ? darkModeColors.border.primary : colors.borderGrey}`,
-                                    backgroundColor: isDark ? darkModeColors.background.tertiary : colors.lightTealBgAlt
+                                    borderBottom: `1px solid ${colors.borderGrey}`,
+                                    backgroundColor: colors.lightTealBgAlt
                                 }}
                             >
                                 {columns.map((column) => (
@@ -69,7 +66,7 @@ export function DataTable({ title, columns, data, actions, emptyMessage = 'No da
                                         style={{
                                             fontSize: fonts.caption.regular.size,
                                             fontWeight: fonts.fontWeight.medium,
-                                            color: isDark ? darkModeColors.text.secondary : colors.bodyTextGrey,
+                                            color: colors.bodyTextGrey,
                                             letterSpacing: fonts.caption.regular.letterSpacing
                                         }}
                                     >
@@ -86,7 +83,7 @@ export function DataTable({ title, columns, data, actions, emptyMessage = 'No da
                                         className="text-center py-12"
                                         style={{
                                             fontSize: fonts.body.regular.size,
-                                            color: isDark ? darkModeColors.text.tertiary : colors.mutedGreyGreen,
+                                            color: colors.mutedGreyGreen,
                                             lineHeight: fonts.body.regular.lineHeight
                                         }}
                                     >
@@ -99,9 +96,9 @@ export function DataTable({ title, columns, data, actions, emptyMessage = 'No da
                                         key={index}
                                         className="transition-colors"
                                         style={{
-                                            borderBottom: `1px solid ${isDark ? darkModeColors.border.secondary : colors.borderGrey}`,
+                                            borderBottom: `1px solid ${colors.borderGrey}`,
                                         }}
-                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDark ? darkModeColors.background.tertiary : '#f9fafb'}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
                                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                     >
                                         {columns.map((column) => (
@@ -110,7 +107,7 @@ export function DataTable({ title, columns, data, actions, emptyMessage = 'No da
                                                 className="py-4 px-4"
                                                 style={{
                                                     fontSize: fonts.body.regular.size,
-                                                    color: isDark ? darkModeColors.text.primary : colors.primaryText,
+                                                    color: colors.primaryText,
                                                     lineHeight: fonts.body.regular.lineHeight
                                                 }}
                                             >

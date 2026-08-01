@@ -16,7 +16,7 @@ interface BarChartProps {
 }
 
 export function BarChart({ categories, series, height = 280, horizontal = false, xAxisTitle, yAxisTitle }: BarChartProps) {
-    const { colors: theme, isDark } = useTheme();
+    const { colors: theme } = useTheme();
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
@@ -149,7 +149,7 @@ export function BarChart({ categories, series, height = 280, horizontal = false,
         fill: {
             type: 'gradient',
             gradient: {
-                shade: isDark ? 'dark' : 'light',
+                shade: 'light',
                 type: horizontal ? 'horizontal' : 'vertical',
                 shadeIntensity: 0.5,
                 gradientToColors: [theme.primary],
@@ -162,7 +162,7 @@ export function BarChart({ categories, series, height = 280, horizontal = false,
         colors: [theme.primary],
         tooltip: {
             enabled: true,
-            theme: isDark ? 'dark' : 'light',
+            theme: 'light',
             style: {
                 fontSize: '14px',
                 fontFamily: 'inherit'

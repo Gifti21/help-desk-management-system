@@ -127,7 +127,7 @@ export default function UsersPage() {
         isActive: true
     });
 
-    const { colors: theme, isDark } = useTheme();
+    const { colors: theme } = useTheme();
     const { toast } = useToast();
 
     // Filter users
@@ -501,7 +501,7 @@ export default function UsersPage() {
                                             className="w-8 h-8 rounded flex items-center justify-center transition-colors"
                                             style={{
                                                 backgroundColor: currentPage === page ? theme.primary : 'transparent',
-                                                color: currentPage === page ? (isDark ? '#0F172A' : '#16332B') : theme.foreground,
+                                                color: currentPage === page ? '#16332B' : theme.foreground,
                                                 fontSize: fonts.body.sm.size
                                             }}
                                         >

@@ -5,7 +5,6 @@ import { Card, CardContent } from '../ui/card';
 import { colors } from '@/lib/colors';
 import { fonts } from '@/lib/fonts';
 import { spacing } from '@/lib/spacing';
-import { darkModeColors } from '@/lib/dark-mode-color';
 import { useTheme } from '../providers/ThemeProvider';
 import { LucideIcon } from 'lucide-react';
 
@@ -28,14 +27,12 @@ export function StatCard({
     trend,
     trendColor = colors.tealPrimary
 }: StatCardProps) {
-    const { isDark } = useTheme();
-
     return (
         <Card
             className="shadow-sm transition-colors"
             style={{
-                backgroundColor: isDark ? darkModeColors.card.background : 'white',
-                borderColor: isDark ? darkModeColors.border.primary : colors.borderGrey
+                backgroundColor: 'white',
+                borderColor: colors.borderGrey
             }}
         >
             <CardContent style={{ padding: spacing.card.padding }}>
@@ -46,7 +43,7 @@ export function StatCard({
                             style={{
                                 fontSize: fonts.caption.regular.size,
                                 fontWeight: fonts.caption.regular.weight,
-                                color: isDark ? darkModeColors.text.secondary : colors.bodyTextGrey,
+                                color: colors.bodyTextGrey,
                                 letterSpacing: fonts.caption.regular.letterSpacing,
                                 marginBottom: spacing.xs
                             }}
@@ -58,7 +55,7 @@ export function StatCard({
                             style={{
                                 fontSize: fonts.heading.md.size,
                                 fontWeight: fonts.heading.md.weight,
-                                color: isDark ? darkModeColors.text.primary : colors.primaryText,
+                                color: colors.primaryText,
                                 lineHeight: fonts.heading.md.lineHeight,
                                 marginBottom: spacing.xs
                             }}
@@ -81,7 +78,7 @@ export function StatCard({
                     <div
                         className="rounded-lg flex items-center justify-center"
                         style={{
-                            backgroundColor: isDark ? darkModeColors.background.tertiary : colors.lightTealBg,
+                            backgroundColor: colors.lightTealBg,
                             width: '48px',
                             height: '48px'
                         }}

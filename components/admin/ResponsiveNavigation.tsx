@@ -6,8 +6,6 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { colors } from "@/lib/colors";
 import { fonts } from "@/lib/fonts";
-import { darkModeColors } from "@/lib/dark-mode-color";
-import { useTheme } from '../providers/ThemeProvider';
 import {
   LayoutDashboard,
   Ticket,
@@ -42,7 +40,6 @@ export function ResponsiveNavigation({
   userName = "Admin User",
 }: ResponsiveNavigationProps) {
   const pathname = usePathname();
-  const { isDark } = useTheme();
 
   const navigationItems: NavigationItem[] = [
     {
@@ -126,15 +123,9 @@ export function ResponsiveNavigation({
         fontSize: fonts.body.regular.size,
         fontWeight: fonts.body.regular.weight,
         lineHeight: fonts.body.regular.lineHeight,
-        color: isActive
-          ? (isDark ? darkModeColors.sidebar.textActive : colors.tealPrimary)
-          : (isDark ? darkModeColors.sidebar.text : "rgba(255, 255, 255, 0.7)"),
-        backgroundColor: isActive
-          ? (isDark ? darkModeColors.sidebar.itemActive : "rgba(47, 217, 196, 0.15)")
-          : "transparent",
-        borderLeft: isActive
-          ? `3px solid ${isDark ? darkModeColors.accent.primary : colors.tealPrimary}`
-          : "none",
+        color: isActive ? colors.tealPrimary : "rgba(255, 255, 255, 0.7)",
+        backgroundColor: isActive ? "rgba(47, 217, 196, 0.15)" : "transparent",
+        borderLeft: isActive ? `3px solid ${colors.tealPrimary}` : "none",
         padding: isActive ? "8px 12px 8px 9px" : "8px 12px",
         borderRadius: "6px",
       };
@@ -146,15 +137,9 @@ export function ResponsiveNavigation({
         fontSize: fonts.body.sm.size,
         fontWeight: fonts.fontWeight.medium,
         lineHeight: fonts.body.sm.lineHeight,
-        color: isActive
-          ? (isDark ? darkModeColors.accent.primary : colors.tealPrimary)
-          : (isDark ? darkModeColors.text.secondary : colors.bodyTextGrey),
-        backgroundColor: isActive
-          ? (isDark ? darkModeColors.sidebar.itemActive : "rgba(255, 255, 255, 0.05)")
-          : "transparent",
-        borderBottom: isActive
-          ? `3px solid ${isDark ? darkModeColors.accent.primary : colors.tealPrimary}`
-          : "none",
+        color: isActive ? colors.tealPrimary : colors.bodyTextGrey,
+        backgroundColor: isActive ? "rgba(255, 255, 255, 0.05)" : "transparent",
+        borderBottom: isActive ? `3px solid ${colors.tealPrimary}` : "none",
         padding: isActive ? "12px 16px 9px 16px" : "12px 16px",
         borderRadius: "0",
       };
@@ -166,9 +151,7 @@ export function ResponsiveNavigation({
       fontSize: fonts.caption.regular.size,
       fontWeight: fonts.fontWeight.medium,
       lineHeight: fonts.caption.regular.lineHeight,
-      color: isActive
-        ? (isDark ? darkModeColors.accent.primary : colors.tealPrimary)
-        : (isDark ? darkModeColors.text.secondary : colors.bodyTextGrey),
+      color: isActive ? colors.tealPrimary : colors.bodyTextGrey,
     };
   };
 
@@ -177,15 +160,15 @@ export function ResponsiveNavigation({
     <div
       className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:bottom-[52px] lg:top-0 lg:z-50"
       style={{
-        backgroundColor: isDark ? darkModeColors.sidebar.background : colors.darkGreen,
-        borderRight: isDark ? `1px solid ${darkModeColors.sidebar.border}` : `1px solid rgba(47, 217, 196, 0.2)`,
+        backgroundColor: colors.darkGreen,
+        borderRight: `1px solid rgba(47, 217, 196, 0.2)`,
         fontFamily: fonts.fontFamily.primary,
       }}
     >
       {/* Logo */}
       <div
         className="flex items-center px-6 py-4 flex-shrink-0"
-        style={{ borderBottom: isDark ? `1px solid ${darkModeColors.sidebar.border}` : `1px solid rgba(47, 217, 196, 0.2)` }}
+        style={{ borderBottom: `1px solid rgba(47, 217, 196, 0.2)` }}
       >
         <div className="flex items-center">
           <Image
@@ -201,7 +184,7 @@ export function ResponsiveNavigation({
               style={{
                 fontSize: fonts.heading.sm.size,
                 fontWeight: fonts.heading.sm.weight,
-                color: isDark ? darkModeColors.accent.primary : colors.tealPrimary,
+                color: colors.tealPrimary,
                 lineHeight: fonts.heading.sm.lineHeight,
               }}
             >
@@ -210,7 +193,7 @@ export function ResponsiveNavigation({
             <div
               style={{
                 fontSize: fonts.body.sm.size,
-                color: isDark ? darkModeColors.text.secondary : "rgba(255, 255, 255, 0.7)",
+                color: "rgba(255, 255, 255, 0.7)",
                 lineHeight: fonts.body.sm.lineHeight,
               }}
             >
@@ -233,9 +216,7 @@ export function ResponsiveNavigation({
                 style={getLinkStyles(item.current || false, "desktop")}
               >
                 <Icon className="mr-3 h-5 w-5" style={{
-                  color: item.current
-                    ? (isDark ? darkModeColors.sidebar.textActive : colors.tealPrimary)
-                    : (isDark ? darkModeColors.sidebar.text : "rgba(255, 255, 255, 0.7)")
+                  color: item.current ? colors.tealPrimary : "rgba(255, 255, 255, 0.7)"
                 }} />
                 {item.name}
               </Link>
@@ -253,8 +234,8 @@ export function ResponsiveNavigation({
                 fontSize: fonts.button.regular.size,
                 fontWeight: fonts.button.regular.weight,
                 lineHeight: fonts.button.regular.lineHeight,
-                color: isDark ? darkModeColors.button.primary.text : colors.buttons.primaryText,
-                backgroundColor: isDark ? darkModeColors.button.primary.bg : colors.buttons.primary,
+                color: colors.buttons.primaryText,
+                backgroundColor: colors.buttons.primary,
               }}
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -268,7 +249,7 @@ export function ResponsiveNavigation({
       <div className="flex-shrink-0">
         <div
           className="px-4 py-3"
-          style={{ borderTop: isDark ? `1px solid ${darkModeColors.sidebar.border}` : `1px solid rgba(47, 217, 196, 0.2)` }}
+          style={{ borderTop: `1px solid rgba(47, 217, 196, 0.2)` }}
         >
           <button
             onClick={() => {
@@ -297,14 +278,14 @@ export function ResponsiveNavigation({
       <div
         className="fixed top-0 left-0 right-0 z-50"
         style={{
-          backgroundColor: isDark ? darkModeColors.sidebar.background : colors.darkGreen,
-          borderBottom: isDark ? `1px solid ${darkModeColors.sidebar.border}` : `1px solid rgba(47, 217, 196, 0.2)`,
+          backgroundColor: colors.darkGreen,
+          borderBottom: `1px solid rgba(47, 217, 196, 0.2)`,
         }}
       >
         {/* Logo Bar */}
         <div
           className="flex items-center justify-between px-6 py-3"
-          style={{ borderBottom: isDark ? `1px solid ${darkModeColors.sidebar.border}` : `1px solid rgba(47, 217, 196, 0.2)` }}
+          style={{ borderBottom: `1px solid rgba(47, 217, 196, 0.2)` }}
         >
           <div className="flex items-center">
             <Image
@@ -319,7 +300,7 @@ export function ResponsiveNavigation({
               style={{
                 fontSize: fonts.heading.xs.size,
                 fontWeight: fonts.heading.xs.weight,
-                color: isDark ? darkModeColors.accent.primary : colors.tealPrimary,
+                color: colors.tealPrimary,
               }}
             >
               BESYS Support
@@ -403,8 +384,8 @@ export function ResponsiveNavigation({
               <div
                 className="rounded-lg shadow-lg overflow-hidden"
                 style={{
-                  backgroundColor: isDark ? darkModeColors.card.background : '#FFFFFF',
-                  borderColor: isDark ? darkModeColors.border.primary : colors.borderGrey,
+                  backgroundColor: '#FFFFFF',
+                  borderColor: colors.borderGrey,
                   border: '1px solid',
                 }}
               >
@@ -417,18 +398,14 @@ export function ResponsiveNavigation({
                       onClick={() => setShowMoreMenu(false)}
                       className="flex items-center px-4 py-3 transition-colors"
                       style={{
-                        borderBottom: `1px solid ${isDark ? darkModeColors.border.secondary : colors.borderGrey}`,
-                        color: item.current
-                          ? (isDark ? darkModeColors.accent.primary : colors.tealPrimary)
-                          : (isDark ? darkModeColors.text.primary : colors.primaryText),
+                        borderBottom: `1px solid ${colors.borderGrey}`,
+                        color: item.current ? colors.tealPrimary : colors.primaryText,
                       }}
                     >
                       <Icon
                         className="h-5 w-5 mr-3"
                         style={{
-                          color: item.current
-                            ? (isDark ? darkModeColors.accent.primary : colors.tealPrimary)
-                            : (isDark ? darkModeColors.text.secondary : colors.bodyTextGrey),
+                          color: item.current ? colors.tealPrimary : colors.bodyTextGrey,
                         }}
                       />
                       <span style={{ fontSize: fonts.body.regular.size }}>
@@ -445,8 +422,8 @@ export function ResponsiveNavigation({
         <div
           className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-sm"
           style={{
-            backgroundColor: isDark ? 'rgba(13, 27, 42, 0.95)' : "rgba(22, 51, 43, 0.95)",
-            borderTop: isDark ? `1px solid ${darkModeColors.sidebar.border}` : `1px solid rgba(47, 217, 196, 0.2)`,
+            backgroundColor: "rgba(22, 51, 43, 0.95)",
+            borderTop: `1px solid rgba(47, 217, 196, 0.2)`,
           }}
         >
           <nav className="flex">
@@ -462,9 +439,7 @@ export function ResponsiveNavigation({
                   <Icon
                     className="h-5 w-5 mb-1"
                     style={{
-                      color: item.current
-                        ? (isDark ? darkModeColors.accent.primary : colors.tealPrimary)
-                        : (isDark ? darkModeColors.text.secondary : "rgba(255, 255, 255, 0.7)"),
+                      color: item.current ? colors.tealPrimary : "rgba(255, 255, 255, 0.7)",
                     }}
                   />
                   <span className="text-xs truncate">{item.name}</span>
@@ -479,13 +454,13 @@ export function ResponsiveNavigation({
                 fontSize: fonts.caption.regular.size,
                 fontWeight: fonts.fontWeight.medium,
                 lineHeight: fonts.caption.regular.lineHeight,
-                color: isDark ? darkModeColors.text.secondary : colors.bodyTextGrey,
+                color: colors.bodyTextGrey,
               }}
             >
               <MoreHorizontal
                 className="h-5 w-5 mb-1"
                 style={{
-                  color: isDark ? darkModeColors.text.secondary : "rgba(255, 255, 255, 0.7)",
+                  color: "rgba(255, 255, 255, 0.7)",
                 }}
               />
               <span className="text-xs">More</span>
@@ -504,8 +479,8 @@ export function ResponsiveNavigation({
       <div
         className="fixed top-0 left-0 right-0 z-40 px-4 py-3 backdrop-blur-sm"
         style={{
-          backgroundColor: isDark ? 'rgba(13, 27, 42, 0.95)' : "rgba(22, 51, 43, 0.95)",
-          borderBottom: isDark ? `1px solid ${darkModeColors.sidebar.border}` : `1px solid rgba(47, 217, 196, 0.2)`,
+          backgroundColor: "rgba(22, 51, 43, 0.95)",
+          borderBottom: `1px solid rgba(47, 217, 196, 0.2)`,
         }}
       >
         <div className="flex items-center justify-between">
@@ -522,7 +497,7 @@ export function ResponsiveNavigation({
               style={{
                 fontSize: fonts.body.lg.size,
                 fontWeight: fonts.fontWeight.semibold,
-                color: isDark ? darkModeColors.accent.primary : colors.tealPrimary,
+                color: colors.tealPrimary,
               }}
             >
               BESYS Support

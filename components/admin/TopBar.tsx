@@ -3,7 +3,6 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
-import { SimpleThemeToggle } from '../ui/theme-toggle';
 import { useTheme } from '../providers/ThemeProvider';
 import { useToast } from '../ui/toast';
 import { fonts } from '@/lib/fonts';
@@ -69,8 +68,6 @@ export function TopBar({ title, subtitle, actions }: TopBarProps) {
 
                     {/* Theme toggle and user controls */}
                     <div className="flex items-center space-x-2">
-                        <SimpleThemeToggle />
-
                         <div className="hidden md:flex items-center space-x-2">
                             <Button
                                 variant="ghost"

@@ -3,7 +3,6 @@
 import React from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 import { useTheme } from '../providers/ThemeProvider';
-import { darkModeColors } from '@/lib/dark-mode-color';
 import { colors } from '@/lib/colors';
 
 interface ConfirmationDialogProps {
@@ -27,7 +26,7 @@ export function ConfirmationDialog({
   cancelLabel = 'Cancel',
   variant = 'danger',
 }: ConfirmationDialogProps) {
-  const { colors: theme, isDark } = useTheme();
+  const { colors: theme } = useTheme();
 
   if (!isOpen) return null;
 
@@ -35,29 +34,29 @@ export function ConfirmationDialog({
     switch (variant) {
       case 'danger':
         return {
-          iconBg: isDark ? 'rgba(239, 68, 68, 0.1)' : '#FEE2E2',
-          iconColor: isDark ? '#FCA5A5' : '#DC2626',
+          iconBg: '#FEE2E2',
+          iconColor: '#DC2626',
           buttonBg: '#EF4444',
           buttonText: '#FFFFFF',
         };
       case 'warning':
         return {
-          iconBg: isDark ? 'rgba(251, 146, 60, 0.1)' : '#FEF3C7',
-          iconColor: isDark ? '#FCD34D' : '#D97706',
+          iconBg: '#FEF3C7',
+          iconColor: '#D97706',
           buttonBg: '#F59E0B',
           buttonText: '#000000',
         };
       case 'default':
         return {
-          iconBg: isDark ? 'rgba(45, 212, 191, 0.1)' : '#DBEAFE',
-          iconColor: isDark ? darkModeColors.accent.primary : colors.tealPrimary,
-          buttonBg: isDark ? darkModeColors.accent.primary : colors.tealPrimary,
-          buttonText: isDark ? '#0F172A' : '#16332B',
+          iconBg: '#DBEAFE',
+          iconColor: colors.tealPrimary,
+          buttonBg: colors.tealPrimary,
+          buttonText: '#16332B',
         };
       default:
         return {
-          iconBg: isDark ? 'rgba(239, 68, 68, 0.1)' : '#FEE2E2',
-          iconColor: isDark ? '#FCA5A5' : '#DC2626',
+          iconBg: '#FEE2E2',
+          iconColor: '#DC2626',
           buttonBg: '#EF4444',
           buttonText: '#FFFFFF',
         };
@@ -87,7 +86,7 @@ export function ConfirmationDialog({
           onClick={onClose}
           className="absolute top-4 right-4 p-1 rounded-lg hover:opacity-80 transition-colors"
           style={{
-            color: isDark ? darkModeColors.text.secondary : colors.bodyTextGrey,
+            color: colors.bodyTextGrey,
           }}
         >
           <X className="w-5 h-5" />
@@ -112,7 +111,7 @@ export function ConfirmationDialog({
           </h3>
           <p
             className="text-sm mb-6 max-w-sm"
-            style={{ color: isDark ? darkModeColors.text.secondary : colors.bodyTextGrey }}
+            style={{ color: colors.bodyTextGrey }}
           >
             {message}
           </p>
@@ -122,7 +121,7 @@ export function ConfirmationDialog({
               onClick={onClose}
               className="flex-1 px-4 py-2.5 text-sm font-medium rounded-xl transition-colors"
               style={{
-                backgroundColor: isDark ? darkModeColors.background.tertiary : colors.lightTealBg,
+                backgroundColor: colors.lightTealBg,
                 color: theme.foreground,
               }}
             >

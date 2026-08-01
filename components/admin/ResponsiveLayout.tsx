@@ -5,7 +5,6 @@ import { ResponsiveNavigation } from './ResponsiveNavigation';
 import { Footer } from './Footer';
 import { useTheme } from '../providers/ThemeProvider';
 import { fonts } from '@/lib/fonts';
-import { darkModeColors } from '@/lib/dark-mode-color';
 
 interface ResponsiveLayoutProps {
     children: React.ReactNode;
@@ -14,14 +13,14 @@ interface ResponsiveLayoutProps {
 }
 
 export function ResponsiveLayout({ children, userRole = 'ADMIN', userName = 'Admin User' }: ResponsiveLayoutProps) {
-    const { isDark, colors } = useTheme();
+    const { colors } = useTheme();
 
     return (
         <div
             className="min-h-screen flex flex-col"
             style={{
-                backgroundColor: isDark ? darkModeColors.background.primary : colors.background,
-                color: isDark ? darkModeColors.text.primary : colors.foreground,
+                backgroundColor: colors.background,
+                color: colors.foreground,
                 fontFamily: fonts.fontFamily.primary
             }}
         >

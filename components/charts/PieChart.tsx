@@ -14,7 +14,7 @@ interface PieChartProps {
 }
 
 export function PieChart({ series, labels, colors, height = 280 }: PieChartProps) {
-    const { colors: theme, isDark } = useTheme();
+    const { colors: theme } = useTheme();
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
@@ -101,7 +101,7 @@ export function PieChart({ series, labels, colors, height = 280 }: PieChartProps
         },
         tooltip: {
             enabled: true,
-            theme: isDark ? 'dark' : 'light',
+            theme: 'light',
             style: {
                 fontSize: '14px',
                 fontFamily: 'inherit'

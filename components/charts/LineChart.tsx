@@ -15,7 +15,7 @@ interface LineChartProps {
 }
 
 export function LineChart({ categories, series, height = 280, xAxisTitle, yAxisTitle }: LineChartProps) {
-    const { colors: theme, isDark } = useTheme();
+    const { colors: theme } = useTheme();
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
@@ -61,7 +61,7 @@ export function LineChart({ categories, series, height = 280, xAxisTitle, yAxisT
         fill: {
             type: 'gradient',
             gradient: {
-                shade: isDark ? 'dark' : 'light',
+                shade: 'light',
                 type: 'vertical',
                 shadeIntensity: 0.5,
                 gradientToColors: [theme.primary],
@@ -191,7 +191,7 @@ export function LineChart({ categories, series, height = 280, xAxisTitle, yAxisT
         },
         tooltip: {
             enabled: true,
-            theme: isDark ? 'dark' : 'light',
+            theme: 'light',
             style: {
                 fontSize: '14px',
                 fontFamily: 'inherit'
