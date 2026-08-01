@@ -448,10 +448,18 @@ export default function UsersPage() {
 
             <div className="p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <StatCard title="Total Users" value={totalUsers.toString()} icon={Users} iconColor={theme.primary} />
-                    <StatCard title="Active Users" value={activeUsers.toString()} icon={UserCheck} iconColor="#10B981" />
-                    <StatCard title="Inactive Users" value={inactiveUsers.toString()} icon={UserX} iconColor="#f59e0b" />
-                    <StatCard title="Administrators" value={adminUsers.toString()} icon={Shield} iconColor="#dc2626" />
+                    <div className="animate-slideInLeft" style={{ animationDelay: '100ms' }}>
+                        <StatCard title="Total Users" value={totalUsers.toString()} icon={Users} iconColor={theme.primary} />
+                    </div>
+                    <div className="animate-slideInLeft" style={{ animationDelay: '200ms' }}>
+                        <StatCard title="Active Users" value={activeUsers.toString()} icon={UserCheck} iconColor="#10B981" />
+                    </div>
+                    <div className="animate-slideInLeft" style={{ animationDelay: '300ms' }}>
+                        <StatCard title="Inactive Users" value={inactiveUsers.toString()} icon={UserX} iconColor="#f59e0b" />
+                    </div>
+                    <div className="animate-slideInLeft" style={{ animationDelay: '400ms' }}>
+                        <StatCard title="Administrators" value={adminUsers.toString()} icon={Shield} iconColor="#dc2626" />
+                    </div>
                 </div>
 
                 <SearchFilter

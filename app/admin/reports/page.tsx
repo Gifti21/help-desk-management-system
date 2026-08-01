@@ -952,40 +952,48 @@ export default function ReportsPage() {
                 <div className="flex-1 space-y-6">
                     {/* Key Metrics */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <StatCard
-                            title="Total Tickets"
-                            value={filteredStats.totalTickets.toString()}
-                            subtitle={selectedDepartment === 'all' ? 'All departments' : 'Filtered view'}
-                            icon={Ticket}
-                            iconColor={theme.primary}
-                        />
-                        <StatCard
-                            title="Avg. Resolution Time"
-                            value={filteredStats.avgResolutionTime}
-                            subtitle="Target: 4h"
-                            icon={Clock}
-                            iconColor="#F59E0B"
-                            trend={parseFloat(filteredStats.avgResolutionTime) <= 4 ? 'On target' : 'Needs improvement'}
-                            trendColor={parseFloat(filteredStats.avgResolutionTime) <= 4 ? '#10B981' : '#F59E0B'}
-                        />
-                        <StatCard
-                            title="SLA Compliance"
-                            value={filteredStats.avgSLA}
-                            subtitle="Target: 95%"
-                            icon={Shield}
-                            iconColor="#10B981"
-                            trend={parseFloat(filteredStats.avgSLA) >= 95 ? 'Excellent' : 'Near target'}
-                            trendColor={parseFloat(filteredStats.avgSLA) >= 95 ? '#10B981' : '#F59E0B'}
-                        />
-                        <StatCard
-                            title="Pending Tickets"
-                            value={filteredStats.pendingTickets.toString()}
-                            subtitle={`${filteredStats.resolvedTickets} resolved`}
-                            icon={Activity}
-                            iconColor={filteredStats.pendingTickets > 50 ? '#EF4444' : '#F59E0B'}
-                            trend={filteredStats.pendingTickets > 50 ? 'High volume' : 'Manageable'}
-                            trendColor={filteredStats.pendingTickets > 50 ? '#EF4444' : '#10B981'}
-                        />
+                        <div className="animate-slideInLeft" style={{ animationDelay: '100ms' }}>
+                            <StatCard
+                                title="Total Tickets"
+                                value={filteredStats.totalTickets.toString()}
+                                subtitle={selectedDepartment === 'all' ? 'All departments' : 'Filtered view'}
+                                icon={Ticket}
+                                iconColor={theme.primary}
+                            />
+                        </div>
+                        <div className="animate-slideInLeft" style={{ animationDelay: '200ms' }}>
+                            <StatCard
+                                title="Avg. Resolution Time"
+                                value={filteredStats.avgResolutionTime}
+                                subtitle="Target: 4h"
+                                icon={Clock}
+                                iconColor="#F59E0B"
+                                trend={parseFloat(filteredStats.avgResolutionTime) <= 4 ? 'On target' : 'Needs improvement'}
+                                trendColor={parseFloat(filteredStats.avgResolutionTime) <= 4 ? '#10B981' : '#F59E0B'}
+                            />
+                        </div>
+                        <div className="animate-slideInLeft" style={{ animationDelay: '300ms' }}>
+                            <StatCard
+                                title="SLA Compliance"
+                                value={filteredStats.avgSLA}
+                                subtitle="Target: 95%"
+                                icon={Shield}
+                                iconColor="#10B981"
+                                trend={parseFloat(filteredStats.avgSLA) >= 95 ? 'Excellent' : 'Near target'}
+                                trendColor={parseFloat(filteredStats.avgSLA) >= 95 ? '#10B981' : '#F59E0B'}
+                            />
+                        </div>
+                        <div className="animate-slideInLeft" style={{ animationDelay: '400ms' }}>
+                            <StatCard
+                                title="Pending Tickets"
+                                value={filteredStats.pendingTickets.toString()}
+                                subtitle={`${filteredStats.resolvedTickets} resolved`}
+                                icon={Activity}
+                                iconColor={filteredStats.pendingTickets > 50 ? '#EF4444' : '#F59E0B'}
+                                trend={filteredStats.pendingTickets > 50 ? 'High volume' : 'Manageable'}
+                                trendColor={filteredStats.pendingTickets > 50 ? '#EF4444' : '#10B981'}
+                            />
+                        </div>
                     </div>
 
                     {/* Monthly Trend */}

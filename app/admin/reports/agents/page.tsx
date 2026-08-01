@@ -7,8 +7,8 @@ import { DataTable } from '../../../../components/admin/DataTable';
 import { useTheme } from '../../../../components/providers/ThemeProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../../components/ui/card';
 import { fonts } from '@/lib/fonts';
-import { BarChart } from '../../../../components/charts/bar-chart';
-import { LineChart } from '../../../../components/charts/line-chart';
+import { BarChart } from '../../../../components/charts/BarChart';
+import { LineChart } from '../../../../components/charts/LineChart';
 import { ReportFilters } from '../../../../components/reports/ReportFilters';
 import { ExportButtons } from '../../../../components/reports/ExportButtons';
 import { MetricsGrid } from '../../../../components/reports/MetricsGrid';
@@ -378,7 +378,10 @@ export default function AgentReportsPage() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <BarChart data={ticketsResolvedChart} />
+                                <BarChart
+                                    categories={ticketsResolvedChart.map(d => d.name)}
+                                    series={[{ name: 'Tickets Resolved', data: ticketsResolvedChart.map(d => d.value) }]}
+                                />
                             </CardContent>
                         </Card>
 
@@ -401,7 +404,11 @@ export default function AgentReportsPage() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <LineChart data={weeklyPerformance} height={250} />
+                                <LineChart
+                                    categories={weeklyPerformance.map(d => d.label)}
+                                    series={[{ name: 'Performance', data: weeklyPerformance.map(d => d.value) }]}
+                                    height={250}
+                                />
                             </CardContent>
                         </Card>
                     </div>

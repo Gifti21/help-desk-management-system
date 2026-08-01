@@ -29,7 +29,7 @@ export function StatCard({
 }: StatCardProps) {
     return (
         <Card
-            className="shadow-sm transition-colors"
+            className="shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-105 hover:-translate-y-1 transform"
             style={{
                 backgroundColor: 'white',
                 borderColor: colors.borderGrey
@@ -76,14 +76,14 @@ export function StatCard({
                         )}
                     </div>
                     <div
-                        className="rounded-lg flex items-center justify-center"
+                        className="rounded-lg flex items-center justify-center transition-all duration-300 ease-in-out hover:scale-110 hover:rotate-6"
                         style={{
                             backgroundColor: colors.lightTealBg,
                             width: '48px',
                             height: '48px'
                         }}
                     >
-                        <Icon className="h-6 w-6" style={{ color: iconColor }} />
+                        <Icon className="h-6 w-6 transition-all duration-300" style={{ color: iconColor }} />
                     </div>
                 </div>
             </CardContent>

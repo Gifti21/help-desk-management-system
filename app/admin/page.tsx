@@ -314,29 +314,37 @@ export default function AdminDashboard() {
             <div className="p-6 space-y-6">
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <StatCard
-                        title="Total Tickets"
-                        value="2,842"
-                        icon={Ticket}
-                    />
-                    <StatCard
-                        title="Open Tickets"
-                        value="142"
-                        icon={AlertTriangle}
-                        iconColor="#ea580c"
-                    />
-                    <StatCard
-                        title="Closed Today"
-                        value="64"
-                        icon={CheckCircle}
-                        iconColor="#15803d"
-                    />
-                    <StatCard
-                        title="Overdue"
-                        value="28"
-                        icon={Clock}
-                        iconColor="#dc2626"
-                    />
+                    <div className="animate-slideInLeft" style={{ animationDelay: '100ms' }}>
+                        <StatCard
+                            title="Total Tickets"
+                            value="2,842"
+                            icon={Ticket}
+                        />
+                    </div>
+                    <div className="animate-slideInLeft" style={{ animationDelay: '200ms' }}>
+                        <StatCard
+                            title="Open Tickets"
+                            value="142"
+                            icon={AlertTriangle}
+                            iconColor="#ea580c"
+                        />
+                    </div>
+                    <div className="animate-slideInLeft" style={{ animationDelay: '300ms' }}>
+                        <StatCard
+                            title="Closed Today"
+                            value="64"
+                            icon={CheckCircle}
+                            iconColor="#15803d"
+                        />
+                    </div>
+                    <div className="animate-slideInLeft" style={{ animationDelay: '400ms' }}>
+                        <StatCard
+                            title="Overdue"
+                            value="28"
+                            icon={Clock}
+                            iconColor="#dc2626"
+                        />
+                    </div>
                 </div>
 
                 {/* Charts Row */}

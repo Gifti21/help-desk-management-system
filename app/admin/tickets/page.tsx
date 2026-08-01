@@ -478,10 +478,18 @@ export default function TicketsPage() {
 
             <div className="p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <StatCard title="Total Tickets" value={totalTickets.toString()} icon={Ticket} iconColor={theme.primary} />
-                    <StatCard title="Open Tickets" value={openTickets.toString()} icon={AlertTriangle} iconColor="#f59e0b" />
-                    <StatCard title="In Progress" value={inProgressTickets.toString()} icon={Users} iconColor="#2FD9C4" />
-                    <StatCard title="Unassigned" value={unassignedTickets.toString()} icon={AlertTriangle} iconColor="#dc2626" />
+                    <div className="animate-slideInLeft" style={{ animationDelay: '100ms' }}>
+                        <StatCard title="Total Tickets" value={totalTickets.toString()} icon={Ticket} iconColor={theme.primary} />
+                    </div>
+                    <div className="animate-slideInLeft" style={{ animationDelay: '200ms' }}>
+                        <StatCard title="Open Tickets" value={openTickets.toString()} icon={AlertTriangle} iconColor="#f59e0b" />
+                    </div>
+                    <div className="animate-slideInLeft" style={{ animationDelay: '300ms' }}>
+                        <StatCard title="In Progress" value={inProgressTickets.toString()} icon={Users} iconColor="#2FD9C4" />
+                    </div>
+                    <div className="animate-slideInLeft" style={{ animationDelay: '400ms' }}>
+                        <StatCard title="Unassigned" value={unassignedTickets.toString()} icon={AlertTriangle} iconColor="#dc2626" />
+                    </div>
                 </div>
 
                 <SearchFilter

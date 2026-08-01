@@ -7,8 +7,8 @@ import { DataTable } from '../../../../components/admin/DataTable';
 import { useTheme } from '../../../../components/providers/ThemeProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../../components/ui/card';
 import { fonts } from '@/lib/fonts';
-import { BarChart } from '../../../../components/charts/bar-chart';
-import { PieChart } from '../../../../components/charts/pie-chart';
+import { BarChart } from '../../../../components/charts/BarChart';
+import { PieChart } from '../../../../components/charts/PieChart';
 import { ReportFilters } from '../../../../components/reports/ReportFilters';
 import { ExportButtons } from '../../../../components/reports/ExportButtons';
 import { MetricsGrid } from '../../../../components/reports/MetricsGrid';
@@ -373,7 +373,10 @@ export default function UserReportsPage() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <PieChart data={roleDistribution} />
+                                <PieChart
+                                    series={roleDistribution.map(d => d.value)}
+                                    labels={roleDistribution.map(d => d.name)}
+                                />
                             </CardContent>
                         </Card>
 
@@ -396,7 +399,11 @@ export default function UserReportsPage() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <BarChart data={activityChart} horizontal />
+                                <BarChart
+                                    categories={activityChart.map(d => d.name)}
+                                    series={[{ name: 'Logins', data: activityChart.map(d => d.value) }]}
+                                    horizontal={true}
+                                />
                             </CardContent>
                         </Card>
                     </div>

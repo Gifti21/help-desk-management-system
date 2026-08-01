@@ -98,7 +98,7 @@ export function DataTable({ title, columns, data, actions, emptyMessage = 'No da
                                         style={{
                                             borderBottom: `1px solid ${colors.borderGrey}`,
                                         }}
-                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dcfce7'}
                                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                     >
                                         {columns.map((column) => (

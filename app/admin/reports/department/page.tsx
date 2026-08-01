@@ -7,8 +7,8 @@ import { DataTable } from '../../../../components/admin/DataTable';
 import { useTheme } from '../../../../components/providers/ThemeProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../../components/ui/card';
 import { fonts } from '@/lib/fonts';
-import { BarChart } from '../../../../components/charts/bar-chart';
-import { PieChart } from '../../../../components/charts/pie-chart';
+import { BarChart } from '../../../../components/charts/BarChart';
+import { PieChart } from '../../../../components/charts/PieChart';
 import { ReportFilters } from '../../../../components/reports/ReportFilters';
 import { ExportButtons } from '../../../../components/reports/ExportButtons';
 import { MetricsGrid } from '../../../../components/reports/MetricsGrid';
@@ -327,7 +327,10 @@ export default function DepartmentReportsPage() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <PieChart data={ticketDistribution} />
+                                <PieChart
+                                    series={ticketDistribution.map(d => d.value)}
+                                    labels={ticketDistribution.map(d => d.name)}
+                                />
                             </CardContent>
                         </Card>
 
@@ -350,7 +353,11 @@ export default function DepartmentReportsPage() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <BarChart data={performanceChart} horizontal />
+                                <BarChart
+                                    categories={performanceChart.map(d => d.name)}
+                                    series={[{ name: 'Resolution Rate %', data: performanceChart.map(d => d.value) }]}
+                                    horizontal={true}
+                                />
                             </CardContent>
                         </Card>
                     </div>
