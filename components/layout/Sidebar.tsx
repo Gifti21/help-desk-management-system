@@ -14,14 +14,15 @@ import {
   LogOut
 } from 'lucide-react';
 import { useTickets } from '@/context/TicketContext';
+import { DARK_GREEN, BORDER_GREY, TEAL_PRIMARY } from '@/lib/colors';
 
 interface SidebarProps {
   onLogout?: () => void;
 }
 
 const navItems = [
-  { label: "Overview", href: "/dashboard/technician", icon: LayoutDashboard },
-  { label: "Assigned Queue", href: "/dashboard/technician/queue", icon: Inbox },
+  { label: "Dashboard", href: "/dashboard/technician", icon: LayoutDashboard },
+  { label: "Assigned Tickets", href: "/dashboard/technician/queue", icon: Inbox },
   { label: "Notifications", href: "/dashboard/technician/notifications", icon: Bell },
   { label: "Reports", href: "/dashboard/technician/reports", icon: BarChart2 },
   { label: "Help Center", href: "/dashboard/technician/help", icon: HelpCircle },
@@ -33,12 +34,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const { unreadNotificationsCount } = useTickets();
 
   return (
-    <aside className="w-full md:w-64 bg-[#0E2621] border-r border-[#193831] md:h-screen md:sticky md:top-0 flex flex-col p-4 justify-between select-none">
+    <aside 
+      style={{ backgroundColor: DARK_GREEN }}
+      className="w-full md:w-64 border-r md:h-screen md:sticky md:top-0 flex flex-col p-4 justify-between select-none"
+    >
       {/* Top Section: Brand Header & Navigation */}
       <div className="flex flex-col flex-1 min-h-0 space-y-4">
         
         {/* Logo Header */}
-        <div className="flex items-center gap-3 px-2 py-2 border-b border-[#193831]">
+        <div 
+          style={{ borderColor: BORDER_GREY }}
+          className="flex items-center gap-3 px-2 py-2 border-b"
+        >
           <div className="relative w-9 h-9 shrink-0 rounded-full overflow-hidden border border-[#2FD9C4]/40 bg-[#0A1C18]">
             <Image
               src="/besys_logo.webp"
@@ -52,7 +59,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
             <span className="font-extrabold text-sm text-white tracking-tight truncate block">
               Besys Technologies
             </span>
-            <span className="text-[10px] text-[#2FD9C4] font-mono font-bold block uppercase tracking-wider">
+            <span style={{ color: TEAL_PRIMARY }} className="text-[10px] font-mono font-bold block uppercase tracking-wider">
               Support Agent HDMS
             </span>
           </div>
@@ -67,9 +74,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
               <Link
                 key={item.href}
                 href={item.href}
+                style={{
+                  backgroundColor: isActive ? TEAL_PRIMARY : undefined,
+                  color: isActive ? DARK_GREEN : undefined,
+                }}
                 className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
                   isActive
-                    ? "bg-[#2FD9C4] text-[#0E2621] font-bold shadow-md shadow-[#2FD9C4]/10"
+                    ? "font-bold shadow-md shadow-[#2FD9C4]/10"
                     : "text-slate-300 hover:text-white hover:bg-[#193831]"
                 }`}
               >
@@ -79,9 +90,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                 </div>
 
                 {item.label === "Notifications" && unreadNotificationsCount > 0 && (
-                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                    isActive ? "bg-[#0E2621] text-[#2FD9C4]" : "bg-[#2FD9C4] text-[#0E2621]"
-                  }`}>
+                  <span 
+                    style={{
+                      backgroundColor: isActive ? DARK_GREEN : TEAL_PRIMARY,
+                      color: isActive ? TEAL_PRIMARY : DARK_GREEN,
+                    }}
+                    className="px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+                  >
                     {unreadNotificationsCount}
                   </span>
                 )}
@@ -92,7 +107,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
       </div>
 
       {/* Sidebar Footer: Logout Button Only */}
-      <div className="pt-3 border-t border-[#193831] mt-auto">
+      <div 
+        style={{ borderColor: BORDER_GREY }}
+        className="pt-3 border-t mt-auto"
+      >
         <button
           onClick={onLogout}
           className="w-full flex items-center justify-center gap-2 text-xs font-semibold text-rose-300 hover:text-white bg-rose-950/30 hover:bg-rose-900/50 border border-rose-900/40 py-2 px-3 rounded-lg transition-colors group cursor-pointer"

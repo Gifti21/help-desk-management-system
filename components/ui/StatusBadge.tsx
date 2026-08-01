@@ -1,5 +1,6 @@
 import React from 'react';
 import { Status, Priority } from '@/types/ticket';
+import { STATUS, PRIORITY } from '@/lib/colors';
 
 interface StatusBadgeProps {
   type: 'status' | 'priority';
@@ -12,37 +13,44 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ type, value }) => {
     if (type === 'status') {
       switch (val) {
         case 'OPEN':
-          return 'bg-sky-50 text-sky-700 border-sky-200';
+          return { backgroundColor: STATUS.open.background, color: STATUS.open.text, borderColor: STATUS.open.border };
         case 'IN_PROGRESS':
-          return 'bg-amber-50 text-amber-700 border-amber-200';
+          return { backgroundColor: STATUS.inProgress.background, color: STATUS.inProgress.text, borderColor: STATUS.inProgress.border };
         case 'PENDING':
-          return 'bg-purple-50 text-purple-700 border-purple-200';
+          return { backgroundColor: STATUS.inProgress.background, color: STATUS.inProgress.text, borderColor: STATUS.inProgress.border };
         case 'RESOLVED':
-          return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+          return { backgroundColor: STATUS.resolved.background, color: STATUS.resolved.text, borderColor: STATUS.resolved.border };
         case 'CLOSED':
-          return 'bg-slate-100 text-slate-700 border-slate-300';
+          return { backgroundColor: STATUS.closed.background, color: STATUS.closed.text, borderColor: STATUS.closed.border };
         default:
-          return 'bg-slate-100 text-slate-700 border-slate-300';
+          return { backgroundColor: STATUS.closed.background, color: STATUS.closed.text, borderColor: STATUS.closed.border };
       }
     } else {
       switch (val) {
         case 'CRITICAL':
-          return 'bg-rose-50 text-rose-700 border-rose-200 font-bold';
         case 'HIGH':
-          return 'bg-orange-50 text-orange-700 border-orange-200 font-semibold';
+          return { backgroundColor: PRIORITY.high.background, color: PRIORITY.high.text, borderColor: PRIORITY.high.border };
         case 'MEDIUM':
-          return 'bg-yellow-50 text-yellow-800 border-yellow-200';
+          return { backgroundColor: PRIORITY.medium.background, color: PRIORITY.medium.text, borderColor: PRIORITY.medium.border };
         case 'LOW':
-          return 'bg-teal-50 text-teal-700 border-teal-200';
+          return { backgroundColor: PRIORITY.low.background, color: PRIORITY.low.text, borderColor: PRIORITY.low.border };
         default:
-          return 'bg-slate-100 text-slate-700 border-slate-300';
+          return { backgroundColor: STATUS.closed.background, color: STATUS.closed.text, borderColor: STATUS.closed.border };
       }
     }
   };
 
+  const getExtraFontClass = () => {
+    const val = (value || '').toString().toUpperCase();
+    if (type === 'priority' && val === 'CRITICAL') return 'font-bold';
+    if (type === 'priority' && val === 'HIGH') return 'font-semibold';
+    return '';
+  };
+
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-mono font-semibold border uppercase tracking-wider ${getStyles()}`}
+      style={getStyles()}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-mono font-semibold border uppercase tracking-wider ${getExtraFontClass()}`}
     >
       {(value || '').toString().replace('_', ' ')}
     </span>

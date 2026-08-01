@@ -1,5 +1,5 @@
 import React from 'react';
-import { BUTTONS, FONT_FAMILY } from '@/lib/colors';
+import { BUTTONS, ERROR } from '@/lib/colors';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'danger';
@@ -24,6 +24,7 @@ export const Button: React.FC<ButtonProps> = ({
         backgroundColor: BUTTONS.disabled,
         color: BUTTONS.disabledText,
         borderColor: 'transparent',
+        cursor: 'not-allowed',
       };
     }
 
@@ -36,19 +37,21 @@ export const Button: React.FC<ButtonProps> = ({
         };
       case 'secondary':
         return {
-          backgroundColor: '#1F483D',
-          color: '#FFFFFF',
+          backgroundColor: BUTTONS.hover, // Using secondary button hover tone
+          color: BUTTONS.hoverText,
           borderColor: 'transparent',
         };
       case 'outline':
         return {
           backgroundColor: 'transparent',
-          color: '#2FD9C4',
-          borderColor: '#1E3E35',
+          color: BUTTONS.primary,
+          borderColor: BUTTONS.primary,
+          borderWidth: '1px',
+          borderStyle: 'solid',
         };
       case 'danger':
         return {
-          backgroundColor: '#E53E3E',
+          backgroundColor: ERROR.text,
           color: '#FFFFFF',
           borderColor: 'transparent',
         };
@@ -68,7 +71,6 @@ export const Button: React.FC<ButtonProps> = ({
       disabled={disabled || loading}
       className={`rounded-lg font-medium transition-all duration-150 inline-flex items-center justify-center gap-2 ${sizeClasses} ${className}`}
       style={{
-        fontFamily: FONT_FAMILY,
         ...getVariantStyles(),
         ...style,
       }}
