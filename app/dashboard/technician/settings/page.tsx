@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { User, BellRing, Save, Check, Shield } from "lucide-react";
+import { User, BellRing, Save, Check, Shield, Lock, Phone, MapPin } from "lucide-react";
 
 export default function SettingsPage() {
   const [displayName, setDisplayName] = useState("Bontu");
@@ -12,6 +12,15 @@ export default function SettingsPage() {
   const [soundAlerts, setSoundAlerts] = useState(false);
   const [agentStatus, setAgentStatus] = useState("AVAILABLE");
   const [defaultView, setDefaultView] = useState("ALL");
+  
+  // New profile security & contact state fields
+  const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -27,6 +36,8 @@ export default function SettingsPage() {
         if (parsed.soundAlerts !== undefined) setSoundAlerts(parsed.soundAlerts);
         if (parsed.agentStatus) setAgentStatus(parsed.agentStatus);
         if (parsed.defaultView) setDefaultView(parsed.defaultView);
+        if (parsed.phone) setPhone(parsed.phone);
+        if (parsed.location) setLocation(parsed.location);
       }
     } catch (error) {
       console.error("Failed to load agent preferences:", error);
@@ -37,6 +48,23 @@ export default function SettingsPage() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    setPasswordError("");
+
+    // Validate password change if any password field is filled
+    if (newPassword || confirmPassword || currentPassword) {
+      if (!currentPassword) {
+        setPasswordError("Current password is required to set a new password.");
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        setPasswordError("New passwords do not match.");
+        return;
+      }
+      if (newPassword.length < 6) {
+        setPasswordError("New password must be at least 6 characters long.");
+        return;
+      }
+    }
     
     const settingsPayload = {
       displayName,
@@ -45,12 +73,23 @@ export default function SettingsPage() {
       soundAlerts,
       agentStatus,
       defaultView,
+      phone,
+      location,
       updatedAt: new Date().toISOString(),
     };
 
     try {
-      // Persist to localStorage (can be swapped out for a fetch() call to a backend API route)
+      // Persist preferences to localStorage (can be swapped out for a fetch() call to a backend API route)
       localStorage.setItem("hdms_agent_settings", JSON.stringify(settingsPayload));
+
+      // If password update was requested, handle backend call simulation here
+      if (newPassword) {
+        // Clear password fields upon successful change validation simulation
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      }
+
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (error) {
@@ -71,7 +110,7 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Workspace Settings</h1>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Manage your account preferences, notification parameters, and support workstation configurations.
+          Manage your account preferences, contact info, security parameters, and support workstation configurations.
         </p>
       </div>
 
@@ -106,6 +145,83 @@ export default function SettingsPage() {
                 <option value="BUSY">Busy (In Resolution)</option>
                 <option value="AWAY">Away / On Break</option>
               </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5 text-emerald-600 dark:text-[#2FD9C4]" />
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+251 900 000 000"
+                className="w-full bg-slate-50 dark:bg-[#060D0B] border border-slate-200 dark:border-[#1E3E35] rounded-lg px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 dark:focus:border-[#2FD9C4]"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-[#2FD9C4]" />
+                Location / Workstation Office
+              </label>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="Addis Ababa, Ethiopia"
+                className="w-full bg-slate-50 dark:bg-[#060D0B] border border-slate-200 dark:border-[#1E3E35] rounded-lg px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 dark:focus:border-[#2FD9C4]"
+              />
+            </div>
+          </div>
+        </Card>
+
+        {/* Security & Password Update */}
+        <Card className="p-6 space-y-4 bg-white dark:bg-[#0C1815] border-slate-200 dark:border-[#1E3E35] shadow-sm">
+          <div className="flex items-center gap-2 border-b border-slate-200 dark:border-[#1E3E35] pb-3">
+            <Lock className="w-5 h-5 text-emerald-600 dark:text-[#2FD9C4]" />
+            <h2 className="text-base font-semibold text-slate-900 dark:text-white">Security & Password</h2>
+          </div>
+
+          {passwordError && (
+            <div className="p-3 text-xs rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 font-medium">
+              {passwordError}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">Current Password</label>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-slate-50 dark:bg-[#060D0B] border border-slate-200 dark:border-[#1E3E35] rounded-lg px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 dark:focus:border-[#2FD9C4]"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">New Password</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-slate-50 dark:bg-[#060D0B] border border-slate-200 dark:border-[#1E3E35] rounded-lg px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 dark:focus:border-[#2FD9C4]"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">Confirm New Password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-slate-50 dark:bg-[#060D0B] border border-slate-200 dark:border-[#1E3E35] rounded-lg px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 dark:focus:border-[#2FD9C4]"
+              />
             </div>
           </div>
         </Card>
