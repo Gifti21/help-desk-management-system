@@ -318,7 +318,7 @@ export default function SettingsPage() {
                             <div className="flex items-center space-x-3 pt-6">
                                 <div
                                     className="w-10 h-6 rounded-full relative transition-colors cursor-pointer"
-                                    style={{ backgroundColor: securitySettings.twoFactorAuth ? theme.primary : theme.backgroundMuted }}
+                                    style={{ backgroundColor: securitySettings.twoFactorAuth ? theme.primary : theme.foregroundMuted }}
                                     onClick={() => setSecuritySettings({ ...securitySettings, twoFactorAuth: !securitySettings.twoFactorAuth })}
                                 >
                                     <div

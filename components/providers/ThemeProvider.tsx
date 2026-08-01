@@ -8,14 +8,23 @@ type ThemeMode = 'light' | 'dark' | 'system';
 
 interface ThemeColors {
     background: string;
+    backgroundSecondary: string;
+    backgroundTertiary: string;
     foreground: string;
+    foregroundMuted: string;
+    foregroundSecondary: string;
+    foregroundSubtle: string;
     card: string;
     cardForeground: string;
     cardBorder: string;
-    foregroundMuted: string;
     accent: string;
     accentForeground: string;
     primary: string;
+    primaryForeground: string;
+    border: string;
+    error: string;
+    success: string;
+    warning: string;
 }
 
 interface ThemeContextType {
@@ -29,27 +38,45 @@ interface ThemeContextType {
 // Light theme colors mapping
 const lightColors: ThemeColors = {
     background: colors.pageBackground,
+    backgroundSecondary: '#FFFFFF',
+    backgroundTertiary: colors.lightTealBgAlt,
     foreground: colors.primaryText,
+    foregroundMuted: colors.bodyTextGrey,
+    foregroundSecondary: colors.bodyTextGrey,
+    foregroundSubtle: colors.mutedGreyGreen,
     card: '#FFFFFF',
     cardForeground: colors.primaryText,
     cardBorder: colors.borderGrey,
-    foregroundMuted: colors.bodyTextGrey,
     accent: colors.lightTealBg,
     accentForeground: colors.darkGreen,
     primary: colors.tealPrimary,
+    primaryForeground: colors.darkGreen,
+    border: colors.borderGrey,
+    error: '#DC2626',
+    success: '#10B981',
+    warning: '#F59E0B',
 };
 
 // Dark theme colors mapping
 const darkColors: ThemeColors = {
     background: darkModeColors.background.primary,
+    backgroundSecondary: darkModeColors.background.secondary,
+    backgroundTertiary: darkModeColors.background.tertiary,
     foreground: darkModeColors.text.primary,
+    foregroundMuted: darkModeColors.text.secondary,
+    foregroundSecondary: darkModeColors.text.secondary,
+    foregroundSubtle: darkModeColors.text.tertiary,
     card: darkModeColors.card.background,
     cardForeground: darkModeColors.text.primary,
     cardBorder: darkModeColors.border.primary,
-    foregroundMuted: darkModeColors.text.secondary,
     accent: darkModeColors.background.tertiary,
     accentForeground: darkModeColors.accent.primary,
     primary: darkModeColors.accent.primary,
+    primaryForeground: darkModeColors.background.primary,
+    border: darkModeColors.border.secondary,
+    error: darkModeColors.status.critical.base,
+    success: darkModeColors.status.resolved.base,
+    warning: darkModeColors.status.high.base,
 };
 
 const defaultThemeContext: ThemeContextType = {

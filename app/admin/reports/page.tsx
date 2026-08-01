@@ -11,7 +11,7 @@ import { useToast } from '../../../components/ui/toast';
 import { useTheme } from '../../../components/providers/ThemeProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
 import { fonts } from '@/lib/fonts';
-import { BarChart, DonutChart, LineChart } from '../../../components/charts';
+import { BarChart, PieChart, LineChart } from '../../../components/charts';
 import { ReportFilters } from '../../../components/reports/ReportFilters';
 import { ExportButtons } from '../../../components/reports/ExportButtons';
 import {
@@ -958,8 +958,6 @@ export default function ReportsPage() {
                             subtitle={selectedDepartment === 'all' ? 'All departments' : 'Filtered view'}
                             icon={Ticket}
                             iconColor={theme.primary}
-                            trend={`${filteredStats.resolvedPercentage}% resolved`}
-                            trendColor="#10B981"
                         />
                         <StatCard
                             title="Avg. Resolution Time"
@@ -1044,7 +1042,7 @@ export default function ReportsPage() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <DonutChart
+                                <PieChart
                                     series={dynamicStatusDistributionData.map(d => d.value)}
                                     labels={dynamicStatusDistributionData.map(d => d.name)}
                                     colors={dynamicStatusDistributionData.map(d => d.color)}

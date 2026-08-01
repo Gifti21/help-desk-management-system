@@ -11,7 +11,7 @@ import { Card } from '../../components/ui/card';
 import { useTheme } from '../../components/providers/ThemeProvider';
 import { useToast } from '../../components/ui/toast';
 import { fonts } from '@/lib/fonts';
-import { DonutChart } from '../../components/charts/DonutChart';
+import { PieChart } from '../../components/charts/PieChart';
 import { BarChart } from '../../components/charts/BarChart';
 import { LineChart } from '../../components/charts/LineChart';
 import {
@@ -20,7 +20,9 @@ import {
     CheckCircle,
     Clock,
     Download,
-    RefreshCw
+    RefreshCw,
+    ChevronLeft,
+    ChevronRight
 } from 'lucide-react';
 
 // Mock data
@@ -62,8 +64,15 @@ const mockTickets = [
 
 export default function AdminDashboard() {
     const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
     const { colors: theme, isDark } = useTheme();
     const { toast } = useToast();
+
+    // Reset to page 1 when search term changes
+    React.useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
 
     const getStatusBadge = (status: string) => {
         const statusColors: Record<string, { bg: string; text: string }> = {
@@ -350,7 +359,7 @@ export default function AdminDashboard() {
                             >
                                 Tickets by Status
                             </h3>
-                            <DonutChart
+                            <PieChart
                                 series={[132, 55, 33]}
                                 labels={['Resolved', 'Pending', 'Overdue']}
                                 colors={[theme.primary, '#f59e0b', '#ef4444']}
@@ -362,21 +371,21 @@ export default function AdminDashboard() {
                                         <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: theme.primary }} />
                                         <span style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Resolved</span>
                                     </div>
-                                    <span style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.semibold, color: theme.foreground }}>60%</span>
+                                    <span style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.semibold, color: theme.foreground }}>132</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
                                         <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2" />
                                         <span style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Pending</span>
                                     </div>
-                                    <span style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.semibold, color: theme.foreground }}>25%</span>
+                                    <span style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.semibold, color: theme.foreground }}>55</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
                                         <div className="w-3 h-3 rounded-full bg-red-500 mr-2" />
                                         <span style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Overdue</span>
                                     </div>
-                                    <span style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.semibold, color: theme.foreground }}>15%</span>
+                                    <span style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.semibold, color: theme.foreground }}>33</span>
                                 </div>
                             </div>
                         </div>
@@ -404,7 +413,9 @@ export default function AdminDashboard() {
                                 categories={['IT Services', 'HR & Ops', 'Finance']}
                                 series={[{ name: 'Tickets', data: [842, 428, 310] }]}
                                 height={240}
-                                horizontal={true}
+                                horizontal={false}
+                                xAxisTitle="Department"
+                                yAxisTitle="Tickets"
                             />
                         </div>
                     </Card>
@@ -431,6 +442,8 @@ export default function AdminDashboard() {
                                 categories={['Jun', 'Jul', 'Aug', 'Sep', 'Oct']}
                                 series={[{ name: 'Tickets', data: [290, 245, 350, 280, 320] }]}
                                 height={240}
+                                xAxisTitle="Month"
+                                yAxisTitle="Tickets"
                             />
                         </div>
                     </Card>
@@ -444,16 +457,73 @@ export default function AdminDashboard() {
                 />
 
                 {/* Global Ticket Log */}
-                <DataTable
-                    title={`Global Ticket Log (${mockTickets.length})`}
-                    columns={ticketColumns}
-                    data={mockTickets.filter(ticket =>
+                {(() => {
+                    const filteredTickets = mockTickets.filter(ticket =>
                         ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         ticket.requester.toLowerCase().includes(searchTerm.toLowerCase())
-                    )}
-                    emptyMessage="No tickets found matching your search."
-                />
+                    );
+
+                    const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
+                    const startIndex = (currentPage - 1) * itemsPerPage;
+                    const endIndex = startIndex + itemsPerPage;
+                    const paginatedTickets = filteredTickets.slice(startIndex, endIndex);
+
+                    return (
+                        <>
+                            <DataTable
+                                title={`Global Ticket Log (${filteredTickets.length})`}
+                                columns={ticketColumns}
+                                data={paginatedTickets}
+                                emptyMessage="No tickets found matching your search."
+                            />
+
+                            {filteredTickets.length > 0 && (
+                                <div
+                                    className="flex items-center justify-between px-6 py-4 rounded-lg shadow-sm"
+                                    style={{
+                                        backgroundColor: theme.card,
+                                        borderColor: theme.cardBorder,
+                                        border: '1px solid'
+                                    }}
+                                >
+                                    <div style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>
+                                        Showing {startIndex + 1} to {Math.min(endIndex, filteredTickets.length)} of {filteredTickets.length} tickets
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <ActionButton
+                                            variant="outline"
+                                            size="sm"
+                                            icon={ChevronLeft}
+                                            onClick={() => {
+                                                setCurrentPage(prev => Math.max(1, prev - 1));
+                                            }}
+                                            disabled={currentPage === 1}
+                                        >
+                                            Previous
+                                        </ActionButton>
+                                        <div className="flex items-center gap-2 px-3">
+                                            <span style={{ fontSize: fonts.body.sm.size, color: theme.foreground, fontWeight: fonts.fontWeight.medium }}>
+                                                Page {currentPage} of {totalPages}
+                                            </span>
+                                        </div>
+                                        <ActionButton
+                                            variant="outline"
+                                            size="sm"
+                                            icon={ChevronRight}
+                                            onClick={() => {
+                                                setCurrentPage(prev => Math.min(totalPages, prev + 1));
+                                            }}
+                                            disabled={currentPage === totalPages}
+                                        >
+                                            Next
+                                        </ActionButton>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    );
+                })()}
             </div>
         </PageLayout>
     );

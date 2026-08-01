@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { PageLayout } from '../../../components/admin/PageLayout';
 import { TopBar } from '../../../components/admin/TopBar';
 import { ActionButton } from '../../../components/admin/ActionButton';
@@ -10,16 +10,14 @@ import { useTheme } from '../../../components/providers/ThemeProvider';
 import { useToast } from '../../../components/ui/toast';
 import { fonts } from '@/lib/fonts';
 import {
-    User, Mail, MapPin, Shield, Edit, Save, Camera, Lock, X, Eye, EyeOff
+    User, Mail, MapPin, Shield, Edit, Save, Lock, X, Eye, EyeOff
 } from 'lucide-react';
 
 export default function ProfilePage() {
     const { colors: theme } = useTheme();
     const { toast } = useToast();
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [isEditing, setIsEditing] = useState(false);
-    const [profilePicture, setProfilePicture] = useState<string | null>(null);
     const [originalProfile, setOriginalProfile] = useState({
         firstName: 'Abebe',
         lastName: 'Kebede',
@@ -39,10 +37,9 @@ export default function ProfilePage() {
         confirmPassword: ''
     });
 
-    // Load saved profile and photo from localStorage on mount
+    // Load saved profile from localStorage on mount
     React.useEffect(() => {
         const savedProfile = localStorage.getItem('adminProfile');
-        const savedPhoto = localStorage.getItem('adminProfilePhoto');
 
         if (savedProfile) {
             try {
@@ -53,35 +50,27 @@ export default function ProfilePage() {
                 console.error('Failed to load profile:', e);
             }
         }
-
-        if (savedPhoto) {
-            setProfilePicture(savedPhoto);
-        }
     }, []);
 
-    const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-                toast('File size must be less than 5MB', 'error');
-                return;
-            }
-            if (!file.type.startsWith('image/')) {
-                toast('Please upload an image file', 'error');
-                return;
-            }
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const imageData = reader.result as string;
-                setProfilePicture(imageData);
-                localStorage.setItem('adminProfilePhoto', imageData);
-                toast('Profile picture updated successfully', 'success');
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
     const handleSave = () => {
+        if (!profile.firstName.trim()) {
+            toast('First name is required', 'error');
+            return;
+        }
+        if (!profile.lastName.trim()) {
+            toast('Last name is required', 'error');
+            return;
+        }
+        if (!profile.email.trim()) {
+            toast('Email is required', 'error');
+            return;
+        }
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(profile.email)) {
+            toast('Please enter a valid email address', 'error');
+            return;
+        }
         if (!profile.phone.trim()) {
             toast('Phone number is required', 'error');
             return;
@@ -137,23 +126,14 @@ export default function ProfilePage() {
         <PageLayout>
             <TopBar title="My Profile" subtitle="Manage your account settings and preferences" actions={topBarActions} />
             <div className="p-6 space-y-6">
+                {/* Profile Header Card */}
                 <Card className="shadow-sm transition-colors" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder }}>
                     <div className="p-6">
                         <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
-                            <div className="relative">
-                                {profilePicture ? (
-                                    <img src={profilePicture} alt="Profile" className="w-24 h-24 rounded-full object-cover" />
-                                ) : (
-                                    <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.accent }}>
-                                        <span className="text-2xl font-bold" style={{ color: theme.accentForeground }}>
-                                            {profile.firstName[0]}{profile.lastName[0]}
-                                        </span>
-                                    </div>
-                                )}
-                                <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-                                <button onClick={() => fileInputRef.current?.click()} className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:opacity-80" style={{ backgroundColor: theme.primary, color: theme.primaryForeground }} title="Change photo">
-                                    <Camera className="h-4 w-4" />
-                                </button>
+                            <div className="w-24 h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.accent }}>
+                                <span className="text-3xl font-bold" style={{ color: theme.accentForeground }}>
+                                    {profile.firstName[0]}{profile.lastName[0]}
+                                </span>
                             </div>
                             <div className="flex-1">
                                 <div className="flex items-center space-x-3 mb-2">
@@ -176,6 +156,7 @@ export default function ProfilePage() {
                         </div>
                     </div>
                 </Card>
+                {/* Personal Information Card */}
                 <Card className="shadow-sm transition-colors" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder }}>
                     <div className="p-6">
                         <h3 className="font-semibold mb-6 flex items-center" style={{ fontSize: fonts.heading.sm.size, fontWeight: fonts.heading.sm.weight, color: theme.foreground }}>
@@ -184,39 +165,70 @@ export default function ProfilePage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
-                                    First Name <span style={{ color: theme.foregroundSubtle }}>(Read-only)</span>
+                                    First Name {isEditing && <span style={{ color: theme.error }}>*</span>}
                                 </label>
-                                <Input value={profile.firstName} disabled style={{ backgroundColor: theme.backgroundTertiary, color: theme.foregroundMuted, borderColor: theme.border, cursor: 'not-allowed' }} />
+                                <Input
+                                    value={profile.firstName}
+                                    onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
+                                    disabled={!isEditing}
+                                    placeholder="Enter first name"
+                                    style={{ backgroundColor: isEditing ? theme.background : theme.backgroundSecondary, color: theme.foreground, borderColor: theme.border }}
+                                />
                             </div>
                             <div>
                                 <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
-                                    Last Name <span style={{ color: theme.foregroundSubtle }}>(Read-only)</span>
+                                    Last Name {isEditing && <span style={{ color: theme.error }}>*</span>}
                                 </label>
-                                <Input value={profile.lastName} disabled style={{ backgroundColor: theme.backgroundTertiary, color: theme.foregroundMuted, borderColor: theme.border, cursor: 'not-allowed' }} />
+                                <Input
+                                    value={profile.lastName}
+                                    onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
+                                    disabled={!isEditing}
+                                    placeholder="Enter last name"
+                                    style={{ backgroundColor: isEditing ? theme.background : theme.backgroundSecondary, color: theme.foreground, borderColor: theme.border }}
+                                />
                             </div>
                             <div>
                                 <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
-                                    Company Email <span style={{ color: theme.foregroundSubtle }}>(Read-only)</span>
+                                    Email {isEditing && <span style={{ color: theme.error }}>*</span>}
                                 </label>
-                                <Input type="email" value={profile.email} disabled style={{ backgroundColor: theme.backgroundTertiary, color: theme.foregroundMuted, borderColor: theme.border, cursor: 'not-allowed' }} />
+                                <Input
+                                    type="email"
+                                    value={profile.email}
+                                    onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                                    disabled={!isEditing}
+                                    placeholder="email@example.com"
+                                    style={{ backgroundColor: isEditing ? theme.background : theme.backgroundSecondary, color: theme.foreground, borderColor: theme.border }}
+                                />
                             </div>
                             <div>
                                 <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
                                     Role <span style={{ color: theme.foregroundSubtle }}>(Read-only)</span>
                                 </label>
-                                <Input value={profile.role} disabled style={{ backgroundColor: theme.backgroundTertiary, color: theme.foregroundMuted, borderColor: theme.border, cursor: 'not-allowed' }} />
+                                <Input value={profile.role} disabled style={{ backgroundColor: theme.backgroundSecondary, color: theme.foregroundMuted, borderColor: theme.border, cursor: 'not-allowed' }} />
                             </div>
                             <div>
                                 <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
                                     Phone Number {isEditing && <span style={{ color: theme.error }}>*</span>}
                                 </label>
-                                <Input value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} disabled={!isEditing} placeholder="+1 (555) 000-0000" style={{ backgroundColor: isEditing ? theme.background : theme.backgroundTertiary, color: theme.foreground, borderColor: theme.border }} />
+                                <Input
+                                    value={profile.phone}
+                                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                                    disabled={!isEditing}
+                                    placeholder="+251 91 123 4567"
+                                    style={{ backgroundColor: isEditing ? theme.background : theme.backgroundSecondary, color: theme.foreground, borderColor: theme.border }}
+                                />
                             </div>
                             <div>
                                 <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
                                     Location {isEditing && <span style={{ color: theme.error }}>*</span>}
                                 </label>
-                                <Input value={profile.location} onChange={(e) => setProfile({ ...profile, location: e.target.value })} disabled={!isEditing} placeholder="City, State/Country" style={{ backgroundColor: isEditing ? theme.background : theme.backgroundTertiary, color: theme.foreground, borderColor: theme.border }} />
+                                <Input
+                                    value={profile.location}
+                                    onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                                    disabled={!isEditing}
+                                    placeholder="City, Country"
+                                    style={{ backgroundColor: isEditing ? theme.background : theme.backgroundSecondary, color: theme.foreground, borderColor: theme.border }}
+                                />
                             </div>
                         </div>
                     </div>
