@@ -1,7 +1,7 @@
 import { InputHTMLAttributes, forwardRef } from 'react';
 import { LucideIcon } from 'lucide-react';
-import { BODY_TEXT_GREY, INPUT_BORDER, PAGE_BACKGROUND, TEAL_PRIMARY, PRIMARY_TEXT } from '@/lib/colors';
-import { INPUT_REGULAR, INPUT_PLACEHOLDER, FONT_FAMILY, FONT_WEIGHT } from '@/lib/fonts';
+import { BODY_TEXT_GREY, PLACEHOLDER_TEXT, INPUT_BORDER, PAGE_BACKGROUND, TEAL_PRIMARY, PRIMARY_TEXT } from '@/lib/colors';
+import { INPUT_REGULAR, FONT_FAMILY, FONT_WEIGHT } from '@/lib/fonts';
 
 interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   icon?: LucideIcon;
@@ -22,7 +22,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           '--tw-ring-color-light': 'rgba(47, 217, 196, 0.2)',
         } as React.CSSProperties}
       >
-        {Icon && iconPosition === 'left' && <Icon className="h-5 w-5" style={{ color: BODY_TEXT_GREY }} />}
+        {Icon && iconPosition === 'left' && <Icon className="h-5 w-5" style={{ color: PLACEHOLDER_TEXT }} />}
         <input
           ref={ref}
           type={type}
@@ -35,10 +35,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             letterSpacing: INPUT_REGULAR.letterSpacing,
             color: PRIMARY_TEXT,
           }}
-          placeholder=""
           {...props}
         />
-        {Icon && iconPosition === 'right' && <Icon className="h-5 w-5" style={{ color: BODY_TEXT_GREY }} />}
+        {Icon && iconPosition === 'right' && <Icon className="h-5 w-5" style={{ color: PLACEHOLDER_TEXT }} />}
       </div>
     );
   }

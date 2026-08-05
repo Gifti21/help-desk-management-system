@@ -113,12 +113,6 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="flex justify-end">
-              <Link href="/forgot-password" className="text-sm font-semibold text-[#2fd9c4] transition hover:text-[#24c3b0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2fd9c4] focus-visible:ring-offset-2">
-                Forgot password?
-              </Link>
-            </div>
-
             <button
               type="submit"
               disabled={!isFormReady}

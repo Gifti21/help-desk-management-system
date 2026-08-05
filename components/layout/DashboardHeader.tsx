@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Bell, HelpCircle } from "lucide-react";
-import { DARK_GREEN, TEAL_PRIMARY, INPUT_BORDER, PAGE_BACKGROUND, BODY_TEXT_GREY, BORDER_GREY, PRIMARY_TEXT, LIGHT_TEAL_BG } from "@/lib/colors";
+import { Search, Bell, HelpCircle, X } from "lucide-react";
+import { DARK_GREEN, TEAL_PRIMARY, INPUT_BORDER, PAGE_BACKGROUND, BODY_TEXT_GREY, BORDER_GREY, PRIMARY_TEXT, LIGHT_TEAL_BG, PLACEHOLDER_TEXT, SECONDARY_BACKGROUND } from "@/lib/colors";
 import { INPUT_REGULAR, BODY_REGULAR, FONT_FAMILY, FONT_WEIGHT } from "@/lib/fonts";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
@@ -10,17 +10,21 @@ import { Avatar } from "@/components/ui/Avatar";
 interface DashboardHeaderProps {
   userName: string;
   userInitials: string;
+  onSearch?: (value: string) => void;
+  searchValue?: string;
 }
 
-export function DashboardHeader({ userName, userInitials }: DashboardHeaderProps) {
+export function DashboardHeader({ userName, userInitials, onSearch, searchValue = "" }: DashboardHeaderProps) {
   return (
-    <header className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: BORDER_GREY, backgroundColor: PAGE_BACKGROUND }}>
+    <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b" style={{ borderColor: BORDER_GREY, backgroundColor: PAGE_BACKGROUND }}>
       <div className="flex items-center gap-4 flex-1">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: BODY_TEXT_GREY }} />
+        <div className="relative flex-1 max-w-md hidden sm:block">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: PLACEHOLDER_TEXT }} />
           <input
             type="text"
             placeholder="Search tickets..."
+            value={searchValue}
+            onChange={(e) => onSearch?.(e.target.value)}
             className="w-full rounded-2xl border pl-10 pr-4 py-2.5 outline-none transition focus:ring-2"
             style={{
               fontFamily: FONT_FAMILY.primary,
@@ -33,18 +37,24 @@ export function DashboardHeader({ userName, userInitials }: DashboardHeaderProps
               backgroundColor: PAGE_BACKGROUND,
               '--tw-ring-color': TEAL_PRIMARY,
               '--tw-ring-color-light': 'rgba(47, 217, 196, 0.2)',
+              paddingRight: searchValue ? "36px" : undefined,
             } as React.CSSProperties}
           />
+          {searchValue && (
+            <button
+              onClick={() => onSearch?.("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded transition focus-visible:outline-none focus-visible:ring-2"
+              style={{ color: BODY_TEXT_GREY, '--tw-ring-color': TEAL_PRIMARY } as React.CSSProperties}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = SECONDARY_BACKGROUND}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <Link href="/employee/tickets/new">
-          <Button variant="primary" size="md">
-            + Create Ticket
-          </Button>
-        </Link>
-
+      <div className="flex items-center gap-2 sm:gap-4">
         <button
           className="p-2 rounded-lg transition focus-visible:outline-none focus-visible:ring-2"
           style={{
@@ -69,7 +79,7 @@ export function DashboardHeader({ userName, userInitials }: DashboardHeaderProps
           <HelpCircle className="h-5 w-5" />
         </button>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Avatar initials={userInitials} size="md" />
           <span
             className="hidden sm:block"

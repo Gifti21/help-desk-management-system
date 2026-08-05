@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Ticket, Plus, Settings, LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { DARK_GREEN, TEAL_PRIMARY, LIGHT_TEAL_BG, MUTED_GREY_GREEN } from "@/lib/colors";
@@ -17,7 +17,18 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  const handleLogout = () => {
+    // TODO: connect to real logout endpoint
+    // Clear local auth state
+    localStorage.removeItem('isAuthenticated');
+    sessionStorage.removeItem('isAuthenticated');
+    
+    // Navigate to landing page
+    router.push('/');
+  };
 
   return (
     <>
@@ -121,33 +132,28 @@ export function Sidebar() {
           </nav>
 
           {/* Bottom actions */}
-          <div className="p-4 border-t space-y-2" style={{ borderColor: "rgba(47, 217, 196, 0.2)" }}>
-            <Link
-              href="/employee/tickets/new"
-              className="flex items-center justify-center gap-2 rounded-lg px-4 py-3 transition"
-              style={{
-                backgroundColor: TEAL_PRIMARY,
-                color: DARK_GREEN,
-              }}
-              onClick={() => setIsMobileOpen(false)}
-            >
-              <Plus className="h-5 w-5" />
-              <span
-                style={{
-                  fontFamily: FONT_FAMILY.primary,
-                  fontSize: BODY_REGULAR.size,
-                  lineHeight: BODY_REGULAR.lineHeight,
-                  fontWeight: FONT_WEIGHT.semibold,
-                  letterSpacing: BODY_REGULAR.letterSpacing,
-                }}
-              >
-                Create Ticket
-              </span>
-            </Link>
+          <div className="p-4 border-t" style={{ borderColor: "rgba(47, 217, 196, 0.2)" }}>
             <button
-              className="flex items-center gap-3 rounded-lg px-4 py-3 w-full transition"
+              onClick={handleLogout}
+              className="flex items-center gap-3 rounded-lg px-4 py-3 w-full transition cursor-pointer focus-visible:outline-none focus-visible:ring-2"
               style={{
                 color: MUTED_GREY_GREEN,
+                backgroundColor: 'rgba(47, 217, 196, 0.08)',
+                '--tw-ring-color': TEAL_PRIMARY,
+              } as React.CSSProperties}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(47, 217, 196, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(47, 217, 196, 0.08)';
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'scale(0.98)';
+                e.currentTarget.style.backgroundColor = 'rgba(47, 217, 196, 0.25)';
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.backgroundColor = 'rgba(47, 217, 196, 0.08)';
               }}
             >
               <LogOut className="h-5 w-5" />
