@@ -5,8 +5,9 @@ import { TicketFilters } from "@/components/tickets/TicketFilters";
 import { TicketTable } from "@/components/tickets/TicketTable";
 import { TicketDrawer } from "@/components/dashboard/TicketDrawer";
 import { useTickets } from "@/context/TicketContext";
+import { usePagination } from "@/hooks/usePagination";
 import { Ticket } from "@/types/ticket";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function AssignedQueuePage() {
   const { tickets, updateTicketStatus, updateTicketPriority, addComment } = useTickets();
@@ -38,9 +39,22 @@ export default function AssignedQueuePage() {
     });
   }, [tickets, scopeFilter, searchQuery, statusFilter, priorityFilter, departmentFilter]);
 
+  // Enforces strictly 5 items per page
+  const pagination = usePagination({ 
+    totalItems: filteredTickets.length, 
+    pageSize: 5 
+  });
+  
+  const visibleTickets = useMemo(
+    () => pagination.paginate(filteredTickets),
+    [filteredTickets, pagination]
+  );
+
   const selectedTicket = useMemo(() => {
     return tickets.find((t) => t.id === selectedTicketId) || null;
   }, [tickets, selectedTicketId]);
+
+  const pages = Array.from({ length: pagination.totalPages }, (_, i) => i + 1);
 
   return (
     <div className="p-4 sm:p-6 md:p-8 space-y-6 max-w-7xl mx-auto bg-[#F4F7F6] min-h-screen">
@@ -87,9 +101,60 @@ export default function AssignedQueuePage() {
       {/* Ticket List Table Container */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
         <TicketTable
-          tickets={filteredTickets}
+          tickets={visibleTickets}
           onSelectTicket={(ticket: Ticket) => setSelectedTicketId(ticket.id)}
         />
+
+        {/* Minimalist Professional Dot Pagination Footer */}
+        {pagination.totalPages > 1 ? (
+          <div className="flex items-center justify-center px-6 py-4 bg-white border-t border-slate-200">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={pagination.previousPage}
+                disabled={!pagination.hasPrevious}
+                className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
+                  pagination.hasPrevious
+                    ? 'text-slate-700 hover:bg-slate-100 cursor-pointer'
+                    : 'text-slate-300 cursor-not-allowed'
+                }`}
+                aria-label="Previous Page"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center gap-2">
+                {pages.map((p) => {
+                  const isActive = p === pagination.currentPage;
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => pagination.setPage(p)}
+                      aria-label={`Page ${p}`}
+                      className={`transition-all rounded-full ${
+                        isActive
+                          ? 'w-6 h-2.5 bg-[#2FD9C4]'
+                          : 'w-2.5 h-2.5 bg-slate-300 hover:bg-slate-400 cursor-pointer'
+                      }`}
+                    />
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={pagination.nextPage}
+                disabled={!pagination.hasNext}
+                className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
+                  pagination.hasNext
+                    ? 'text-slate-700 hover:bg-slate-100 cursor-pointer'
+                    : 'text-slate-300 cursor-not-allowed'
+                }`}
+                aria-label="Next Page"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {/* Detail Inspection Drawer */}

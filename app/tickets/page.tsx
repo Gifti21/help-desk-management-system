@@ -31,7 +31,7 @@ export default function TicketsPage() {
     activeFilterCount,
   } = useTicketFilters(tickets, { currentUserId: user?.id });
 
-  const pagination = usePagination({ totalItems: filteredTickets.length, pageSize: 8 });
+  const pagination = usePagination({ totalItems: filteredTickets.length, pageSize: 5 });
   const visibleTickets = useMemo(
     () => pagination.paginate(filteredTickets),
     [filteredTickets, pagination]

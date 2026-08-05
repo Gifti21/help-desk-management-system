@@ -21,7 +21,7 @@ export const TicketTable: React.FC<TicketTableProps> = ({ tickets, onSelectTicke
           No Tickets Found
         </h3>
         <p className="text-xs text-slate-500 max-w-sm mx-auto">
-          No assigned tickets match your current search, status, or department filter criteria.
+          No assigned tickets match your current search, status, or category filter criteria.
         </p>
       </div>
     );
@@ -36,7 +36,7 @@ export const TicketTable: React.FC<TicketTableProps> = ({ tickets, onSelectTicke
               <th className="p-3.5">Ticket ID</th>
               <th className="p-3.5">Subject / Title</th>
               <th className="p-3.5">Requester</th>
-              <th className="p-3.5">Department</th>
+              <th className="p-3.5">Category</th>
               <th className="p-3.5">Priority</th>
               <th className="p-3.5">Status</th>
               <th className="p-3.5 text-right">Action</th>

@@ -3,6 +3,7 @@
 import React from "react";
 import { Search, RotateCcw, UserCheck, Layers } from "lucide-react";
 import { BUTTONS } from "@/lib/colors";
+import { DEPARTMENTS } from "@/types/ticket";
 
 interface TicketFiltersProps {
   searchValue: string;
@@ -73,7 +74,6 @@ export const TicketFilters: React.FC<TicketFiltersProps> = ({
             placeholder="Search title, ticket # (TICK-1024), or requester..."
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
-            style={{ focusBorderColor: BUTTONS.primary } as any}
             className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-10 pr-4 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition-colors"
           />
         </div>
@@ -84,7 +84,7 @@ export const TicketFilters: React.FC<TicketFiltersProps> = ({
           <select
             value={status}
             onChange={(e) => onStatusChange(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:outline-none"
+            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:outline-none cursor-pointer"
           >
             <option value="ALL">All Statuses</option>
             <option value="OPEN">Open</option>
@@ -94,25 +94,25 @@ export const TicketFilters: React.FC<TicketFiltersProps> = ({
             <option value="CLOSED">Closed</option>
           </select>
 
-          {/* Department Filter */}
+          {/* Department Filter (Dynamically Mapped to standard DEPARTMENTS constant) */}
           <select
             value={department}
             onChange={(e) => onDepartmentChange(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:outline-none"
+            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:outline-none cursor-pointer"
           >
             <option value="ALL">All Departments</option>
-            <option value="IT Support">IT Support</option>
-            <option value="Network">Network</option>
-            <option value="Hardware">Hardware</option>
-            <option value="Software">Software</option>
-            <option value="Infrastructure">Infrastructure</option>
+            {DEPARTMENTS.map((dept) => (
+              <option key={dept} value={dept}>
+                {dept}
+              </option>
+            ))}
           </select>
 
           {/* Priority Filter */}
           <select
             value={priority}
             onChange={(e) => onPriorityChange(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:outline-none"
+            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:outline-none cursor-pointer"
           >
             <option value="ALL">All Priorities</option>
             <option value="LOW">Low</option>
@@ -124,7 +124,7 @@ export const TicketFilters: React.FC<TicketFiltersProps> = ({
           {/* Reset Button */}
           <button
             onClick={onReset}
-            className="flex items-center gap-1 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold transition-colors"
+            className="flex items-center gap-1 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
             title="Reset Filters"
           >
             <RotateCcw className="w-3.5 h-3.5 text-slate-500" />

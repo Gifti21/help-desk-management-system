@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 type UsePaginationOptions = {
   totalItems: number;
@@ -10,6 +10,7 @@ type UsePaginationOptions = {
 
 type UsePaginationResult = {
   page: number;
+  currentPage: number;
   pageSize: number;
   totalItems: number;
   totalPages: number;
@@ -31,7 +32,17 @@ export function usePagination({
   const [page, setPageState] = useState(initialPage);
 
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  
+  // Ensure page doesn't exceed totalPages if items change
+  useEffect(() => {
+    if (page > totalPages) {
+      setPageState(totalPages);
+    }
+  }, [totalPages, page]);
+
   const safePage = Math.min(Math.max(page, 1), totalPages);
+  
+  // Clean zero-based index calculations
   const startIndex = (safePage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, totalItems);
 
@@ -44,6 +55,7 @@ export function usePagination({
   return useMemo(
     () => ({
       page: safePage,
+      currentPage: safePage,
       pageSize,
       totalItems,
       totalPages,

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { X, PlusCircle } from "lucide-react";
-import { Priority } from "@/types/ticket";
+import { Priority, DEPARTMENTS, CATEGORIES, Category, Department } from "@/types/ticket";
 import { useTickets } from "@/context/TicketContext";
 import { BUTTONS } from "@/lib/colors";
 
@@ -18,9 +18,9 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<Priority>("MEDIUM");
   
-  // Explicitly separate Category (issue type/technical nature) from Department (owning team/responsibility)
-  const [category, setCategory] = useState("Software Issue");
-  const [department, setDepartment] = useState("IT Support");
+  // Cleanly using initial values directly from centralized exported constants
+  const [category, setCategory] = useState<Category>(CATEGORIES[0]);
+  const [department, setDepartment] = useState<Department>(DEPARTMENTS[0]);
   
   const [creatorName, setCreatorName] = useState("");
   const [creatorEmail, setCreatorEmail] = useState("");
@@ -50,6 +50,9 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
     setDescription("");
     setCreatorName("");
     setCreatorEmail("");
+    setCategory(CATEGORIES[0]);
+    setDepartment(DEPARTMENTS[0]);
+    setPriority("MEDIUM");
     onClose();
   };
 
@@ -107,20 +110,20 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
             />
           </div>
 
-          {/* SRS Split: Category (Issue Type) and Department (Owning Team) */}
+          {/* Category and Department Dropdowns tied dynamically to CATEGORIES & DEPARTMENTS */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-slate-700 font-semibold mb-1">Category (Issue Type)</label>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={(e) => setCategory(e.target.value as Category)}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-900 focus:outline-none focus:border-[#0E2621]"
               >
-                <option value="Software Issue">Software Issue</option>
-                <option value="Hardware Failure">Hardware Failure</option>
-                <option value="Network / Connectivity">Network / Connectivity</option>
-                <option value="Access & Credentials">Access & Credentials</option>
-                <option value="Billing & Finance">Billing & Finance</option>
+                {CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -128,14 +131,14 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
               <label className="block text-slate-700 font-semibold mb-1">Department Allocation</label>
               <select
                 value={department}
-                onChange={(e) => setDepartment(e.target.value)}
+                onChange={(e) => setDepartment(e.target.value as Department)}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-900 focus:outline-none focus:border-[#0E2621]"
               >
-                <option value="IT Support">IT Support</option>
-                <option value="Human Resources">Human Resources</option>
-                <option value="Finance">Finance</option>
-                <option value="Operations">Operations</option>
-                <option value="Legal & Compliance">Legal & Compliance</option>
+                {DEPARTMENTS.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
