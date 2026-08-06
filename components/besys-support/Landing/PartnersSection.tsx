@@ -87,19 +87,23 @@ export function PartnersSection() {
   return (
     <section className="border-t px-4 py-8 text-center sm:px-6 lg:px-8" style={{ borderColor: BORDER_GREY, backgroundColor: SECONDARY_BACKGROUND }}>
       <div className="mx-auto max-w-7xl">
+        {/* Label - centered above carousel */}
         <div 
-          className="flex items-center gap-4"
+          className="mb-6 text-center"
           style={{
             fontFamily: FONT_FAMILY.primary,
-            fontSize: BODY_LG.size,
-            lineHeight: BODY_LG.lineHeight,
+            fontSize: "1.125rem",
+            lineHeight: "1.4",
             fontWeight: FONT_WEIGHT.semibold,
-            letterSpacing: BODY_LG.letterSpacing,
-            color: BODY_TEXT_GREY,
+            letterSpacing: "0.05em",
+            color: DARK_GREEN,
           }}
         >
-          <span className="font-semibold uppercase whitespace-nowrap">PARTNERING WITH</span>
-          
+          <span className="font-semibold uppercase">PARTNERING WITH</span>
+        </div>
+
+        {/* Carousel Row */}
+        <div className="flex items-center justify-center gap-4">
           {/* Left Arrow Button */}
           <button
             type="button"
@@ -120,7 +124,7 @@ export function PartnersSection() {
           {/* Carousel Container */}
           <div 
             className="flex-1 overflow-hidden"
-            style={{ maxWidth: "calc(100% - 200px)" }}
+            style={{ maxWidth: "calc(100% - 120px)" }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
@@ -138,11 +142,14 @@ export function PartnersSection() {
                   className="rounded-full border bg-white px-6 py-3 whitespace-nowrap flex-shrink-0"
                   style={{ 
                     borderColor: "#e3e5e2", 
-                    color: "#0f2a2e",
+                    color: BODY_TEXT_GREY,
                     width: "140px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    fontFamily: FONT_FAMILY.primary,
+                    fontSize: BODY_LG.size,
+                    fontWeight: FONT_WEIGHT.medium,
                   }}
                 >
                   {partner}
