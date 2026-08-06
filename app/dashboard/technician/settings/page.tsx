@@ -163,9 +163,8 @@ export default function SettingsPage() {
                 onChange={(e) => setAgentStatus(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-[#060D0B] border border-slate-200 dark:border-[#1E3E35] rounded-lg px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 dark:focus:border-[#2FD9C4]"
               >
-                <option value="AVAILABLE">Available (Taking Queues)</option>
-                <option value="BUSY">Busy (In Resolution)</option>
-                <option value="AWAY">Away / On Break</option>
+                <option value="AVAILABLE">Available</option>
+                <option value="NOT AVAILABLE">Not Available</option>
               </select>
             </div>
           </div>
