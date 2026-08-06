@@ -68,6 +68,7 @@ export function Sidebar() {
               width={48}
               height={48}
               className="mb-2"
+              style={{ borderRadius: '50%', objectFit: 'cover' }}
             />
             <span
               className="text-center"

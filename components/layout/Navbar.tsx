@@ -49,6 +49,7 @@ export function Navbar({ showLoginButton = true }: NavbarProps) {
             width={48}
             height={48}
             priority
+            style={{ borderRadius: '50%', objectFit: 'cover' }}
           />
           <span
             className="text-lg sm:text-xl"

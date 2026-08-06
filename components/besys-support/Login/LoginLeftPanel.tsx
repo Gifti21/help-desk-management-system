@@ -42,8 +42,14 @@ export function LoginLeftPanel() {
         Sign in with your BESYS client credentials to continue tracking support requests.
       </p>
 
-      <div className="pointer-events-none absolute bottom-4 right-4 opacity-20 lg:bottom-6 lg:right-6">
-        <Image src="/besys-logo.jpg" alt="BESYS Technologies PLC logo" width={96} height={96} />
+      <div className="pointer-events-none absolute bottom-4 right-4 opacity-40 lg:bottom-6 lg:right-6">
+        <Image 
+          src="/besys-logo.jpg" 
+          alt="BESYS Technologies PLC logo" 
+          width={96} 
+          height={96}
+          style={{ mixBlendMode: 'screen', borderRadius: '50%', objectFit: 'cover' }}
+        />
       </div>
     </div>
   );

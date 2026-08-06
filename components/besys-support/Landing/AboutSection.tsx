@@ -12,6 +12,7 @@ export function AboutSection() {
             alt="BESYS Technologies PLC logo"
             width={140}
             height={140}
+            style={{ mixBlendMode: 'multiply', borderRadius: '50%', objectFit: 'cover' }}
           />
         </div>
         <div>

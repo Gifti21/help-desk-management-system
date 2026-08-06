@@ -2,11 +2,12 @@
 
 import { DARK_GREEN, BORDER_GREY, BODY_TEXT_GREY, SECONDARY_BACKGROUND, LIGHT_BORDER, TEAL_PRIMARY } from "@/lib/colors";
 import { BODY_LG, FONT_FAMILY, FONT_WEIGHT } from "@/lib/fonts";
-import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const featuredPartners = ["Huawei", "Microsoft"];
-const additionalPartners = [
+const allPartners = [
+  "Huawei",
+  "Microsoft",
   "Cisco",
   "HPE",
   "Fortinet",
@@ -31,14 +32,63 @@ const additionalPartners = [
 ];
 
 export function PartnersSection() {
-  const [showAll, setShowAll] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-scroll effect
+  useEffect(() => {
+    if (isPaused) return;
+
+    const interval = setInterval(() => {
+      setScrollPosition((prev) => {
+        const newPosition = prev + 0.5;
+        const partnerWidth = 160; // Approximate width including gap
+        const totalWidth = partnerWidth * allPartners.length;
+        // Reset to 0 when we reach the first set (seamless loop)
+        return newPosition >= totalWidth ? 0 : newPosition;
+      });
+    }, 16); // ~60fps
+
+    return () => clearInterval(interval);
+  }, [isPaused]);
+
+  const handleScrollLeft = () => {
+    setIsPaused(true);
+    setScrollPosition((prev) => {
+      const newPosition = prev - 160;
+      return newPosition < 0 ? 0 : newPosition;
+    });
+    
+    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    resumeTimeoutRef.current = setTimeout(() => setIsPaused(false), 500);
+  };
+
+  const handleScrollRight = () => {
+    setIsPaused(true);
+    setScrollPosition((prev) => {
+      const partnerWidth = 160;
+      const totalWidth = partnerWidth * allPartners.length;
+      const newPosition = prev + 160;
+      return newPosition >= totalWidth ? 0 : newPosition;
+    });
+    
+    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    resumeTimeoutRef.current = setTimeout(() => setIsPaused(false), 500);
+  };
+
+  const handleMouseEnter = () => setIsPaused(true);
+  const handleMouseLeave = () => setIsPaused(false);
+
+  // Duplicate partners array for infinite scroll effect
+  const displayPartners = [...allPartners, ...allPartners];
 
   return (
     <section className="border-t px-4 py-8 text-center sm:px-6 lg:px-8" style={{ borderColor: BORDER_GREY, backgroundColor: SECONDARY_BACKGROUND }}>
       <div className="mx-auto max-w-7xl">
-        {/* Featured Partners Row */}
         <div 
-          className="flex flex-wrap items-center justify-center gap-4 font-semibold uppercase mb-0"
+          className="flex items-center gap-4"
           style={{
             fontFamily: FONT_FAMILY.primary,
             fontSize: BODY_LG.size,
@@ -48,74 +98,76 @@ export function PartnersSection() {
             color: BODY_TEXT_GREY,
           }}
         >
-          <span>PARTNERING WITH</span>
-          {featuredPartners.map((partner) => (
-            <span key={partner} className="rounded-full border bg-white px-6 py-3" style={{ borderColor: "#e3e5e2", color: "#0f2a2e" }}>
-              {partner}
-            </span>
-          ))}
-          {/* Toggle Button - Always teal border and text */}
+          <span className="font-semibold uppercase whitespace-nowrap">PARTNERING WITH</span>
+          
+          {/* Left Arrow Button */}
           <button
             type="button"
-            onClick={() => setShowAll(!showAll)}
-            className="inline-flex items-center gap-2 rounded-full px-6 py-3 cursor-pointer hover:opacity-80 transition focus:outline-none focus:ring-2 focus:ring-offset-2"
+            onClick={handleScrollLeft}
+            className="flex items-center justify-center rounded-full border bg-white cursor-pointer hover:opacity-80 transition focus:outline-none focus:ring-2 focus:ring-offset-2"
             style={{ 
               borderColor: TEAL_PRIMARY, 
               color: TEAL_PRIMARY,
-              backgroundColor: "white",
               border: `1px solid ${TEAL_PRIMARY}`,
-              "--tw-ring-color": TEAL_PRIMARY
+              "--tw-ring-color": TEAL_PRIMARY,
+              width: "48px",
+              height: "48px",
             } as React.CSSProperties}
           >
-            <span style={{ fontFamily: FONT_FAMILY.primary, fontSize: BODY_LG.size, fontWeight: FONT_WEIGHT.semibold, letterSpacing: BODY_LG.letterSpacing }}>
-              {showAll ? "Show Less" : "+ More"}
-            </span>
-            <ChevronDown className={`h-4 w-4 transition-transform ${showAll ? "rotate-180" : ""}`} />
+            <ChevronLeft className="h-4 w-4" />
           </button>
-        </div>
 
-        {/* Expanded Partners Panel */}
-        {showAll && (
+          {/* Carousel Container */}
           <div 
-            className="mt-6 rounded-2xl border p-6"
-            style={{ 
-              backgroundColor: "#ffffff", 
-              borderColor: "#e3e5e2",
-              borderRadius: "16px"
-            }}
+            className="flex-1 overflow-hidden"
+            style={{ maxWidth: "calc(100% - 200px)" }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
-            <div 
-              className="grid gap-3"
-              style={{ 
-                gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))" 
+            <div
+              ref={carouselRef}
+              className="flex gap-4 transition-transform"
+              style={{
+                transform: `translateX(-${scrollPosition}px)`,
+                width: `${displayPartners.length * 160}px`,
               }}
             >
-              {additionalPartners.map((partner) => (
-                <div
-                  key={partner}
-                  className="flex items-center justify-center rounded-lg border px-4 py-3"
+              {displayPartners.map((partner, index) => (
+                <span 
+                  key={`${partner}-${index}`} 
+                  className="rounded-full border bg-white px-6 py-3 whitespace-nowrap flex-shrink-0"
                   style={{ 
                     borderColor: "#e3e5e2", 
-                    backgroundColor: "#f4f5f4",
-                    color: "#0f2a2e"
+                    color: "#0f2a2e",
+                    width: "140px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  <span 
-                    className="font-semibold uppercase text-sm"
-                    style={{
-                      fontFamily: FONT_FAMILY.primary,
-                      fontSize: "0.875rem",
-                      fontWeight: FONT_WEIGHT.semibold,
-                      letterSpacing: BODY_LG.letterSpacing,
-                    }}
-                  >
-                    {partner}
-                  </span>
-                </div>
+                  {partner}
+                </span>
               ))}
             </div>
           </div>
-        )}
+
+          {/* Right Arrow Button */}
+          <button
+            type="button"
+            onClick={handleScrollRight}
+            className="flex items-center justify-center rounded-full border bg-white cursor-pointer hover:opacity-80 transition focus:outline-none focus:ring-2 focus:ring-offset-2"
+            style={{ 
+              borderColor: TEAL_PRIMARY, 
+              color: TEAL_PRIMARY,
+              border: `1px solid ${TEAL_PRIMARY}`,
+              "--tw-ring-color": TEAL_PRIMARY,
+              width: "48px",
+              height: "48px",
+            } as React.CSSProperties}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </section>
   );

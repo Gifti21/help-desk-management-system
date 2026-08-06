@@ -72,11 +72,18 @@ interface FaqItemProps {
 
 function FaqItem({ faq, isOpen, onToggle }: FaqItemProps) {
   return (
-    <Card variant="bordered" className="rounded-2xl">
+    <div 
+      className="rounded-2xl border"
+      style={{ 
+        borderColor: BORDER_GREY,
+        backgroundColor: isOpen ? PAGE_BACKGROUND : 'white',
+        transition: 'background-color 0.2s ease',
+      }}
+    >
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition focus-visible:outline-none focus-visible:ring-2"
+        className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition focus-visible:outline-none focus-visible:ring-2 rounded-t-2xl"
         style={{
           fontFamily: FONT_FAMILY.primary,
           fontSize: BODY_REGULAR.size,
@@ -85,9 +92,18 @@ function FaqItem({ faq, isOpen, onToggle }: FaqItemProps) {
           letterSpacing: BODY_REGULAR.letterSpacing,
           color: DARK_GREEN,
           '--tw-ring-color': TEAL_PRIMARY,
+          backgroundColor: isOpen ? PAGE_BACKGROUND : 'transparent',
         } as React.CSSProperties}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = PAGE_BACKGROUND}
-        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+        onMouseEnter={(e) => {
+          if (!isOpen) {
+            e.currentTarget.style.backgroundColor = PAGE_BACKGROUND;
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isOpen) {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }
+        }}
         aria-expanded={isOpen}
       >
         <span>{faq.question}</span>
@@ -104,6 +120,6 @@ function FaqItem({ faq, isOpen, onToggle }: FaqItemProps) {
           color: BODY_TEXT_GREY,
         }}
       >{faq.answer}</p> : null}
-    </Card>
+    </div>
   );
 }
