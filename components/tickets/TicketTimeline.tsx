@@ -73,7 +73,7 @@ function TimelineEventItem({ event, isFirst, isLast }: TimelineEventItemProps) {
 
         const getPriorityColor = (priority: string) => {
             switch (priority?.toLowerCase()) {
-                case 'urgent': return 'bg-red-100 text-red-700';
+                case 'critical': return 'bg-red-100 text-red-700';
                 case 'high': return 'bg-orange-100 text-orange-700';
                 case 'medium': return 'bg-blue-100 text-blue-700';
                 case 'low': return 'bg-green-100 text-green-700';

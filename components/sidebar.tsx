@@ -15,7 +15,6 @@ import {
   BarChart3,
   Settings,
   Plus,
-  UserCircle,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -36,24 +35,17 @@ export function Sidebar({
       icon: LayoutDashboard,
       current: pathname === "/admin",
     },
-    // Admins get "My Profile" instead of "My Tickets"
-    ...(userRole === "ADMIN"
+    // Employees get "My Tickets"
+    ...(userRole === "EMPLOYEE"
       ? [
-        {
-          name: "My Profile",
-          href: "/admin/profile",
-          icon: UserCircle,
-          current: pathname === "/admin/profile",
-        },
-      ]
-      : [
         {
           name: "My Tickets",
           href: "/admin/my-tickets",
           icon: Ticket,
           current: pathname === "/admin/my-tickets",
         },
-      ]),
+      ]
+      : []),
     {
       name: "All Tickets",
       href: "/admin/tickets",

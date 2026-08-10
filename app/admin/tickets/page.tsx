@@ -31,67 +31,97 @@ import {
     RefreshCw
 } from 'lucide-react';
 
-// Ethiopian mock ticket data
+// Mock data matching database schema exactly
 const initialMockTickets = [
     {
-        id: '#HD-4892',
+        id: 'tick-001',
         title: 'Network connectivity issue in Bole office',
         description: 'Unable to access internal servers from Bole branch. Multiple users affected since morning.',
-        requester: 'Alemayehu Tadesse',
-        assignee: 'Selam Yohannes',
-        department: 'IT Support',
-        category: 'Network',
         status: 'IN_PROGRESS',
         priority: 'HIGH',
-        createdAt: '2024-07-15T10:30:00Z'
+        categoryId: 'cat-3',
+        category: { id: 'cat-3', name: 'Network' },
+        departmentId: 'dept-1',
+        department: { id: 'dept-1', name: 'IT Support' },
+        requesterId: 'user-101',
+        requester: { id: 'user-101', firstName: 'Alemayehu', lastName: 'Tadesse', email: 'alemayehu.t@company.com' },
+        assigneeId: 'user-201',
+        assignee: { id: 'user-201', firstName: 'Selam', lastName: 'Yohannes', email: 'selam.y@company.com' },
+        createdAt: '2024-07-15T10:30:00Z',
+        updatedAt: '2024-07-15T14:20:00Z',
+        closedAt: null
     },
     {
-        id: '#HD-4888',
+        id: 'tick-002',
         title: 'Printer not working - 3rd floor',
         description: 'HP LaserJet printer on 3rd floor is showing paper jam error but there is no paper stuck.',
-        requester: 'Tigist Bekele',
-        assignee: 'Dawit Hailu',
-        department: 'Operations',
-        category: 'Hardware',
         status: 'OPEN',
         priority: 'MEDIUM',
-        createdAt: '2024-07-14T14:20:00Z'
+        categoryId: 'cat-1',
+        category: { id: 'cat-1', name: 'Hardware' },
+        departmentId: 'dept-4',
+        department: { id: 'dept-4', name: 'Operations' },
+        requesterId: 'user-102',
+        requester: { id: 'user-102', firstName: 'Tigist', lastName: 'Bekele', email: 'tigist.b@company.com' },
+        assigneeId: 'user-202',
+        assignee: { id: 'user-202', firstName: 'Dawit', lastName: 'Hailu', email: 'dawit.h@company.com' },
+        createdAt: '2024-07-14T14:20:00Z',
+        updatedAt: '2024-07-14T14:20:00Z',
+        closedAt: null
     },
     {
-        id: '#HD-4875',
+        id: 'tick-003',
         title: 'Access request for new employee',
         description: 'New employee Meron Assefa needs access to ERP system and email account setup.',
-        requester: 'Hanna Solomon',
-        assignee: '',
-        department: 'HR',
-        category: 'Access',
         status: 'OPEN',
-        priority: 'URGENT',
-        createdAt: '2024-07-10T08:45:00Z'
+        priority: 'CRITICAL',
+        categoryId: 'cat-4',
+        category: { id: 'cat-4', name: 'Access Request' },
+        departmentId: 'dept-2',
+        department: { id: 'dept-2', name: 'Human Resources' },
+        requesterId: 'user-103',
+        requester: { id: 'user-103', firstName: 'Hanna', lastName: 'Solomon', email: 'hanna.s@company.com' },
+        assigneeId: null,
+        assignee: null,
+        createdAt: '2024-07-10T08:45:00Z',
+        updatedAt: '2024-07-10T08:45:00Z',
+        closedAt: null
     },
     {
-        id: '#HD-4850',
+        id: 'tick-004',
         title: 'Email account issue - Cannot send emails',
         description: 'User reports emails are stuck in outbox and not being sent.',
-        requester: 'Bereket Mekonnen',
-        assignee: 'Selam Yohannes',
-        department: 'IT Support',
-        category: 'Software',
         status: 'RESOLVED',
         priority: 'MEDIUM',
-        createdAt: '2024-07-08T11:15:00Z'
+        categoryId: 'cat-2',
+        category: { id: 'cat-2', name: 'Software' },
+        departmentId: 'dept-1',
+        department: { id: 'dept-1', name: 'IT Support' },
+        requesterId: 'user-104',
+        requester: { id: 'user-104', firstName: 'Bereket', lastName: 'Mekonnen', email: 'bereket.m@company.com' },
+        assigneeId: 'user-201',
+        assignee: { id: 'user-201', firstName: 'Selam', lastName: 'Yohannes', email: 'selam.y@company.com' },
+        createdAt: '2024-07-08T11:15:00Z',
+        updatedAt: '2024-07-09T16:30:00Z',
+        closedAt: null
     },
     {
-        id: '#HD-4820',
+        id: 'tick-005',
         title: 'Security audit completed',
         description: 'Annual security audit has been completed. All systems passed compliance checks.',
-        requester: 'Yonas Desta',
-        assignee: 'Dawit Hailu',
-        department: 'Security',
-        category: 'Security',
         status: 'CLOSED',
         priority: 'LOW',
-        createdAt: '2024-07-05T09:00:00Z'
+        categoryId: 'cat-6',
+        category: { id: 'cat-6', name: 'Security' },
+        departmentId: 'dept-6',
+        department: { id: 'dept-6', name: 'Security' },
+        requesterId: 'user-105',
+        requester: { id: 'user-105', firstName: 'Yonas', lastName: 'Desta', email: 'yonas.d@company.com' },
+        assigneeId: 'user-202',
+        assignee: { id: 'user-202', firstName: 'Dawit', lastName: 'Hailu', email: 'dawit.h@company.com' },
+        createdAt: '2024-07-05T09:00:00Z',
+        updatedAt: '2024-07-06T15:45:00Z',
+        closedAt: '2024-07-06T15:45:00Z'
     }
 ];
 
@@ -127,14 +157,15 @@ export default function TicketsPage() {
     const { toast } = useToast();
 
     const filteredTickets = tickets.filter(ticket => {
+        const requesterFullName = `${ticket.requester.firstName} ${ticket.requester.lastName}`.toLowerCase();
         const matchesSearch = ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            ticket.requester.toLowerCase().includes(searchTerm.toLowerCase());
+            requesterFullName.includes(searchTerm.toLowerCase());
 
         const matchesStatus = statusFilter === 'ALL' || ticket.status === statusFilter;
         const matchesPriority = priorityFilter === 'ALL' || ticket.priority === priorityFilter;
-        const matchesDepartment = departmentFilter === 'ALL' || ticket.department === departmentFilter;
-        const matchesCategory = categoryFilter === 'ALL' || ticket.category === categoryFilter;
+        const matchesDepartment = departmentFilter === 'ALL' || ticket.department.name === departmentFilter;
+        const matchesCategory = categoryFilter === 'ALL' || ticket.category.name === categoryFilter;
 
         return matchesSearch && matchesStatus && matchesPriority && matchesDepartment && matchesCategory;
     });
@@ -205,8 +236,15 @@ export default function TicketsPage() {
         const csvData = [
             ['Ticket ID', 'Title', 'Category', 'Department', 'Priority', 'Status', 'Assignee', 'Requester', 'Created'],
             ...filteredTickets.map(t => [
-                t.id, t.title, t.category, t.department, t.priority, t.status,
-                t.assignee || 'Unassigned', t.requester, new Date(t.createdAt).toLocaleDateString()
+                t.id,
+                t.title,
+                t.category.name,
+                t.department.name,
+                t.priority,
+                t.status,
+                t.assignee ? `${t.assignee.firstName} ${t.assignee.lastName}` : 'Unassigned',
+                `${t.requester.firstName} ${t.requester.lastName}`,
+                new Date(t.createdAt).toLocaleDateString()
             ])
         ].map(row => row.join(',')).join('\n');
 
@@ -238,7 +276,7 @@ export default function TicketsPage() {
 
     const getPriorityBadge = (priority: string) => {
         const priorityColors: Record<string, { bg: string; text: string }> = {
-            'URGENT': { bg: '#fecaca', text: '#991b1b' },
+            'CRITICAL': { bg: '#fecaca', text: '#991b1b' },
             'HIGH': { bg: '#fee2e2', text: '#dc2626' },
             'MEDIUM': { bg: '#fed7aa', text: '#ea580c' },
             'LOW': { bg: '#dcfce7', text: '#15803d' }
@@ -266,9 +304,9 @@ export default function TicketsPage() {
                 <div>
                     <h3 className="font-medium" style={{ fontSize: fonts.body.regular.size, fontWeight: fonts.fontWeight.medium, color: theme.foreground }}>{value}</h3>
                     <div className="flex items-center space-x-3 mt-1" style={{ fontSize: fonts.caption.regular.size, color: theme.foregroundMuted }}>
-                        <span>{row.category}</span>
+                        <span>{row.category.name}</span>
                         <span>•</span>
-                        <span>{row.department}</span>
+                        <span>{row.department.name}</span>
                     </div>
                 </div>
             )
@@ -276,14 +314,14 @@ export default function TicketsPage() {
         {
             key: 'requester',
             title: 'Requester',
-            render: (value: string) => <span style={{ fontSize: fonts.body.sm.size, color: theme.foreground }}>{value}</span>
+            render: (value: any) => <span style={{ fontSize: fonts.body.sm.size, color: theme.foreground }}>{value.firstName} {value.lastName}</span>
         },
         {
             key: 'assignee',
             title: 'Assignee',
-            render: (value: string) => (
+            render: (value: any) => (
                 <span style={{ fontSize: fonts.body.sm.size, color: value ? theme.foreground : theme.foregroundMuted }}>
-                    {value || 'Unassigned'}
+                    {value ? `${value.firstName} ${value.lastName}` : 'Unassigned'}
                 </span>
             )
         },
@@ -426,7 +464,7 @@ export default function TicketsPage() {
             onChange: setPriorityFilter,
             options: [
                 { label: 'All Priority', value: 'ALL' },
-                { label: 'Urgent', value: 'URGENT' },
+                { label: 'Critical', value: 'CRITICAL' },
                 { label: 'High', value: 'HIGH' },
                 { label: 'Medium', value: 'MEDIUM' },
                 { label: 'Low', value: 'LOW' }
@@ -583,19 +621,19 @@ export default function TicketsPage() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Category</p>
-                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.ticket.category}</p>
+                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.ticket.category.name}</p>
                                     </div>
                                     <div>
                                         <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Department</p>
-                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.ticket.department}</p>
+                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.ticket.department.name}</p>
                                     </div>
                                     <div>
                                         <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Requester</p>
-                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.ticket.requester}</p>
+                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.ticket.requester.firstName} {viewModal.ticket.requester.lastName}</p>
                                     </div>
                                     <div>
                                         <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Assignee</p>
-                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.ticket.assignee || 'Unassigned'}</p>
+                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.ticket.assignee ? `${viewModal.ticket.assignee.firstName} ${viewModal.ticket.assignee.lastName}` : 'Unassigned'}</p>
                                     </div>
                                     <div>
                                         <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Created</p>
@@ -860,7 +898,7 @@ export default function TicketsPage() {
                         </button>
                         <h3 className="text-lg font-bold mb-4" style={{ color: theme.foreground }}>Change Priority - {priorityModal.ticket.id}</h3>
                         <div className="space-y-2">
-                            {['URGENT', 'HIGH', 'MEDIUM', 'LOW'].map(priority => (
+                            {['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map(priority => (
                                 <button
                                     key={priority}
                                     onClick={() => handlePriorityChange(priorityModal.ticket.id, priority)}

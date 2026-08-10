@@ -14,9 +14,6 @@ import { useTheme } from '../../../components/providers/ThemeProvider';
 import { fonts } from '@/lib/fonts';
 import {
     Tag,
-    Activity,
-    AlertTriangle,
-    TrendingUp,
     Plus,
     Edit,
     Trash2,
@@ -30,69 +27,53 @@ import {
     ChevronRight
 } from 'lucide-react';
 
-// Mock category data with Ethiopian context
+// Mock category data - matching database schema exactly
+// Database schema: id, name, createdAt (only these fields exist)
 const mockCategories = [
     {
         id: 'cat-1',
         name: 'Hardware',
-        description: 'Physical equipment issues and maintenance requests',
-        priority: 'HIGH',
-        status: 'active',
-        ticketCount: 89,
-        avgResolutionTime: '4.2 hours',
-        createdAt: '2023-01-15',
-        updatedAt: '2024-07-20'
+        createdAt: '2023-01-15T10:00:00Z'
     },
     {
         id: 'cat-2',
         name: 'Software',
-        description: 'Application issues, bugs, and software installation requests',
-        priority: 'MEDIUM',
-        status: 'active',
-        ticketCount: 156,
-        avgResolutionTime: '2.8 hours',
-        createdAt: '2023-01-15',
-        updatedAt: '2024-07-19'
+        createdAt: '2023-01-15T09:30:00Z'
     },
     {
         id: 'cat-3',
         name: 'Network',
-        description: 'Connectivity, VPN, and network infrastructure issues',
-        priority: 'HIGH',
-        status: 'active',
-        ticketCount: 73,
-        avgResolutionTime: '3.5 hours',
-        createdAt: '2023-01-15',
-        updatedAt: '2024-07-18'
+        createdAt: '2023-01-15T11:00:00Z'
     },
     {
         id: 'cat-4',
-        name: 'Access Control',
-        description: 'User permissions, account access, and security requests',
-        priority: 'URGENT',
-        status: 'active',
-        ticketCount: 42,
-        avgResolutionTime: '1.2 hours',
-        createdAt: '2023-02-10',
-        updatedAt: '2024-07-17'
+        name: 'Access Request',
+        createdAt: '2023-02-10T14:00:00Z'
     },
     {
         id: 'cat-5',
         name: 'Training',
-        description: 'User training and educational resource requests',
-        priority: 'LOW',
-        status: 'inactive',
-        ticketCount: 8,
-        avgResolutionTime: '6.5 hours',
-        createdAt: '2023-03-15',
-        updatedAt: '2024-06-10'
+        createdAt: '2023-03-15T08:30:00Z'
+    },
+    {
+        id: 'cat-6',
+        name: 'Maintenance',
+        createdAt: '2023-04-01T10:15:00Z'
+    },
+    {
+        id: 'cat-7',
+        name: 'Security',
+        createdAt: '2023-04-20T09:45:00Z'
+    },
+    {
+        id: 'cat-8',
+        name: 'Database',
+        createdAt: '2023-05-10T11:20:00Z'
     }
 ];
 
 export default function CategoriesPage() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('All Status');
-    const [priorityFilter, setPriorityFilter] = useState('All Priority');
     const [categories, setCategories] = useState(mockCategories);
     const [currentPage, setCurrentPage] = useState(1);
     const [actionsMenuOpen, setActionsMenuOpen] = useState<string | null>(null);
@@ -101,18 +82,15 @@ export default function CategoriesPage() {
     const [editModal, setEditModal] = useState<{ isOpen: boolean; category: any }>({ isOpen: false, category: null });
     const [viewModal, setViewModal] = useState<{ isOpen: boolean; category: any }>({ isOpen: false, category: null });
     const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; category: any }>({ isOpen: false, category: null });
-    const [formData, setFormData] = useState({ name: '', description: '', priority: 'MEDIUM', status: 'active' });
+    const [formData, setFormData] = useState({ name: '' });
 
     const { colors: theme } = useTheme();
     const { toast } = useToast();
 
     // Filter categories
     const filteredCategories = categories.filter(cat => {
-        const matchesSearch = cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            cat.description.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = statusFilter === 'All Status' || cat.status === statusFilter.toLowerCase();
-        const matchesPriority = priorityFilter === 'All Priority' || cat.priority === priorityFilter.toUpperCase();
-        return matchesSearch && matchesStatus && matchesPriority;
+        const matchesSearch = cat.name.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesSearch;
     });
 
     // Pagination
@@ -121,39 +99,31 @@ export default function CategoriesPage() {
     const endIndex = startIndex + itemsPerPage;
     const paginatedCategories = filteredCategories.slice(startIndex, endIndex);
 
-    // Reset to page 1 when filters change
-    const handleFilterChange = () => {
-        setCurrentPage(1);
-    };
-
     // Handle CRUD operations
     const handleAddCategory = () => {
-        if (!formData.name || !formData.description) {
-            toast('Please fill all required fields', 'error');
+        if (!formData.name) {
+            toast('Please fill the category name', 'error');
             return;
         }
         const newCategory = {
             id: `cat-${Date.now()}`,
-            ...formData,
-            ticketCount: 0,
-            avgResolutionTime: '0 hours',
-            createdAt: new Date().toISOString().split('T')[0],
-            updatedAt: new Date().toISOString().split('T')[0]
+            name: formData.name,
+            createdAt: new Date().toISOString()
         };
         setCategories(prev => [...prev, newCategory]);
         setAddModal(false);
-        setFormData({ name: '', description: '', priority: 'MEDIUM', status: 'active' });
+        setFormData({ name: '' });
         toast(`Category "${formData.name}" created successfully`, 'success');
     };
 
     const handleEditCategory = () => {
-        if (!editModal.category || !formData.name || !formData.description) {
-            toast('Please fill all required fields', 'error');
+        if (!editModal.category || !formData.name) {
+            toast('Please fill the category name', 'error');
             return;
         }
         setCategories(prev => prev.map(cat =>
             cat.id === editModal.category.id
-                ? { ...cat, ...formData, updatedAt: new Date().toISOString().split('T')[0] }
+                ? { ...cat, name: formData.name }
                 : cat
         ));
         setEditModal({ isOpen: false, category: null });
@@ -168,17 +138,11 @@ export default function CategoriesPage() {
     };
 
     const handleExportData = () => {
-        const headers = ['ID', 'Category Name', 'Description', 'Priority', 'Status', 'Ticket Count', 'Avg Resolution Time', 'Created', 'Last Updated'];
+        const headers = ['ID', 'Category Name', 'Created Date'];
         const csvData = filteredCategories.map(cat => [
             cat.id,
             cat.name,
-            cat.description,
-            cat.priority,
-            cat.status,
-            cat.ticketCount,
-            cat.avgResolutionTime,
-            cat.createdAt,
-            cat.updatedAt
+            new Date(cat.createdAt).toLocaleDateString()
         ]);
         const csvContent = [headers, ...csvData].map(row => row.join(',')).join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -192,100 +156,43 @@ export default function CategoriesPage() {
     };
 
     const openAddModal = () => {
-        setFormData({ name: '', description: '', priority: 'MEDIUM', status: 'active' });
+        setFormData({ name: '' });
         setAddModal(true);
     };
 
     const openEditModal = (category: any) => {
-        setFormData({ name: category.name, description: category.description, priority: category.priority, status: category.status });
+        setFormData({ name: category.name });
         setEditModal({ isOpen: true, category });
-    };
-
-    // Helper functions
-    const getStatusBadge = (status: string) => {
-        const isActive = status === 'active';
-        return (
-            <span
-                className="px-2 py-1 text-xs font-medium rounded border"
-                style={{
-                    backgroundColor: isActive ? '#dcfce7' : '#fee2e2',
-                    color: isActive ? '#15803d' : '#dc2626',
-                    fontSize: fonts.caption.small.size
-                }}
-            >
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-            </span>
-        );
-    };
-
-    const getPriorityBadge = (priority: string) => {
-        const priorityColors: Record<string, { bg: string; text: string }> = {
-            'LOW': { bg: '#f3f4f6', text: '#6b7280' },
-            'MEDIUM': { bg: '#dbeafe', text: '#1e40af' },
-            'HIGH': { bg: '#fed7aa', text: '#c2410c' },
-            'URGENT': { bg: '#fee2e2', text: '#dc2626' }
-        };
-        const color = priorityColors[priority] || priorityColors['MEDIUM'];
-        return (
-            <span
-                className="px-2 py-1 text-xs font-medium rounded border"
-                style={{
-                    backgroundColor: color.bg,
-                    color: color.text,
-                    fontSize: fonts.caption.small.size
-                }}
-            >
-                {priority}
-            </span>
-        );
     };
 
     // Table columns
     const categoryColumns = [
         {
-            key: 'name',
-            title: 'Category',
-            render: (value: string, row: any) => (
-                <div>
-                    <div className="font-medium" style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>
-                        {value}
-                    </div>
-                    <div className="mt-1" style={{ fontSize: fonts.caption.regular.size, color: theme.foregroundSecondary }}>
-                        {row.description}
-                    </div>
-                </div>
-            )
-        },
-        {
-            key: 'priority',
-            title: 'Priority',
-            render: (value: string) => getPriorityBadge(value)
-        },
-        {
-            key: 'ticketCount',
-            title: 'Tickets',
-            render: (value: number) => (
-                <div className="flex items-center">
-                    <Activity className="h-4 w-4 mr-2" style={{ color: theme.foregroundMuted }} />
-                    <span style={{ fontSize: fonts.body.regular.size, color: theme.foreground, fontWeight: fonts.fontWeight.medium }}>
-                        {value}
-                    </span>
-                </div>
-            )
-        },
-        {
-            key: 'avgResolutionTime',
-            title: 'Avg Resolution',
+            key: 'id',
+            title: 'ID',
             render: (value: string) => (
-                <span style={{ fontSize: fonts.body.sm.size, color: theme.foregroundSecondary }}>
+                <span className="font-mono font-medium" style={{ color: theme.primary, fontSize: fonts.body.sm.size }}>
                     {value}
                 </span>
             )
         },
         {
-            key: 'status',
-            title: 'Status',
-            render: (value: string) => getStatusBadge(value)
+            key: 'name',
+            title: 'Category Name',
+            render: (value: string) => (
+                <div className="font-medium" style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>
+                    {value}
+                </div>
+            )
+        },
+        {
+            key: 'createdAt',
+            title: 'Created Date',
+            render: (value: string) => (
+                <span style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>
+                    {new Date(value).toLocaleDateString()}
+                </span>
+            )
         },
         {
             key: 'actions',
@@ -347,36 +254,8 @@ export default function CategoriesPage() {
         }
     ];
 
-    const filters = [
-        {
-            label: 'Status',
-            value: statusFilter,
-            onChange: setStatusFilter,
-            options: [
-                { label: 'All Status', value: 'All Status' },
-                { label: 'Active', value: 'Active' },
-                { label: 'Inactive', value: 'Inactive' }
-            ]
-        },
-        {
-            label: 'Priority',
-            value: priorityFilter,
-            onChange: setPriorityFilter,
-            options: [
-                { label: 'All Priority', value: 'All Priority' },
-                { label: 'Urgent', value: 'Urgent' },
-                { label: 'High', value: 'High' },
-                { label: 'Medium', value: 'Medium' },
-                { label: 'Low', value: 'Low' }
-            ]
-        }
-    ];
-
     // Calculate stats
     const totalCategories = categories.length;
-    const activeCategories = categories.filter(c => c.status === 'active').length;
-    const totalTickets = categories.reduce((sum, c) => sum + c.ticketCount, 0);
-    const urgentCategories = categories.filter(c => c.priority === 'URGENT').length;
 
     return (
         <PageLayout>
@@ -404,35 +283,14 @@ export default function CategoriesPage() {
                         icon={Tag}
                         iconColor={theme.primary}
                     />
-                    <StatCard
-                        title="Active Categories"
-                        value={activeCategories.toString()}
-                        subtitle={`${Math.round((activeCategories / totalCategories) * 100)}% active`}
-                        icon={Activity}
-                        iconColor={theme.success}
-                    />
-                    <StatCard
-                        title="Total Tickets"
-                        value={totalTickets.toString()}
-                        subtitle="Across all categories"
-                        icon={TrendingUp}
-                        iconColor="#2FD9C4"
-                    />
-                    <StatCard
-                        title="Urgent Categories"
-                        value={urgentCategories.toString()}
-                        subtitle="High priority"
-                        icon={AlertTriangle}
-                        iconColor={theme.warning}
-                    />
                 </div>
 
-                {/* Search and Filters */}
+                {/* Search */}
                 <SearchFilter
                     searchValue={searchTerm}
-                    onSearchChange={(value) => { setSearchTerm(value); handleFilterChange(); }}
+                    onSearchChange={(value) => { setSearchTerm(value); setCurrentPage(1); }}
                     searchPlaceholder="Search categories..."
-                    filters={filters}
+                    filters={[]}
                 />
 
                 {/* Categories Table */}
@@ -518,32 +376,6 @@ export default function CategoriesPage() {
                                 </label>
                                 <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Enter category name" style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} />
                             </div>
-                            <div>
-                                <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
-                                    Description <span style={{ color: theme.error }}>*</span>
-                                </label>
-                                <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Enter description" rows={3} className="w-full px-3 py-2 border rounded-md resize-none" style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} />
-                            </div>
-                            <div>
-                                <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
-                                    Priority <span style={{ color: theme.error }}>*</span>
-                                </label>
-                                <select value={formData.priority} onChange={(e) => setFormData({ ...formData, priority: e.target.value })} className="w-full px-3 py-2 border rounded-md" style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }}>
-                                    <option value="LOW">Low</option>
-                                    <option value="MEDIUM">Medium</option>
-                                    <option value="HIGH">High</option>
-                                    <option value="URGENT">Urgent</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
-                                    Status <span style={{ color: theme.error }}>*</span>
-                                </label>
-                                <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="w-full px-3 py-2 border rounded-md" style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }}>
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                </select>
-                            </div>
                         </div>
                         <div className="flex gap-3 mt-6">
                             <ActionButton variant="outline" size="md" onClick={() => setAddModal(false)}>Cancel</ActionButton>
@@ -572,32 +404,6 @@ export default function CategoriesPage() {
                                 </label>
                                 <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} />
                             </div>
-                            <div>
-                                <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
-                                    Description <span style={{ color: theme.error }}>*</span>
-                                </label>
-                                <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-md resize-none" style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} />
-                            </div>
-                            <div>
-                                <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
-                                    Priority <span style={{ color: theme.error }}>*</span>
-                                </label>
-                                <select value={formData.priority} onChange={(e) => setFormData({ ...formData, priority: e.target.value })} className="w-full px-3 py-2 border rounded-md" style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }}>
-                                    <option value="LOW">Low</option>
-                                    <option value="MEDIUM">Medium</option>
-                                    <option value="HIGH">High</option>
-                                    <option value="URGENT">Urgent</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
-                                    Status <span style={{ color: theme.error }}>*</span>
-                                </label>
-                                <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="w-full px-3 py-2 border rounded-md" style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }}>
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                </select>
-                            </div>
                         </div>
                         <div className="flex gap-3 mt-6">
                             <ActionButton variant="outline" size="md" onClick={() => setEditModal({ isOpen: false, category: null })}>Cancel</ActionButton>
@@ -622,49 +428,28 @@ export default function CategoriesPage() {
                                 </div>
                                 <div>
                                     <h3 className="text-xl font-bold" style={{ color: theme.foreground }}>{viewModal.category.name}</h3>
-                                    <div className="flex gap-2 mt-1">
-                                        {getStatusBadge(viewModal.category.status)}
-                                        {getPriorityBadge(viewModal.category.priority)}
-                                    </div>
+                                    <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, marginTop: '4px' }}>
+                                        ID: {viewModal.category.id}
+                                    </p>
                                 </div>
                             </div>
                             <div className="space-y-4">
                                 <div>
-                                    <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, marginBottom: '8px' }}>Description</p>
-                                    <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.category.description}</p>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, marginBottom: '8px' }}>Total Tickets</p>
-                                        <div className="flex items-center">
-                                            <Activity className="h-4 w-4 mr-2" style={{ color: theme.foregroundMuted }} />
-                                            <span style={{ fontSize: fonts.body.regular.size, color: theme.foreground, fontWeight: fonts.fontWeight.semibold }}>{viewModal.category.ticketCount}</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, marginBottom: '8px' }}>Avg Resolution Time</p>
-                                        <span style={{ fontSize: fonts.body.regular.size, color: theme.foreground, fontWeight: fonts.fontWeight.semibold }}>{viewModal.category.avgResolutionTime}</span>
-                                    </div>
-                                    <div>
-                                        <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, marginBottom: '8px' }}>Created Date</p>
-                                        <div className="flex items-center">
-                                            <Calendar className="h-4 w-4 mr-2" style={{ color: theme.foregroundMuted }} />
-                                            <span style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{new Date(viewModal.category.createdAt).toLocaleDateString()}</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, marginBottom: '8px' }}>Last Updated</p>
-                                        <div className="flex items-center">
-                                            <Calendar className="h-4 w-4 mr-2" style={{ color: theme.foregroundMuted }} />
-                                            <span style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{new Date(viewModal.category.updatedAt).toLocaleDateString()}</span>
-                                        </div>
+                                    <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, marginBottom: '8px' }}>Created Date</p>
+                                    <div className="flex items-center">
+                                        <Calendar className="h-4 w-4 mr-2" style={{ color: theme.foregroundMuted }} />
+                                        <span style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>
+                                            {new Date(viewModal.category.createdAt).toLocaleString()}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex justify-end gap-3 pt-4" style={{ borderTop: `1px solid ${theme.cardBorder}` }}>
+                        <div className="flex justify-end gap-3 mt-6">
                             <ActionButton variant="outline" size="md" onClick={() => setViewModal({ isOpen: false, category: null })}>Close</ActionButton>
-                            <ActionButton variant="primary" size="md" icon={Edit} onClick={() => { setViewModal({ isOpen: false, category: null }); openEditModal(viewModal.category); }}>Edit Category</ActionButton>
+                            <ActionButton variant="primary" size="md" icon={Edit} onClick={() => { openEditModal(viewModal.category); setViewModal({ isOpen: false, category: null }); }}>
+                                Edit Category
+                            </ActionButton>
                         </div>
                     </div>
                 </div>
@@ -673,12 +458,13 @@ export default function CategoriesPage() {
             {/* Delete Confirmation Dialog */}
             <ConfirmationDialog
                 isOpen={deleteDialog.isOpen}
-                onClose={() => setDeleteDialog({ isOpen: false, category: null })}
-                onConfirm={handleDeleteCategory}
-                variant="danger"
                 title="Delete Category"
-                message={`Are you sure you want to delete "${deleteDialog.category?.name}"? This action cannot be undone and will affect all associated tickets.`}
-                confirmLabel="Delete Category"
+                message={`Are you sure you want to delete the category "${deleteDialog.category?.name}"? This action cannot be undone.`}
+                confirmLabel="Delete"
+                cancelLabel="Cancel"
+                onConfirm={handleDeleteCategory}
+                onClose={() => setDeleteDialog({ isOpen: false, category: null })}
+                variant="danger"
             />
         </PageLayout>
     );

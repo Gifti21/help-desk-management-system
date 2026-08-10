@@ -27,7 +27,10 @@ import {
     ChevronRight
 } from 'lucide-react';
 
-// Ethiopian mock user data
+// Type definitions matching database schema
+type Role = 'ADMIN' | 'AGENT' | 'EMPLOYEE';
+
+// Mock user data matching database schema exactly
 const initialMockUsers = [
     {
         id: 'user-1',
@@ -35,9 +38,11 @@ const initialMockUsers = [
         lastName: 'Tadesse',
         email: 'alemayehu.tadesse@besys.com',
         role: 'ADMIN',
-        department: 'IT Support',
+        departmentId: 'dept-1',
+        department: { id: 'dept-1', name: 'IT Support' },
         isActive: true,
-        createdAt: '2024-01-15T10:00:00Z'
+        createdAt: '2024-01-15T10:00:00Z',
+        updatedAt: '2024-01-15T10:00:00Z'
     },
     {
         id: 'user-2',
@@ -45,9 +50,11 @@ const initialMockUsers = [
         lastName: 'Yohannes',
         email: 'selam.yohannes@besys.com',
         role: 'AGENT',
-        department: 'IT Support',
+        departmentId: 'dept-1',
+        department: { id: 'dept-1', name: 'IT Support' },
         isActive: true,
-        createdAt: '2024-01-20T09:30:00Z'
+        createdAt: '2024-01-20T09:30:00Z',
+        updatedAt: '2024-01-20T09:30:00Z'
     },
     {
         id: 'user-3',
@@ -55,9 +62,11 @@ const initialMockUsers = [
         lastName: 'Hailu',
         email: 'dawit.hailu@besys.com',
         role: 'AGENT',
-        department: 'Operations',
+        departmentId: 'dept-4',
+        department: { id: 'dept-4', name: 'Operations' },
         isActive: true,
-        createdAt: '2024-02-10T11:15:00Z'
+        createdAt: '2024-02-10T11:15:00Z',
+        updatedAt: '2024-02-10T11:15:00Z'
     },
     {
         id: 'user-4',
@@ -65,9 +74,11 @@ const initialMockUsers = [
         lastName: 'Bekele',
         email: 'tigist.bekele@besys.com',
         role: 'EMPLOYEE',
-        department: 'Operations',
+        departmentId: 'dept-4',
+        department: { id: 'dept-4', name: 'Operations' },
         isActive: true,
-        createdAt: '2024-03-05T14:20:00Z'
+        createdAt: '2024-03-05T14:20:00Z',
+        updatedAt: '2024-03-05T14:20:00Z'
     },
     {
         id: 'user-5',
@@ -75,9 +86,11 @@ const initialMockUsers = [
         lastName: 'Mekonnen',
         email: 'bereket.mekonnen@besys.com',
         role: 'EMPLOYEE',
-        department: 'IT Support',
+        departmentId: 'dept-1',
+        department: { id: 'dept-1', name: 'IT Support' },
         isActive: false,
-        createdAt: '2024-02-28T08:45:00Z'
+        createdAt: '2024-02-28T08:45:00Z',
+        updatedAt: '2024-02-28T08:45:00Z'
     },
     {
         id: 'user-6',
@@ -85,9 +98,11 @@ const initialMockUsers = [
         lastName: 'Kebede',
         email: 'meseret.kebede@besys.com',
         role: 'AGENT',
-        department: 'HR',
+        departmentId: 'dept-2',
+        department: { id: 'dept-2', name: 'Human Resources' },
         isActive: true,
-        createdAt: '2024-01-25T10:30:00Z'
+        createdAt: '2024-01-25T10:30:00Z',
+        updatedAt: '2024-01-25T10:30:00Z'
     },
     {
         id: 'user-7',
@@ -95,9 +110,11 @@ const initialMockUsers = [
         lastName: 'Desta',
         email: 'yonas.desta@besys.com',
         role: 'EMPLOYEE',
-        department: 'Security',
+        departmentId: 'dept-6',
+        department: { id: 'dept-6', name: 'Security' },
         isActive: true,
-        createdAt: '2024-03-12T13:00:00Z'
+        createdAt: '2024-03-12T13:00:00Z',
+        updatedAt: '2024-03-12T13:00:00Z'
     }
 ];
 
@@ -123,7 +140,7 @@ export default function UsersPage() {
         lastName: '',
         email: '',
         role: 'EMPLOYEE',
-        department: 'IT Support',
+        departmentId: 'dept-1', // Use departmentId, not department
         isActive: true
     });
 
@@ -137,7 +154,7 @@ export default function UsersPage() {
             user.email.toLowerCase().includes(searchTerm.toLowerCase());
 
         const matchesRole = roleFilter === 'ALL' || user.role === roleFilter;
-        const matchesDepartment = departmentFilter === 'ALL' || user.department === departmentFilter;
+        const matchesDepartment = departmentFilter === 'ALL' || user.department.name === departmentFilter;
         const matchesStatus = statusFilter === 'ALL' ||
             (statusFilter === 'ACTIVE' && user.isActive) ||
             (statusFilter === 'INACTIVE' && !user.isActive);
@@ -158,21 +175,56 @@ export default function UsersPage() {
 
     // Handler functions
     const handleAddUser = () => {
+        // Map departmentId to full department object
+        const departmentMap: Record<string, { id: string, name: string }> = {
+            'dept-1': { id: 'dept-1', name: 'IT Support' },
+            'dept-2': { id: 'dept-2', name: 'Human Resources' },
+            'dept-4': { id: 'dept-4', name: 'Operations' },
+            'dept-6': { id: 'dept-6', name: 'Security' }
+        };
+
         const newUser = {
             id: `user-${Date.now()}`,
-            ...formData,
-            createdAt: new Date().toISOString()
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            passwordHash: 'hashed_password', // This would be set by backend
+            role: formData.role as Role,
+            isActive: formData.isActive,
+            departmentId: formData.departmentId,
+            department: departmentMap[formData.departmentId],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
         };
         setUsers(prev => [...prev, newUser]);
         setAddModal(false);
-        setFormData({ firstName: '', lastName: '', email: '', role: 'EMPLOYEE', department: 'IT Support', isActive: true });
+        setFormData({ firstName: '', lastName: '', email: '', role: 'EMPLOYEE', departmentId: 'dept-1', isActive: true });
         toast(`User ${newUser.firstName} ${newUser.lastName} created successfully`, 'success');
     };
 
     const handleEditUser = () => {
         if (!editModal.user) return;
+
+        // Map departmentId to full department object
+        const departmentMap: Record<string, { id: string, name: string }> = {
+            'dept-1': { id: 'dept-1', name: 'IT Support' },
+            'dept-2': { id: 'dept-2', name: 'Human Resources' },
+            'dept-4': { id: 'dept-4', name: 'Operations' },
+            'dept-6': { id: 'dept-6', name: 'Security' }
+        };
+
         setUsers(prev => prev.map(u =>
-            u.id === editModal.user.id ? { ...u, ...formData } : u
+            u.id === editModal.user.id ? {
+                ...u,
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                email: formData.email,
+                role: formData.role as Role,
+                isActive: formData.isActive,
+                departmentId: formData.departmentId,
+                department: departmentMap[formData.departmentId],
+                updatedAt: new Date().toISOString()
+            } : u
         ));
         setEditModal({ isOpen: false, user: null });
         toast(`User ${formData.firstName} ${formData.lastName} updated successfully`, 'success');
@@ -280,7 +332,7 @@ export default function UsersPage() {
         {
             key: 'department',
             title: 'Department',
-            render: (value: string) => <span style={{ fontSize: fonts.body.sm.size, color: theme.foreground }}>{value}</span>
+            render: (value: any, row: any) => <span style={{ fontSize: fonts.body.sm.size, color: theme.foreground }}>{row.department?.name || 'N/A'}</span>
         },
         {
             key: 'isActive',
@@ -339,7 +391,7 @@ export default function UsersPage() {
                                             lastName: row.lastName,
                                             email: row.email,
                                             role: row.role,
-                                            department: row.department,
+                                            departmentId: row.departmentId,
                                             isActive: row.isActive
                                         });
                                         setEditModal({ isOpen: true, user: row });
@@ -556,7 +608,7 @@ export default function UsersPage() {
                                     </div>
                                     <div>
                                         <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Department</p>
-                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.user.department}</p>
+                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.user.department.name}</p>
                                     </div>
                                     <div>
                                         <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>User ID</p>
@@ -575,7 +627,7 @@ export default function UsersPage() {
                                         lastName: viewModal.user.lastName,
                                         email: viewModal.user.email,
                                         role: viewModal.user.role,
-                                        department: viewModal.user.department,
+                                        departmentId: viewModal.user.departmentId,
                                         isActive: viewModal.user.isActive
                                     });
                                     setViewModal({ isOpen: false, user: null });
@@ -648,8 +700,8 @@ export default function UsersPage() {
                             <div>
                                 <label style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, marginBottom: '8px', display: 'block' }}>Department</label>
                                 <select
-                                    value={formData.department}
-                                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                                    value={formData.departmentId}
+                                    onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
                                     className="w-full px-3 py-2 rounded-lg"
                                     style={{
                                         backgroundColor: theme.backgroundSecondary,
@@ -658,10 +710,10 @@ export default function UsersPage() {
                                         fontSize: fonts.body.regular.size
                                     }}
                                 >
-                                    <option value="IT Support">IT Support</option>
-                                    <option value="Operations">Operations</option>
-                                    <option value="HR">HR</option>
-                                    <option value="Security">Security</option>
+                                    <option value="dept-1">IT Support</option>
+                                    <option value="dept-2">Human Resources</option>
+                                    <option value="dept-4">Operations</option>
+                                    <option value="dept-6">Security</option>
                                 </select>
                             </div>
                         </div>
@@ -717,8 +769,8 @@ export default function UsersPage() {
                             <div>
                                 <label style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, marginBottom: '8px', display: 'block' }}>Department</label>
                                 <select
-                                    value={formData.department}
-                                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                                    value={formData.departmentId}
+                                    onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
                                     className="w-full px-3 py-2 rounded-lg"
                                     style={{
                                         backgroundColor: theme.backgroundSecondary,
@@ -727,10 +779,10 @@ export default function UsersPage() {
                                         fontSize: fonts.body.regular.size
                                     }}
                                 >
-                                    <option value="IT Support">IT Support</option>
-                                    <option value="Operations">Operations</option>
-                                    <option value="HR">HR</option>
-                                    <option value="Security">Security</option>
+                                    <option value="dept-1">IT Support</option>
+                                    <option value="dept-2">Human Resources</option>
+                                    <option value="dept-4">Operations</option>
+                                    <option value="dept-6">Security</option>
                                 </select>
                             </div>
                         </div>
@@ -806,7 +858,7 @@ export default function UsersPage() {
                 confirmText="Disable"
                 variant="warning"
                 onConfirm={handleDisable}
-                onCancel={() => setDisableDialog({ isOpen: false, user: null })}
+                onClose={() => setDisableDialog({ isOpen: false, user: null })}
             />
 
             {/* Enable User Confirmation */}
@@ -817,7 +869,7 @@ export default function UsersPage() {
                 confirmText="Enable"
                 variant="default"
                 onConfirm={handleEnable}
-                onCancel={() => setEnableDialog({ isOpen: false, user: null })}
+                onClose={() => setEnableDialog({ isOpen: false, user: null })}
             />
         </PageLayout>
     );

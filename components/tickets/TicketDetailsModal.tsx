@@ -25,7 +25,7 @@ interface Ticket {
     title: string;
     description: string;
     status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'OVERDUE' | 'CLOSED';
-    priority: 'URGENT' | 'HIGH' | 'MEDIUM' | 'LOW';
+    priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
     category: string;
     department: string;
     requester: {
@@ -116,7 +116,7 @@ export default function TicketDetailsModal({
 
     const getPriorityColor = (priority: string) => {
         switch (priority) {
-            case 'URGENT': return 'bg-red-100 text-red-700 border-red-200';
+            case 'CRITICAL': return 'bg-red-100 text-red-700 border-red-200';
             case 'HIGH': return 'bg-orange-100 text-orange-700 border-orange-200';
             case 'MEDIUM': return 'bg-blue-100 text-blue-700 border-blue-200';
             case 'LOW': return 'bg-green-100 text-green-700 border-green-200';
@@ -224,8 +224,8 @@ export default function TicketDetailsModal({
                         <button
                             onClick={() => setActiveTab('details')}
                             className={`py-3 px-1 border-b-2 font-medium text-sm ${activeTab === 'details'
-                                    ? 'border-green-500 text-green-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ? 'border-green-500 text-green-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
                             Details
@@ -233,8 +233,8 @@ export default function TicketDetailsModal({
                         <button
                             onClick={() => setActiveTab('comments')}
                             className={`py-3 px-1 border-b-2 font-medium text-sm flex items-center ${activeTab === 'comments'
-                                    ? 'border-green-500 text-green-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ? 'border-green-500 text-green-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
                             Comments
@@ -247,8 +247,8 @@ export default function TicketDetailsModal({
                         <button
                             onClick={() => setActiveTab('timeline')}
                             className={`py-3 px-1 border-b-2 font-medium text-sm flex items-center ${activeTab === 'timeline'
-                                    ? 'border-green-500 text-green-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ? 'border-green-500 text-green-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
                             Timeline
