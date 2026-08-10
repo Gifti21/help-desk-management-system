@@ -239,6 +239,8 @@ export default function DepartmentReportsPage() {
                             <BarChart
                                 categories={departmentChartData.map(d => d.name)}
                                 series={[{ name: 'Departments', data: departmentChartData.map(d => d.value) }]}
+                                xAxisTitle="Departments"
+                                yAxisTitle="Number of Items"
                             />
                         </CardContent>
                     </Card>

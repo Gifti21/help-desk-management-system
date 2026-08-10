@@ -403,6 +403,8 @@ export default function UserReportsPage() {
                                     categories={departmentDistribution.map(d => d.name)}
                                     series={[{ name: 'Users', data: departmentDistribution.map(d => d.value) }]}
                                     horizontal={true}
+                                    xAxisTitle="Number of Users"
+                                    yAxisTitle="Departments"
                                 />
                             </CardContent>
                         </Card>

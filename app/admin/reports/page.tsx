@@ -375,14 +375,10 @@ export default function ReportsPage() {
     };
 
     const handleRefresh = () => {
-        setSearchTerm('');
-        setStatusFilter('all');
-        setRoleFilter('all');
-        setUsersPage(1);
-        setDeptsPage(1);
-        setCatsPage(1);
-        setTicketsPage(1);
-        toast('Filters and search cleared', 'success');
+        toast('Refreshing reports...', 'info');
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000); // Wait 1 second to show toast before refresh
     };
 
     const renderPagination = (currentPage: number, totalPages: number, onPageChange: (page: number) => void) => (
@@ -421,7 +417,7 @@ export default function ReportsPage() {
                 actions={
                     <div className="flex gap-2">
                         <ActionButton
-                            variant="outline"
+                            variant="primary"
                             size="sm"
                             icon={RefreshCw}
                             onClick={handleRefresh}
@@ -624,18 +620,22 @@ export default function ReportsPage() {
                             />
                         </div>
 
-                        <DataTable
-                            columns={userColumns}
-                            data={paginatedUsers.map(u => ({
-                                id: u.id,
-                                name: `${u.firstName} ${u.lastName}`,
-                                email: u.email,
-                                role: u.role,
-                                status: u.isActive ? 'Active' : 'Inactive',
-                                department: departments.find(d => d.id === u.departmentId)?.name || 'N/A'
-                            }))}
-                        />
-                        {renderPagination(usersPage, totalUsersPages, setUsersPage)}
+                        <div className="rounded-lg p-6" style={{ backgroundColor: theme.colors.card, border: `1px solid ${theme.colors.cardBorder}` }}>
+                            <DataTable
+                                title="Users List"
+                                columns={userColumns}
+                                data={paginatedUsers.map(u => ({
+                                    id: u.id,
+                                    name: `${u.firstName} ${u.lastName}`,
+                                    email: u.email,
+                                    role: u.role,
+                                    status: u.isActive ? 'Active' : 'Inactive',
+                                    department: departments.find(d => d.id === u.departmentId)?.name || 'N/A'
+                                }))}
+                                emptyMessage="No users found."
+                            />
+                            {renderPagination(usersPage, totalUsersPages, setUsersPage)}
+                        </div>
                     </>
                 )}
 
@@ -658,16 +658,20 @@ export default function ReportsPage() {
                             />
                         </div>
 
-                        <DataTable
-                            columns={deptColumns}
-                            data={paginatedDepts.map(d => ({
-                                id: d.id,
-                                name: d.name,
-                                users: users.filter(u => u.departmentId === d.id).length,
-                                tickets: tickets.filter(t => t.departmentId === d.id).length
-                            }))}
-                        />
-                        {renderPagination(deptsPage, totalDeptsPages, setDeptsPage)}
+                        <div className="rounded-lg p-6" style={{ backgroundColor: theme.colors.card, border: `1px solid ${theme.colors.cardBorder}` }}>
+                            <DataTable
+                                title="Departments List"
+                                columns={deptColumns}
+                                data={paginatedDepts.map(d => ({
+                                    id: d.id,
+                                    name: d.name,
+                                    users: users.filter(u => u.departmentId === d.id).length,
+                                    tickets: tickets.filter(t => t.departmentId === d.id).length
+                                }))}
+                                emptyMessage="No departments found."
+                            />
+                            {renderPagination(deptsPage, totalDeptsPages, setDeptsPage)}
+                        </div>
                     </>
                 )}
 
@@ -690,15 +694,19 @@ export default function ReportsPage() {
                             />
                         </div>
 
-                        <DataTable
-                            columns={catColumns}
-                            data={paginatedCats.map(c => ({
-                                id: c.id,
-                                name: c.name,
-                                tickets: tickets.filter(t => t.categoryId === c.id).length
-                            }))}
-                        />
-                        {renderPagination(catsPage, totalCatsPages, setCatsPage)}
+                        <div className="rounded-lg p-6" style={{ backgroundColor: theme.colors.card, border: `1px solid ${theme.colors.cardBorder}` }}>
+                            <DataTable
+                                title="Categories List"
+                                columns={catColumns}
+                                data={paginatedCats.map(c => ({
+                                    id: c.id,
+                                    name: c.name,
+                                    tickets: tickets.filter(t => t.categoryId === c.id).length
+                                }))}
+                                emptyMessage="No categories found."
+                            />
+                            {renderPagination(catsPage, totalCatsPages, setCatsPage)}
+                        </div>
                     </>
                 )}
 
@@ -726,21 +734,25 @@ export default function ReportsPage() {
                             />
                         </div>
 
-                        <DataTable
-                            columns={ticketColumns}
-                            data={paginatedTickets.map(t => ({
-                                id: t.id,
-                                title: t.title,
-                                status: t.status,
-                                priority: t.priority,
-                                assignee: (() => {
-                                    if (!t.assigneeId) return 'Unassigned';
-                                    const user = users.find(u => u.id === t.assigneeId);
-                                    return user ? `${user.firstName} ${user.lastName}` : 'Unassigned';
-                                })()
-                            }))}
-                        />
-                        {renderPagination(ticketsPage, totalTicketsPages, setTicketsPage)}
+                        <div className="rounded-lg p-6" style={{ backgroundColor: theme.colors.card, border: `1px solid ${theme.colors.cardBorder}` }}>
+                            <DataTable
+                                title="Tickets List"
+                                columns={ticketColumns}
+                                data={paginatedTickets.map(t => ({
+                                    id: t.id,
+                                    title: t.title,
+                                    status: t.status,
+                                    priority: t.priority,
+                                    assignee: (() => {
+                                        if (!t.assigneeId) return 'Unassigned';
+                                        const user = users.find(u => u.id === t.assigneeId);
+                                        return user ? `${user.firstName} ${user.lastName}` : 'Unassigned';
+                                    })()
+                                }))}
+                                emptyMessage="No tickets found."
+                            />
+                            {renderPagination(ticketsPage, totalTicketsPages, setTicketsPage)}
+                        </div>
                     </>
                 )}
             </div>
