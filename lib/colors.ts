@@ -117,6 +117,10 @@ export const colors = {
   inputBorder: '#D9E4DE',
   cardBackground: '#FBFDFC',
   statsGrey: '#6B8079',
+  mutedGreyGreen: '#9BB0AB',
+  bodyTextGrey: '#6B6E6C',
+  pageBackground: '#F7F9F8',
+  borderGrey: '#E3ECE8',
   primaryText: '#1A1D1C',
 } as const;
 
@@ -141,6 +145,10 @@ export const LIGHT_BORDER = colors.lightBorder;
 export const INPUT_BORDER = colors.inputBorder;
 export const CARD_BACKGROUND = colors.cardBackground;
 export const STATS_GREY = colors.statsGrey;
+export const MUTED_GREY_GREEN = colors.mutedGreyGreen;
+export const BODY_TEXT_GREY = colors.bodyTextGrey;
+export const PAGE_BACKGROUND = colors.pageBackground;
+export const BORDER_GREY = colors.borderGrey;
 export const PRIMARY_TEXT = colors.primaryText;
 
 export const cssVariables = {
@@ -179,5 +187,9 @@ export const cssVariables = {
   '--color-input-border': colors.inputBorder,
   '--color-card-background': colors.cardBackground,
   '--color-stats-grey': colors.statsGrey,
+  '--color-muted-grey-green': colors.mutedGreyGreen,
+  '--color-body-text-grey': colors.bodyTextGrey,
+  '--color-page-background': colors.pageBackground,
+  '--color-border-grey': colors.borderGrey,
   '--color-primary-text': colors.primaryText,
 } as const;
