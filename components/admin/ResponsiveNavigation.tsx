@@ -48,24 +48,17 @@ export function ResponsiveNavigation({
       icon: LayoutDashboard,
       current: pathname === "/admin",
     },
-    // Admins get "My Profile" instead of "My Tickets"
-    ...(userRole === "ADMIN"
+    // Employees get "My Tickets"
+    ...(userRole === "EMPLOYEE"
       ? [
-        {
-          name: "Profile",
-          href: "/admin/profile",
-          icon: UserCircle,
-          current: pathname === "/admin/profile",
-        },
-      ]
-      : [
         {
           name: "My Tickets",
           href: "/admin/my-tickets",
           icon: Ticket,
           current: pathname === "/admin/my-tickets",
         },
-      ]),
+      ]
+      : []),
     {
       name: "Tickets",
       href: "/admin/tickets",

@@ -65,7 +65,7 @@ export default function BulkActionsToolbar({
     ];
 
     const priorityOptions = [
-        { value: 'URGENT', label: 'Urgent', color: 'text-red-600' },
+        { value: 'CRITICAL', label: 'Critical', color: 'text-red-600' },
         { value: 'HIGH', label: 'High', color: 'text-orange-600' },
         { value: 'MEDIUM', label: 'Medium', color: 'text-blue-600' },
         { value: 'LOW', label: 'Low', color: 'text-green-600' }

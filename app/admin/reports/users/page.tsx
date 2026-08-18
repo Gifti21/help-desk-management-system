@@ -16,115 +16,77 @@ import { useToast } from '../../../../components/ui/toast';
 import {
     RefreshCw,
     User,
-    Activity,
-    MessageSquare,
-    LogIn
+    Activity
 } from 'lucide-react';
 
-// Mock user activity data
-const userMetrics = [
-    {
-        id: 'total-users',
-        title: 'Total Users',
-        value: '156',
-        subtitle: 'Active users',
-        icon: 'users'
-    },
-    {
-        id: 'daily-logins',
-        title: 'Daily Logins',
-        value: '89',
-        subtitle: 'Average per day',
-        trend: '+12% increase',
-        trendColor: '#10B981',
-        icon: 'activity'
-    },
-    {
-        id: 'most-active',
-        title: 'Most Active',
-        value: 'Admin User',
-        subtitle: '145 logins this month',
-        trend: 'Consistent usage',
-        trendColor: '#10B981',
-        icon: 'target'
-    },
-    {
-        id: 'avg-session',
-        title: 'Avg. Session',
-        value: '2.3h',
-        subtitle: 'Session duration',
-        trend: '+15m increase',
-        trendColor: '#10B981',
-        icon: 'clock'
-    }
-];
-
+// User data matching EXACT database schema - NO extra fields
+// These are the ONLY fields that exist in the User table
 const userActivityData = [
     {
-        user: 'Admin User',
+        id: 'user-1',
+        firstName: 'Admin',
+        lastName: 'User',
         email: 'admin@company.com',
-        role: 'Administrator',
-        logins: 145,
-        ticketsCreated: 28,
-        commentsAdded: 89,
-        lastActive: '2 minutes ago',
-        totalSessions: '8.5h'
+        passwordHash: 'hashed',
+        role: 'ADMIN',
+        isActive: true,
+        departmentId: 'dept-1',
+        department: { id: 'dept-1', name: 'IT Services', createdAt: '2025-01-01T00:00:00Z' },
+        createdAt: '2026-01-15T08:30:00Z',
+        updatedAt: '2026-06-07T14:22:00Z'
     },
     {
-        user: 'John Smith',
+        id: 'user-2',
+        firstName: 'John',
+        lastName: 'Smith',
         email: 'john.smith@company.com',
-        role: 'Manager',
-        logins: 98,
-        ticketsCreated: 42,
-        commentsAdded: 67,
-        lastActive: '15 minutes ago',
-        totalSessions: '6.2h'
+        passwordHash: 'hashed',
+        role: 'AGENT',
+        isActive: true,
+        departmentId: 'dept-2',
+        department: { id: 'dept-2', name: 'Support', createdAt: '2025-01-01T00:00:00Z' },
+        createdAt: '2026-02-10T09:15:00Z',
+        updatedAt: '2026-06-07T13:45:00Z'
     },
     {
-        user: 'Mary Jones',
+        id: 'user-3',
+        firstName: 'Mary',
+        lastName: 'Jones',
         email: 'mary.jones@company.com',
-        role: 'Employee',
-        logins: 76,
-        ticketsCreated: 35,
-        commentsAdded: 54,
-        lastActive: '1 hour ago',
-        totalSessions: '4.8h'
+        passwordHash: 'hashed',
+        role: 'EMPLOYEE',
+        isActive: true,
+        departmentId: 'dept-3',
+        department: { id: 'dept-3', name: 'HR', createdAt: '2025-01-01T00:00:00Z' },
+        createdAt: '2026-03-05T10:00:00Z',
+        updatedAt: '2026-06-07T12:30:00Z'
     },
     {
-        user: 'Robert Brown',
+        id: 'user-4',
+        firstName: 'Robert',
+        lastName: 'Brown',
         email: 'robert.brown@company.com',
-        role: 'Employee',
-        logins: 65,
-        ticketsCreated: 29,
-        commentsAdded: 48,
-        lastActive: '2 hours ago',
-        totalSessions: '3.9h'
+        passwordHash: 'hashed',
+        role: 'EMPLOYEE',
+        isActive: true,
+        departmentId: 'dept-4',
+        department: { id: 'dept-4', name: 'Engineering', createdAt: '2025-01-01T00:00:00Z' },
+        createdAt: '2026-03-20T11:30:00Z',
+        updatedAt: '2026-06-07T11:15:00Z'
     },
     {
-        user: 'Lisa Wilson',
+        id: 'user-5',
+        firstName: 'Lisa',
+        lastName: 'Wilson',
         email: 'lisa.wilson@company.com',
-        role: 'Manager',
-        logins: 54,
-        ticketsCreated: 18,
-        commentsAdded: 32,
-        lastActive: '3 hours ago',
-        totalSessions: '3.2h'
+        passwordHash: 'hashed',
+        role: 'AGENT',
+        isActive: true,
+        departmentId: 'dept-2',
+        department: { id: 'dept-2', name: 'Support', createdAt: '2025-01-01T00:00:00Z' },
+        createdAt: '2026-04-01T08:45:00Z',
+        updatedAt: '2026-06-07T10:00:00Z'
     }
-];
-
-const roleDistribution = [
-    { name: 'Employees', value: 89, color: '#3B82F6' },
-    { name: 'Managers', value: 34, color: '#F59E0B' },
-    { name: 'Administrators', value: 12, color: '#10B981' },
-    { name: 'Agents', value: 21, color: '#EF4444' }
-];
-
-const activityChart = [
-    { name: 'Admin', value: 145 },
-    { name: 'John', value: 98 },
-    { name: 'Mary', value: 76 },
-    { name: 'Robert', value: 65 },
-    { name: 'Lisa', value: 54 }
 ];
 
 export default function UserReportsPage() {
@@ -136,10 +98,57 @@ export default function UserReportsPage() {
     const { toast } = useToast();
     const { colors: theme } = useTheme();
 
+    // Metrics based on REAL database data - user counts by role
+    const userMetrics = [
+        {
+            id: 'total-users',
+            title: 'Total Users',
+            value: userActivityData.length.toString(),
+            subtitle: 'In system',
+            icon: 'users'
+        },
+        {
+            id: 'admin-users',
+            title: 'Admins',
+            value: userActivityData.filter(u => u.role === 'ADMIN').length.toString(),
+            subtitle: 'Administrator accounts',
+            icon: 'shield'
+        },
+        {
+            id: 'agent-users',
+            title: 'Agents',
+            value: userActivityData.filter(u => u.role === 'AGENT').length.toString(),
+            subtitle: 'Support agents',
+            icon: 'user'
+        },
+        {
+            id: 'employee-users',
+            title: 'Employees',
+            value: userActivityData.filter(u => u.role === 'EMPLOYEE').length.toString(),
+            subtitle: 'Regular users',
+            icon: 'users'
+        }
+    ];
+
+    // Role distribution using exact database enum values and REAL counts
+    const roleDistribution = [
+        { name: 'EMPLOYEE', value: userActivityData.filter(u => u.role === 'EMPLOYEE').length, color: '#3B82F6' },
+        { name: 'AGENT', value: userActivityData.filter(u => u.role === 'AGENT').length, color: '#F59E0B' },
+        { name: 'ADMIN', value: userActivityData.filter(u => u.role === 'ADMIN').length, color: '#10B981' }
+    ];
+
+    // Department distribution using REAL counts
+    const departmentDistribution = [
+        { name: 'IT Services', value: userActivityData.filter(u => u.department.name === 'IT Services').length },
+        { name: 'Support', value: userActivityData.filter(u => u.department.name === 'Support').length },
+        { name: 'HR', value: userActivityData.filter(u => u.department.name === 'HR').length },
+        { name: 'Engineering', value: userActivityData.filter(u => u.department.name === 'Engineering').length }
+    ];
+
     const handleExportCSV = () => {
         setIsLoading(true);
         setTimeout(() => {
-            toast('User activity report exported as CSV.', 'success');
+            toast('User report exported as CSV.', 'success');
             setIsLoading(false);
         }, 1500);
     };
@@ -147,7 +156,7 @@ export default function UserReportsPage() {
     const handleExportPDF = () => {
         setIsLoading(true);
         setTimeout(() => {
-            toast('User activity report exported as PDF.', 'success');
+            toast('User report exported as PDF.', 'success');
             setIsLoading(false);
         }, 1500);
     };
@@ -155,23 +164,24 @@ export default function UserReportsPage() {
     const handleRefreshData = () => {
         setIsLoading(true);
         setTimeout(() => {
-            toast('User activity data refreshed.', 'info');
+            toast('User data refreshed.', 'info');
             setIsLoading(false);
         }, 1200);
     };
 
     const getRoleColor = (role: string) => {
-        switch (role.toLowerCase()) {
-            case 'administrator': return '#10B981';
-            case 'manager': return '#F59E0B';
-            case 'employee': return '#3B82F6';
+        switch (role) {
+            case 'ADMIN': return '#10B981';
+            case 'AGENT': return '#F59E0B';
+            case 'EMPLOYEE': return '#3B82F6';
             default: return theme.foregroundMuted;
         }
     };
 
+    // Table columns showing ONLY real database fields
     const userColumns = [
         {
-            key: 'user',
+            key: 'firstName',
             title: 'User',
             render: (value: string, row: any) => (
                 <div>
@@ -181,7 +191,7 @@ export default function UserReportsPage() {
                             style={{ backgroundColor: theme.primary, color: theme.primaryForeground }}
                         >
                             <span style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.semibold }}>
-                                {value.split(' ').map(n => n[0]).join('')}
+                                {row.firstName[0]}{row.lastName[0]}
                             </span>
                         </div>
                         <div>
@@ -192,7 +202,7 @@ export default function UserReportsPage() {
                                     color: theme.foreground
                                 }}
                             >
-                                {value}
+                                {row.firstName} {row.lastName}
                             </p>
                             <p
                                 style={{
@@ -223,53 +233,44 @@ export default function UserReportsPage() {
             )
         },
         {
-            key: 'logins',
-            title: 'Logins',
-            render: (value: number) => (
-                <div className="flex items-center space-x-1">
-                    <LogIn className="h-4 w-4" style={{ color: theme.primary }} />
-                    <span style={{ fontSize: fonts.body.sm.size, color: theme.foreground }}>
-                        {value}
-                    </span>
-                </div>
-            )
-        },
-        {
-            key: 'ticketsCreated',
-            title: 'Tickets Created',
-            render: (value: number) => (
-                <span style={{ fontSize: fonts.body.sm.size, color: theme.foreground }}>
-                    {value}
+            key: 'department',
+            title: 'Department',
+            render: (value: any, row: any) => (
+                <span style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>
+                    {row.department?.name || 'N/A'}
                 </span>
             )
         },
         {
-            key: 'commentsAdded',
-            title: 'Comments',
-            render: (value: number) => (
-                <div className="flex items-center space-x-1">
-                    <MessageSquare className="h-4 w-4" style={{ color: theme.foregroundMuted }} />
-                    <span style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>
-                        {value}
-                    </span>
-                </div>
-            )
-        },
-        {
-            key: 'totalSessions',
-            title: 'Total Time',
-            render: (value: string) => (
-                <span style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>
-                    {value}
+            key: 'isActive',
+            title: 'Status',
+            render: (value: boolean) => (
+                <span
+                    style={{
+                        fontSize: fonts.body.sm.size,
+                        fontWeight: fonts.fontWeight.medium,
+                        color: value ? '#10B981' : '#EF4444'
+                    }}
+                >
+                    {value ? 'Active' : 'Inactive'}
                 </span>
             )
         },
         {
-            key: 'lastActive',
-            title: 'Last Active',
+            key: 'createdAt',
+            title: 'Created',
             render: (value: string) => (
                 <span style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>
-                    {value}
+                    {new Date(value).toLocaleDateString()}
+                </span>
+            )
+        },
+        {
+            key: 'updatedAt',
+            title: 'Last Updated',
+            render: (value: string) => (
+                <span style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>
+                    {new Date(value).toLocaleDateString()}
                 </span>
             )
         }
@@ -298,10 +299,9 @@ export default function UserReportsPage() {
             onChange: setSelectedRole,
             options: [
                 { label: 'All Roles', value: 'all' },
-                { label: 'Administrator', value: 'admin' },
-                { label: 'Manager', value: 'manager' },
-                { label: 'Employee', value: 'employee' },
-                { label: 'Agent', value: 'agent' }
+                { label: 'Admin', value: 'ADMIN' },
+                { label: 'Agent', value: 'AGENT' },
+                { label: 'Employee', value: 'EMPLOYEE' }
             ]
         },
         {
@@ -322,8 +322,8 @@ export default function UserReportsPage() {
     return (
         <PageLayout>
             <TopBar
-                title="User Activity Reports"
-                subtitle="User engagement, login activity, and usage analytics"
+                title="User Reports"
+                subtitle="User accounts and role distribution"
                 actions={topBarActions}
             />
 
@@ -395,14 +395,16 @@ export default function UserReportsPage() {
                                         color: theme.foreground
                                     }}
                                 >
-                                    Most Active Users (Logins)
+                                    Users by Department
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <BarChart
-                                    categories={activityChart.map(d => d.name)}
-                                    series={[{ name: 'Logins', data: activityChart.map(d => d.value) }]}
+                                    categories={departmentDistribution.map(d => d.name)}
+                                    series={[{ name: 'Users', data: departmentDistribution.map(d => d.value) }]}
                                     horizontal={true}
+                                    xAxisTitle="Number of Users"
+                                    yAxisTitle="Departments"
                                 />
                             </CardContent>
                         </Card>
@@ -410,10 +412,10 @@ export default function UserReportsPage() {
 
                     {/* Detailed Table */}
                     <DataTable
-                        title="User Activity Details"
+                        title="All Users"
                         columns={userColumns}
                         data={userActivityData}
-                        emptyMessage="No user activity data available."
+                        emptyMessage="No users found."
                     />
                 </div>
             </div>

@@ -67,45 +67,10 @@ const fieldConfigurations = {
         }
     ],
     department: [
-        { key: 'name', label: 'Department Name', type: 'text' as const, required: true, placeholder: 'Enter department name' },
-        { key: 'description', label: 'Description', type: 'textarea' as const, placeholder: 'Department description...' },
-        { key: 'manager', label: 'Department Manager', type: 'text' as const, placeholder: 'Manager name' },
-        {
-            key: 'status',
-            label: 'Status',
-            type: 'select' as const,
-            required: true,
-            options: [
-                { label: 'Active', value: 'active' },
-                { label: 'Inactive', value: 'inactive' }
-            ]
-        }
+        { key: 'name', label: 'Department Name', type: 'text' as const, required: true, placeholder: 'Enter department name' }
     ],
     category: [
-        { key: 'name', label: 'Category Name', type: 'text' as const, required: true, placeholder: 'Enter category name' },
-        { key: 'description', label: 'Description', type: 'textarea' as const, placeholder: 'Category description...' },
-        {
-            key: 'priority',
-            label: 'Default Priority',
-            type: 'select' as const,
-            required: true,
-            options: [
-                { label: 'Low', value: 'LOW' },
-                { label: 'Medium', value: 'MEDIUM' },
-                { label: 'High', value: 'HIGH' },
-                { label: 'Urgent', value: 'URGENT' }
-            ]
-        },
-        {
-            key: 'status',
-            label: 'Status',
-            type: 'select' as const,
-            required: true,
-            options: [
-                { label: 'Active', value: 'active' },
-                { label: 'Inactive', value: 'inactive' }
-            ]
-        }
+        { key: 'name', label: 'Category Name', type: 'text' as const, required: true, placeholder: 'Enter category name' }
     ],
     ticket: [
         { key: 'title', label: 'Title', type: 'text' as const, required: true, placeholder: 'Enter ticket title' },
@@ -119,7 +84,7 @@ const fieldConfigurations = {
                 { label: 'Low', value: 'LOW' },
                 { label: 'Medium', value: 'MEDIUM' },
                 { label: 'High', value: 'HIGH' },
-                { label: 'Urgent', value: 'URGENT' }
+                { label: 'Critical', value: 'CRITICAL' }
             ]
         },
         {
