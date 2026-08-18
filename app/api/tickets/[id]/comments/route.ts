@@ -11,17 +11,18 @@ const commentSchema = z.object({
 // GET /api/tickets/[id]/comments - Get all comments for a ticket
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const { id } = await params;
     
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const comments = await prisma.comment.findMany({
-      where: { ticketId: params.id },
+      where: { ticketId: id },
       include: {
         author: {
           select: {
@@ -45,10 +46,11 @@ export async function GET(
 // POST /api/tickets/[id]/comments - Add a comment to a ticket
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const { id } = await params;
     
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -60,7 +62,7 @@ export async function POST(
     const comment = await prisma.comment.create({
       data: {
         ...validatedData,
-        ticketId: params.id,
+        ticketId: id,
         authorId: session.user.id
       },
       include: {

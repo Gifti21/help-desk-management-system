@@ -17,17 +17,18 @@ const updateTicketSchema = z.object({
 // GET /api/tickets/[id] - Get a specific ticket
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const { id } = await params;
     
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const ticket = await prisma.ticket.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         category: true,
         department: true,
@@ -81,10 +82,11 @@ export async function GET(
 // PATCH /api/tickets/[id] - Update a ticket
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const { id } = await params;
     
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -94,7 +96,7 @@ export async function PATCH(
     const validatedData = updateTicketSchema.parse(body);
 
     const ticket = await prisma.ticket.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!ticket) {
@@ -116,7 +118,7 @@ export async function PATCH(
     }
 
     const updatedTicket = await prisma.ticket.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
       include: {
         category: true,
@@ -153,17 +155,18 @@ export async function PATCH(
 // DELETE /api/tickets/[id] - Delete a ticket (admin only)
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const { id } = await params;
     
     if (!session?.user || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await prisma.ticket.delete({
-      where: { id: params.id }
+      where: { id }
     });
 
     return NextResponse.json({ message: "Ticket deleted" });
