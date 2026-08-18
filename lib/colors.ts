@@ -127,6 +127,56 @@ export const colors = {
   cardBackground: '#FBFDFC',
   statsGrey: '#6B8079',
   primaryText: '#1A1D1C',
+
+  // CHART COLORS
+  charts: {
+    indigo: '#6366F1',
+    blue: '#3B82F6',
+    green: '#10B981',
+    emerald: '#10B981',
+    amber: '#F59E0B',
+    orange: '#F59E0B',
+    red: '#EF4444',
+    purple: '#8B5CF6',
+    pink: '#EC4899',
+    grey: '#6B7280',
+    yellow: '#F59E0B',
+  },
+
+  // STATUS COLORS
+  status: {
+    success: '#10B981',
+    successBg: '#dcfce7',
+    successText: '#15803d',
+    warning: '#F59E0B',
+    warningBg: '#fef3c7',
+    warningText: '#92400e',
+    error: '#EF4444',
+    errorBg: '#fee2e2',
+    errorText: '#dc2626',
+    info: '#3B82F6',
+    infoBg: '#dbeafe',
+    infoText: '#1e40af',
+    inactive: '#6B7280',
+    inactiveBg: '#f3f4f6',
+    inactiveText: '#6b7280',
+  },
+
+  // PRIORITY COLORS
+  priority: {
+    critical: '#EF4444',
+    criticalBg: '#fee2e2',
+    criticalText: '#dc2626',
+    high: '#F59E0B',
+    highBg: '#fed7aa',
+    highText: '#c2410c',
+    medium: '#3B82F6',
+    mediumBg: '#dbeafe',
+    mediumText: '#1e40af',
+    low: '#6B7280',
+    lowBg: '#f3f4f6',
+    lowText: '#6b7280',
+  },
 } as const;
 
 export const HERO_GRADIENT = colors.heroGradient;
@@ -160,6 +210,9 @@ export const INPUT_BORDER = colors.inputBorder;
 export const CARD_BACKGROUND = colors.cardBackground;
 export const STATS_GREY = colors.statsGrey;
 export const PRIMARY_TEXT = colors.primaryText;
+export const CHARTS = colors.charts;
+export const STATUS = colors.status;
+export const PRIORITY = colors.priority;
 
 export const cssVariables = {
   // Hero gradient
