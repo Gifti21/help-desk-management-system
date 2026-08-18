@@ -109,6 +109,16 @@ export const colors = {
   lightTealBadge: '#8EF1E0',
   mutedGreyGreen: '#9BB0AB',
   bodyTextGrey: '#6B6E6C',
+  placeholderText: '#4B5563',
+  pageBackground: '#F7F9F8',
+  secondaryBackground: '#F2F5F4',
+  borderGrey: '#E3ECE8',
+  lightBorder: '#DDE5E1',
+  inputBorder: '#D9E4DE',
+  cardBackground: '#FBFDFC',
+  statsGrey: '#6B8079',
+  mutedGreyGreen: '#9BB0AB',
+  bodyTextGrey: '#6B6E6C',
   pageBackground: '#F7F9F8',
   secondaryBackground: '#F2F5F4',
   borderGrey: '#E3ECE8',
@@ -130,6 +140,16 @@ export const TEAL_HOVER = colors.tealHover;
 export const LIGHT_TEAL_BG = colors.lightTealBg;
 export const LIGHT_TEAL_BG_ALT = colors.lightTealBgAlt;
 export const LIGHT_TEAL_BADGE = colors.lightTealBadge;
+export const MUTED_GREY_GREEN = colors.mutedGreyGreen;
+export const BODY_TEXT_GREY = colors.bodyTextGrey;
+export const PLACEHOLDER_TEXT = colors.placeholderText;
+export const PAGE_BACKGROUND = colors.pageBackground;
+export const SECONDARY_BACKGROUND = colors.secondaryBackground;
+export const BORDER_GREY = colors.borderGrey;
+export const LIGHT_BORDER = colors.lightBorder;
+export const INPUT_BORDER = colors.inputBorder;
+export const CARD_BACKGROUND = colors.cardBackground;
+export const STATS_GREY = colors.statsGrey;
 export const MUTED_GREY_GREEN = colors.mutedGreyGreen;
 export const BODY_TEXT_GREY = colors.bodyTextGrey;
 export const PAGE_BACKGROUND = colors.pageBackground;
@@ -168,6 +188,15 @@ export const cssVariables = {
   '--color-light-teal-bg': colors.lightTealBg,
   '--color-light-teal-bg-alt': colors.lightTealBgAlt,
   '--color-light-teal-badge': colors.lightTealBadge,
+  '--color-muted-grey-green': colors.mutedGreyGreen,
+  '--color-body-text-grey': colors.bodyTextGrey,
+  '--color-page-background': colors.pageBackground,
+  '--color-secondary-background': colors.secondaryBackground,
+  '--color-border-grey': colors.borderGrey,
+  '--color-light-border': colors.lightBorder,
+  '--color-input-border': colors.inputBorder,
+  '--color-card-background': colors.cardBackground,
+  '--color-stats-grey': colors.statsGrey,
   '--color-muted-grey-green': colors.mutedGreyGreen,
   '--color-body-text-grey': colors.bodyTextGrey,
   '--color-page-background': colors.pageBackground,

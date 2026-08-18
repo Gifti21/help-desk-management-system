@@ -132,6 +132,34 @@ export const fonts = {
     },
   },
 
+  // INPUT SIZES
+  input: {
+    regular: {
+      size: '0.9375rem',
+      lineHeight: '1.5',
+      weight: 400,
+      letterSpacing: '0.005em',
+    },
+  },
+
+  // BUTTON SIZES
+  button: {
+    sm: {
+      size: '0.875rem',
+      lineHeight: '1.4',
+      weight: 500,
+      letterSpacing: '0.01em',
+    },
+    regular: {
+      size: '0.9375rem',
+      lineHeight: '1.5',
+      weight: 500,
+      letterSpacing: '0.005em',
+    },
+    lg: {
+      size: '1rem',
+      lineHeight: '1.5',
+      weight: 500,
   // BUTTON TEXT
   button: {
     lg: {
@@ -207,6 +235,22 @@ export const BODY_LG = fonts.body.lg;
 export const BODY_REGULAR = fonts.body.regular;
 export const BODY_SM = fonts.body.sm;
 export const BODY_XS = fonts.body.xs;
+export const CAPTION_REGULAR = fonts.caption.regular;
+export const CAPTION_SMALL = fonts.caption.small;
+export const INPUT_REGULAR = fonts.input.regular;
+export const BUTTON_SM = fonts.button.sm;
+export const BUTTON_REGULAR = fonts.button.regular;
+export const BUTTON_LG = fonts.button.lg;
+
+export const cssVariables = {
+  '--font-family-primary': fonts.fontFamily.primary,
+  '--font-family-secondary': fonts.fontFamily.secondary,
+  '--font-family-mono': fonts.fontFamily.mono,
+  '--font-weight-light': fonts.fontWeight.light,
+  '--font-weight-regular': fonts.fontWeight.regular,
+  '--font-weight-medium': fonts.fontWeight.medium,
+  '--font-weight-semibold': fonts.fontWeight.semibold,
+  '--font-weight-bold': fonts.fontWeight.bold,
 
 export const CAPTION_REGULAR = fonts.caption.regular;
 export const CAPTION_SMALL = fonts.caption.small;
