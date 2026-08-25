@@ -45,6 +45,7 @@ export function Sidebar({ onLogout, role = "TECHNICIAN" }: SidebarProps) {
             icon: LayoutDashboard,
           },
           { label: "My Tickets", href: "/employee/tickets", icon: Ticket },
+          { label: "Create Ticket", href: "/employee/tickets/new", icon: Plus },
           { label: "Settings", href: "/employee/settings", icon: Settings },
         ]
       : [

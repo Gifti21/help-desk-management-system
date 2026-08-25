@@ -14,7 +14,7 @@ import {
   INPUT_REGULAR,
 } from "@/lib/fonts";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/button";
 import type { TicketCategory, TicketPriority } from "@/lib/types/ticket";
