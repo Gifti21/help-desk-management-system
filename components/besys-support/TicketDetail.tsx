@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { PAGE_BACKGROUND } from "@/lib/colors";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
+import { Footer } from "@/components/layout/Footer";
 import { TicketNotFound } from "./TicketDetail/TicketNotFound";
 import { BackLink } from "./TicketDetail/BackLink";
 import { TicketHeader } from "./TicketDetail/TicketHeader";
@@ -23,15 +24,19 @@ export function TicketDetail() {
 
   return (
     <div
-      className="flex min-h-screen"
+      className="min-h-screen flex flex-col"
       style={{ backgroundColor: PAGE_BACKGROUND }}
     >
       <Sidebar role="EMPLOYEE" />
 
-      <div className="flex-1 lg:ml-[280px]">
-        <DashboardHeader userName="Jamie Smith" userInitials="JS" />
+      <div className="flex-1 lg:pl-[280px] flex flex-col pb-[120px]">
+        <DashboardHeader
+          userName="Jamie Smith"
+          userInitials="JS"
+          role="EMPLOYEE"
+        />
 
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="max-w-4xl mx-auto">
             <BackLink />
             <TicketHeader ticket={ticket} />
@@ -39,6 +44,10 @@ export function TicketDetail() {
             <TicketComments ticket={ticket} />
           </div>
         </main>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-40">
+        <Footer />
       </div>
     </div>
   );

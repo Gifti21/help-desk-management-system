@@ -4,7 +4,7 @@ import { useState } from "react";
 import { BODY_TEXT_GREY, BORDER_GREY, PRIMARY_TEXT } from "@/lib/colors";
 import { BODY_SM, FONT_FAMILY, FONT_WEIGHT } from "@/lib/fonts";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 interface ProfileSectionProps {

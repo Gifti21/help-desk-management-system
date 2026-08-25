@@ -22,7 +22,7 @@ import {
   FONT_WEIGHT,
 } from "@/lib/fonts";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 
 interface LoginFormProps {

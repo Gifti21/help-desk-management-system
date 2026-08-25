@@ -1,16 +1,26 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { Topbar } from '@/components/layout/Topbar';
+import React from "react";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Topbar } from "@/components/layout/Topbar";
+import { Footer } from "@/components/layout/Footer";
+import { PAGE_BACKGROUND } from "@/lib/colors";
 
 export function AgentShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-besys-lightBg dark:bg-besys-darkBg text-slate-900 dark:text-slate-100 transition-colors duration-200">
-      <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ backgroundColor: PAGE_BACKGROUND }}
+    >
+      <Sidebar role="TECHNICIAN" />
+
+      <div className="flex-1 lg:pl-64 flex flex-col pb-[52px]">
         <Topbar />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-40">
+        <Footer />
       </div>
     </div>
   );
