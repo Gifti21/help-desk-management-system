@@ -1,9 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { DARK_GREEN, BORDER_GREY, PRIMARY_TEXT, BODY_TEXT_GREY } from "@/lib/colors";
+import {
+  DARK_GREEN,
+  BORDER_GREY,
+  PRIMARY_TEXT,
+  BODY_TEXT_GREY,
+} from "@/lib/colors";
 import { Modal } from "@/components/ui/Modal";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 interface NotificationPreferencesModalProps {
   isOpen: boolean;
@@ -18,7 +23,11 @@ interface NotificationPreferences {
   weeklySummary: boolean;
 }
 
-export function NotificationPreferencesModal({ isOpen, onClose, onSave }: NotificationPreferencesModalProps) {
+export function NotificationPreferencesModal({
+  isOpen,
+  onClose,
+  onSave,
+}: NotificationPreferencesModalProps) {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [ticketStatusUpdates, setTicketStatusUpdates] = useState(true);
   const [newTicketAssigned, setNewTicketAssigned] = useState(true);
@@ -38,7 +47,10 @@ export function NotificationPreferencesModal({ isOpen, onClose, onSave }: Notifi
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Notification Preferences">
       <div className="space-y-4">
-        <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: BORDER_GREY }}>
+        <div
+          className="flex items-center justify-between py-3 border-b"
+          style={{ borderColor: BORDER_GREY }}
+        >
           <div>
             <p
               style={{
@@ -71,13 +83,18 @@ export function NotificationPreferencesModal({ isOpen, onClose, onSave }: Notifi
             <span
               className="inline-block h-4 w-4 transform rounded-full bg-white transition"
               style={{
-                transform: emailNotifications ? "translateX(1.5rem)" : "translateX(0.25rem)",
+                transform: emailNotifications
+                  ? "translateX(1.5rem)"
+                  : "translateX(0.25rem)",
               }}
             />
           </button>
         </div>
 
-        <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: BORDER_GREY }}>
+        <div
+          className="flex items-center justify-between py-3 border-b"
+          style={{ borderColor: BORDER_GREY }}
+        >
           <div>
             <p
               style={{
@@ -110,13 +127,18 @@ export function NotificationPreferencesModal({ isOpen, onClose, onSave }: Notifi
             <span
               className="inline-block h-4 w-4 transform rounded-full bg-white transition"
               style={{
-                transform: ticketStatusUpdates ? "translateX(1.5rem)" : "translateX(0.25rem)",
+                transform: ticketStatusUpdates
+                  ? "translateX(1.5rem)"
+                  : "translateX(0.25rem)",
               }}
             />
           </button>
         </div>
 
-        <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: BORDER_GREY }}>
+        <div
+          className="flex items-center justify-between py-3 border-b"
+          style={{ borderColor: BORDER_GREY }}
+        >
           <div>
             <p
               style={{
@@ -149,7 +171,9 @@ export function NotificationPreferencesModal({ isOpen, onClose, onSave }: Notifi
             <span
               className="inline-block h-4 w-4 transform rounded-full bg-white transition"
               style={{
-                transform: newTicketAssigned ? "translateX(1.5rem)" : "translateX(0.25rem)",
+                transform: newTicketAssigned
+                  ? "translateX(1.5rem)"
+                  : "translateX(0.25rem)",
               }}
             />
           </button>
@@ -188,7 +212,9 @@ export function NotificationPreferencesModal({ isOpen, onClose, onSave }: Notifi
             <span
               className="inline-block h-4 w-4 transform rounded-full bg-white transition"
               style={{
-                transform: weeklySummary ? "translateX(1.5rem)" : "translateX(0.25rem)",
+                transform: weeklySummary
+                  ? "translateX(1.5rem)"
+                  : "translateX(0.25rem)",
               }}
             />
           </button>

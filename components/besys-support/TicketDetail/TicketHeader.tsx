@@ -1,6 +1,17 @@
-import { DARK_GREEN, PAGE_BACKGROUND, BORDER_GREY, BODY_TEXT_GREY } from "@/lib/colors";
-import { BODY_XL, BODY_SM, BODY_REGULAR, FONT_FAMILY, FONT_WEIGHT } from "@/lib/fonts";
-import { Card } from "@/components/ui/Card";
+import {
+  DARK_GREEN,
+  PAGE_BACKGROUND,
+  BORDER_GREY,
+  BODY_TEXT_GREY,
+} from "@/lib/colors";
+import {
+  BODY_XL,
+  BODY_SM,
+  BODY_REGULAR,
+  FONT_FAMILY,
+  FONT_WEIGHT,
+} from "@/lib/fonts";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/Badge";
 import { StepProgress } from "@/components/ui/StepProgress";
 import { statusColors, priorityColors } from "@/lib/utils/ticket-colors";
@@ -12,7 +23,11 @@ interface TicketHeaderProps {
 
 export function TicketHeader({ ticket }: TicketHeaderProps) {
   return (
-    <Card variant="elevated" className="p-6 mb-6" style={{ borderColor: BORDER_GREY }}>
+    <Card
+      variant="elevated"
+      className="p-6 mb-6"
+      style={{ borderColor: BORDER_GREY }}
+    >
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-3 mb-2">

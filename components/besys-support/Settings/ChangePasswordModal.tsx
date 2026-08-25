@@ -2,18 +2,33 @@
 
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { DARK_GREEN, BORDER_GREY, BODY_TEXT_GREY, PRIMARY_TEXT, PAGE_BACKGROUND, TEAL_PRIMARY } from "@/lib/colors";
+import {
+  DARK_GREEN,
+  BORDER_GREY,
+  BODY_TEXT_GREY,
+  PRIMARY_TEXT,
+  PAGE_BACKGROUND,
+  TEAL_PRIMARY,
+} from "@/lib/colors";
 import { FONT_FAMILY } from "@/lib/fonts";
 import { Modal } from "@/components/ui/Modal";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onChangePassword: (currentPassword: string, newPassword: string, confirmPassword: string) => void;
+  onChangePassword: (
+    currentPassword: string,
+    newPassword: string,
+    confirmPassword: string,
+  ) => void;
 }
 
-export function ChangePasswordModal({ isOpen, onClose, onChangePassword }: ChangePasswordModalProps) {
+export function ChangePasswordModal({
+  isOpen,
+  onClose,
+  onChangePassword,
+}: ChangePasswordModalProps) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -87,15 +102,17 @@ export function ChangePasswordModal({ isOpen, onClose, onChangePassword }: Chang
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="Enter current password"
               className="w-full px-4 py-3 rounded-xl border outline-none transition focus:ring-2"
-              style={{
-                fontFamily: "system-ui, -apple-system, sans-serif",
-                fontSize: "15px",
-                fontWeight: 400,
-                color: PRIMARY_TEXT,
-                borderColor: BORDER_GREY,
-                backgroundColor: PAGE_BACKGROUND,
-                "--tw-ring-color": TEAL_PRIMARY,
-              } as React.CSSProperties}
+              style={
+                {
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  fontSize: "15px",
+                  fontWeight: 400,
+                  color: PRIMARY_TEXT,
+                  borderColor: BORDER_GREY,
+                  backgroundColor: PAGE_BACKGROUND,
+                  "--tw-ring-color": TEAL_PRIMARY,
+                } as React.CSSProperties
+              }
             />
             <button
               type="button"
@@ -103,7 +120,11 @@ export function ChangePasswordModal({ isOpen, onClose, onChangePassword }: Chang
               className="absolute right-3 top-1/2 -translate-y-1/2"
               style={{ color: BODY_TEXT_GREY }}
             >
-              {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showCurrentPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </button>
           </div>
         </div>
@@ -127,15 +148,17 @@ export function ChangePasswordModal({ isOpen, onClose, onChangePassword }: Chang
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Enter new password (min. 8 characters)"
               className="w-full px-4 py-3 rounded-xl border outline-none transition focus:ring-2"
-              style={{
-                fontFamily: "system-ui, -apple-system, sans-serif",
-                fontSize: "15px",
-                fontWeight: 400,
-                color: PRIMARY_TEXT,
-                borderColor: BORDER_GREY,
-                backgroundColor: PAGE_BACKGROUND,
-                "--tw-ring-color": TEAL_PRIMARY,
-              } as React.CSSProperties}
+              style={
+                {
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  fontSize: "15px",
+                  fontWeight: 400,
+                  color: PRIMARY_TEXT,
+                  borderColor: BORDER_GREY,
+                  backgroundColor: PAGE_BACKGROUND,
+                  "--tw-ring-color": TEAL_PRIMARY,
+                } as React.CSSProperties
+              }
             />
             <button
               type="button"
@@ -143,7 +166,11 @@ export function ChangePasswordModal({ isOpen, onClose, onChangePassword }: Chang
               className="absolute right-3 top-1/2 -translate-y-1/2"
               style={{ color: BODY_TEXT_GREY }}
             >
-              {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showNewPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </button>
           </div>
         </div>
@@ -167,15 +194,17 @@ export function ChangePasswordModal({ isOpen, onClose, onChangePassword }: Chang
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm new password"
               className="w-full px-4 py-3 rounded-xl border outline-none transition focus:ring-2"
-              style={{
-                fontFamily: "system-ui, -apple-system, sans-serif",
-                fontSize: "15px",
-                fontWeight: 400,
-                color: PRIMARY_TEXT,
-                borderColor: BORDER_GREY,
-                backgroundColor: PAGE_BACKGROUND,
-                "--tw-ring-color": TEAL_PRIMARY,
-              } as React.CSSProperties}
+              style={
+                {
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  fontSize: "15px",
+                  fontWeight: 400,
+                  color: PRIMARY_TEXT,
+                  borderColor: BORDER_GREY,
+                  backgroundColor: PAGE_BACKGROUND,
+                  "--tw-ring-color": TEAL_PRIMARY,
+                } as React.CSSProperties
+              }
             />
             <button
               type="button"
@@ -183,7 +212,11 @@ export function ChangePasswordModal({ isOpen, onClose, onChangePassword }: Chang
               className="absolute right-3 top-1/2 -translate-y-1/2"
               style={{ color: BODY_TEXT_GREY }}
             >
-              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showConfirmPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </button>
           </div>
         </div>

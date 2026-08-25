@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Search, Bell, HelpCircle, X } from "lucide-react";
 import { DARK_GREEN, TEAL_PRIMARY, INPUT_BORDER, PAGE_BACKGROUND, BODY_TEXT_GREY, BORDER_GREY, PRIMARY_TEXT, LIGHT_TEAL_BG, PLACEHOLDER_TEXT, SECONDARY_BACKGROUND } from "@/lib/colors";
 import { INPUT_REGULAR, BODY_REGULAR, FONT_FAMILY, FONT_WEIGHT } from "@/lib/fonts";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/Avatar";
 
 interface DashboardHeaderProps {

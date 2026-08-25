@@ -2,8 +2,8 @@
 
 import { useMemo } from 'react';
 import { TicketList } from '@/components/dashboard/TicketList';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/Spinner';
 import { TICKET_STATUSES, TICKET_STATUS_LABELS } from '@/constants/ticketStatuses';
 import { PRIORITIES, PRIORITY_LABELS } from '@/constants/priorities';

@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { BODY_TEXT_GREY, BORDER_GREY, PRIMARY_TEXT } from "@/lib/colors";
 import { BODY_SM, FONT_FAMILY, FONT_WEIGHT } from "@/lib/fonts";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 interface ProfileSectionProps {
   name: string;
@@ -15,9 +15,19 @@ interface ProfileSectionProps {
   onSave: () => void;
 }
 
-export function ProfileSection({ name, email, onNameChange, onEmailChange, onSave }: ProfileSectionProps) {
+export function ProfileSection({
+  name,
+  email,
+  onNameChange,
+  onEmailChange,
+  onSave,
+}: ProfileSectionProps) {
   return (
-    <Card variant="elevated" className="p-6 mb-6" style={{ borderColor: BORDER_GREY }}>
+    <Card
+      variant="elevated"
+      className="p-6 mb-6"
+      style={{ borderColor: BORDER_GREY }}
+    >
       <h2
         className="mb-6"
         style={{
@@ -31,7 +41,7 @@ export function ProfileSection({ name, email, onNameChange, onEmailChange, onSav
       >
         Profile Information
       </h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label
@@ -53,7 +63,7 @@ export function ProfileSection({ name, email, onNameChange, onEmailChange, onSav
             placeholder="Enter your full name"
           />
         </div>
-        
+
         <div>
           <label
             className="block mb-2"

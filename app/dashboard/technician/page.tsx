@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useTickets } from "@/context/TicketContext";
 import { usePagination } from "@/hooks/usePagination";
 import { TicketDrawer } from "@/components/dashboard/TicketDrawer";
@@ -12,13 +12,13 @@ import { TicketFilters } from "@/components/tickets/TicketFilters";
 import { TicketTable } from "@/components/tickets/TicketTable";
 import { ClientChart } from "@/components/dashboard/ClientChart";
 import { Ticket, formatTicketData } from "@/types/ticket";
-import { 
-  Inbox, 
-  Clock, 
-  AlertTriangle, 
-  CheckCircle2, 
-  TrendingUp, 
-  PieChart, 
+import {
+  Inbox,
+  Clock,
+  AlertTriangle,
+  CheckCircle2,
+  TrendingUp,
+  PieChart,
   BarChart3,
   ChevronRight,
   ShieldCheck,
@@ -29,11 +29,11 @@ import {
 import { FONT_FAMILY } from "@/lib/fonts";
 
 export default function TechnicianDashboard() {
-  const { 
-    tickets: rawTickets = [], 
-    updateTicketStatus, 
-    updateTicketPriority, 
-    addComment 
+  const {
+    tickets: rawTickets = [],
+    updateTicketStatus,
+    updateTicketPriority,
+    addComment
   } = useTickets();
 
   // Normalize tickets top-level so charts, filters, and tables use clean data
@@ -60,7 +60,7 @@ export default function TechnicianDashboard() {
   // 1. METRICS & SUMMARY COMPUTATION
   // ==========================================
   const totalTickets = tickets.length;
-  
+
   const openTickets = useMemo(
     () => tickets.filter((t) => {
       const s = (t.status || "").toUpperCase().replace(/_/g, " ");
@@ -68,7 +68,7 @@ export default function TechnicianDashboard() {
     }).length,
     [tickets]
   );
-  
+
   const closedTickets = useMemo(
     () => tickets.filter((t) => {
       const s = (t.status || "").toUpperCase().replace(/_/g, " ");
@@ -76,7 +76,7 @@ export default function TechnicianDashboard() {
     }).length,
     [tickets]
   );
-  
+
   const overdueTickets = useMemo(
     () => tickets.filter((t) => {
       const p = (t.priority || "").toUpperCase();
@@ -121,7 +121,7 @@ export default function TechnicianDashboard() {
   const monthlyData = useMemo(() => {
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const currentYear = new Date().getFullYear();
-    
+
     return months.map((month, idx) => {
       const count = tickets.filter((t) => {
         if (!t.createdAt) return false;
@@ -195,8 +195,8 @@ export default function TechnicianDashboard() {
   const departmentBarOptions: ApexCharts.ApexOptions = useMemo(() => ({
     chart: { type: "bar", toolbar: { show: false }, fontFamily: "inherit" },
     plotOptions: {
-      bar: { 
-        borderRadius: 5, 
+      bar: {
+        borderRadius: 5,
         columnWidth: "40%",
         distributed: true
       }
@@ -252,9 +252,9 @@ export default function TechnicianDashboard() {
     });
   }, [tickets, scopeFilter, searchQuery, statusFilter, priorityFilter, departmentFilter]);
 
-  const pagination = usePagination({ 
-    totalItems: filteredWorkload.length, 
-    pageSize: 5 
+  const pagination = usePagination({
+    totalItems: filteredWorkload.length,
+    pageSize: 5
   });
 
   const visibleWorkload = useMemo(
@@ -270,7 +270,7 @@ export default function TechnicianDashboard() {
   );
 
   return (
-    <div 
+    <div
       className="p-5 sm:p-8 max-w-7xl mx-auto space-y-8 bg-[#F8FAFC] min-h-screen"
       style={{ fontFamily: FONT_FAMILY.primary }}
     >
@@ -457,11 +457,10 @@ export default function TechnicianDashboard() {
                 <button
                   onClick={pagination.previousPage}
                   disabled={!pagination.hasPrevious}
-                  className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
-                    pagination.hasPrevious
+                  className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${pagination.hasPrevious
                       ? 'text-slate-700 hover:bg-slate-100 cursor-pointer'
                       : 'text-slate-300 cursor-not-allowed'
-                  }`}
+                    }`}
                   aria-label="Previous Page"
                 >
                   <ChevronLeft className="w-5 h-5" />
@@ -475,11 +474,10 @@ export default function TechnicianDashboard() {
                         key={p}
                         onClick={() => pagination.setPage(p)}
                         aria-label={`Page ${p}`}
-                        className={`transition-all rounded-full ${
-                          isActive
+                        className={`transition-all rounded-full ${isActive
                             ? 'w-6 h-2.5 bg-[#2FD9C4]'
                             : 'w-2.5 h-2.5 bg-slate-300 hover:bg-slate-400 cursor-pointer'
-                        }`}
+                          }`}
                       />
                     );
                   })}
@@ -488,11 +486,10 @@ export default function TechnicianDashboard() {
                 <button
                   onClick={pagination.nextPage}
                   disabled={!pagination.hasNext}
-                  className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
-                    pagination.hasNext
+                  className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${pagination.hasNext
                       ? 'text-slate-700 hover:bg-slate-100 cursor-pointer'
                       : 'text-slate-300 cursor-not-allowed'
-                  }`}
+                    }`}
                   aria-label="Next Page"
                 >
                   <ChevronRight className="w-5 h-5" />

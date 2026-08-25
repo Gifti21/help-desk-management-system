@@ -9,6 +9,7 @@ interface DashboardLayoutProps {
   userInitials: string;
   onSearch?: (value: string) => void;
   searchValue?: string;
+  role?: "EMPLOYEE" | "TECHNICIAN" | "ADMIN";
 }
 
 export function DashboardLayout({
@@ -17,22 +18,24 @@ export function DashboardLayout({
   userInitials,
   onSearch,
   searchValue,
+  role = "TECHNICIAN",
 }: DashboardLayoutProps) {
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: PAGE_BACKGROUND }}>
-      <Sidebar />
-      
+    <div
+      className="flex min-h-screen"
+      style={{ backgroundColor: PAGE_BACKGROUND }}
+    >
+      <Sidebar role={role} />
+
       <div className="flex-1 lg:ml-[280px]">
-        <DashboardHeader 
-          userName={userName} 
-          userInitials={userInitials} 
+        <DashboardHeader
+          userName={userName}
+          userInitials={userInitials}
           onSearch={onSearch}
           searchValue={searchValue}
         />
-        
-        <main className="p-4 sm:p-6 lg:p-8">
-          {children}
-        </main>
+
+        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );

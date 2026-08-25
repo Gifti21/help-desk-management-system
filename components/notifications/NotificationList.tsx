@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React, { useMemo } from 'react';
-import { NotificationItem } from '@/components/notifications/NotificationItem';
-import { Button } from '@/components/ui/Button';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { Spinner } from '@/components/ui/Spinner';
-import { useNotifications } from '@/hooks/useNotifications';
-import { Bell } from 'lucide-react';
+import React, { useMemo } from "react";
+import { NotificationItem } from "@/components/notifications/NotificationItem";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Spinner } from "@/components/ui/Spinner";
+import { useNotifications } from "@/hooks/useNotifications";
+import { Bell } from "lucide-react";
 
 interface NotificationListProps {
   title?: string;
@@ -14,11 +14,17 @@ interface NotificationListProps {
 }
 
 export function NotificationList({
-  title = 'Recent Updates',
-  description = 'Alerts for assigned tickets, status changes, and comments.',
+  title = "Recent Updates",
+  description = "Alerts for assigned tickets, status changes, and comments.",
 }: NotificationListProps) {
-  const { notifications, loading, unreadCount, markAsRead, markAllAsRead, refreshNotifications } =
-    useNotifications();
+  const {
+    notifications,
+    loading,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    refreshNotifications,
+  } = useNotifications();
 
   // Strict deduplication by ID to guarantee zero duplicate keys or rows
   const uniqueNotifications = useMemo(() => {
@@ -36,10 +42,10 @@ export function NotificationList({
     <section className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">{title}</h2>
-          <p className="text-xs text-slate-600 mt-0.5">
-            {description}
-          </p>
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+            {title}
+          </h2>
+          <p className="text-xs text-slate-600 mt-0.5">{description}</p>
         </div>
 
         <div className="flex gap-2">

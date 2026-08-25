@@ -1,18 +1,32 @@
 "use client";
 
 import { Bell, Shield, ChevronRight } from "lucide-react";
-import { DARK_GREEN, BODY_TEXT_GREY, BORDER_GREY, PRIMARY_TEXT, SECONDARY_BACKGROUND, PAGE_BACKGROUND } from "@/lib/colors";
+import {
+  DARK_GREEN,
+  BODY_TEXT_GREY,
+  BORDER_GREY,
+  PRIMARY_TEXT,
+  SECONDARY_BACKGROUND,
+  PAGE_BACKGROUND,
+} from "@/lib/colors";
 import { BODY_REGULAR, FONT_FAMILY, FONT_WEIGHT } from "@/lib/fonts";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 
 interface QuickActionsProps {
   onChangePassword: () => void;
   onNotificationPreferences: () => void;
 }
 
-export function QuickActions({ onChangePassword, onNotificationPreferences }: QuickActionsProps) {
+export function QuickActions({
+  onChangePassword,
+  onNotificationPreferences,
+}: QuickActionsProps) {
   return (
-    <Card variant="elevated" className="p-6" style={{ borderColor: BORDER_GREY }}>
+    <Card
+      variant="elevated"
+      className="p-6"
+      style={{ borderColor: BORDER_GREY }}
+    >
       <h2
         className="mb-6"
         style={{
@@ -26,14 +40,18 @@ export function QuickActions({ onChangePassword, onNotificationPreferences }: Qu
       >
         Quick Actions
       </h2>
-      
+
       <div className="space-y-3">
         <button
           onClick={onChangePassword}
           className="w-full flex items-center justify-between p-4 rounded-xl transition"
           style={{ backgroundColor: PAGE_BACKGROUND }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = SECONDARY_BACKGROUND}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = PAGE_BACKGROUND}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = SECONDARY_BACKGROUND)
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = PAGE_BACKGROUND)
+          }
         >
           <div className="flex items-center gap-3">
             <div
@@ -62,8 +80,12 @@ export function QuickActions({ onChangePassword, onNotificationPreferences }: Qu
           onClick={onNotificationPreferences}
           className="w-full flex items-center justify-between p-4 rounded-xl transition"
           style={{ backgroundColor: PAGE_BACKGROUND }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = SECONDARY_BACKGROUND}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = PAGE_BACKGROUND}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = SECONDARY_BACKGROUND)
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = PAGE_BACKGROUND)
+          }
         >
           <div className="flex items-center gap-3">
             <div

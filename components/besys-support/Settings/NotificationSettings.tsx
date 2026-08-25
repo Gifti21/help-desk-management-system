@@ -1,17 +1,29 @@
 "use client";
 
-import { DARK_GREEN, BODY_TEXT_GREY, BORDER_GREY, PRIMARY_TEXT } from "@/lib/colors";
+import {
+  DARK_GREEN,
+  BODY_TEXT_GREY,
+  BORDER_GREY,
+  PRIMARY_TEXT,
+} from "@/lib/colors";
 import { BODY_REGULAR, BODY_SM, FONT_FAMILY, FONT_WEIGHT } from "@/lib/fonts";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 
 interface NotificationSettingsProps {
   notificationsEnabled: boolean;
   onToggle: () => void;
 }
 
-export function NotificationSettings({ notificationsEnabled, onToggle }: NotificationSettingsProps) {
+export function NotificationSettings({
+  notificationsEnabled,
+  onToggle,
+}: NotificationSettingsProps) {
   return (
-    <Card variant="elevated" className="p-6 mb-6" style={{ borderColor: BORDER_GREY }}>
+    <Card
+      variant="elevated"
+      className="p-6 mb-6"
+      style={{ borderColor: BORDER_GREY }}
+    >
       <h2
         className="mb-6"
         style={{
@@ -25,8 +37,11 @@ export function NotificationSettings({ notificationsEnabled, onToggle }: Notific
       >
         Notifications
       </h2>
-      
-      <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: BORDER_GREY }}>
+
+      <div
+        className="flex items-center justify-between py-3 border-b"
+        style={{ borderColor: BORDER_GREY }}
+      >
         <div>
           <p
             style={{
@@ -64,7 +79,9 @@ export function NotificationSettings({ notificationsEnabled, onToggle }: Notific
           <span
             className="inline-block h-4 w-4 transform rounded-full bg-white transition"
             style={{
-              transform: notificationsEnabled ? "translateX(1.5rem)" : "translateX(0.25rem)",
+              transform: notificationsEnabled
+                ? "translateX(1.5rem)"
+                : "translateX(0.25rem)",
             }}
           />
         </button>

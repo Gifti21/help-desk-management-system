@@ -1,55 +1,55 @@
-<<<<<<< HEAD
-'use client';
-
-import React from 'react';
-import { ActionButton } from '../admin/ActionButton';
-import { Download, FileText } from 'lucide-react';
-
-interface ExportButtonsProps {
-    onExportCSV: () => void;
-    onExportPDF: () => void;
-    isLoading?: boolean;
-}
-
-export function ExportButtons({ onExportCSV, onExportPDF, isLoading = false }: ExportButtonsProps) {
-    return (
-        <div className="flex items-center space-x-2">
-            <ActionButton
-                variant="outline"
-                size="sm"
-                icon={Download}
-                onClick={onExportCSV}
-                disabled={isLoading}
-            >
-                Export CSV
-            </ActionButton>
-            <ActionButton
-                variant="primary"
-                size="sm"
-                icon={FileText}
-                onClick={onExportPDF}
-                disabled={isLoading}
-            >
-                Export PDF
-            </ActionButton>
-        </div>
-    );
-}
-=======
 "use client";
 
 import React from "react";
 import { Download, FileText } from "lucide-react";
+import { ActionButton } from "../admin/ActionButton";
+import { BUTTONS } from "@/lib/colors";
 import { Ticket } from "@/types/ticket";
 import { exportToCSV, exportToPDF } from "@/utils/exportUtils";
-import { BUTTONS } from "@/lib/colors";
 
-interface ExportButtonsProps {
+interface LegacyExportButtonsProps {
+  onExportCSV: () => void;
+  onExportPDF: () => void;
+  isLoading?: boolean;
+}
+
+interface TicketExportButtonsProps {
   tickets: Ticket[];
   title?: string;
 }
 
-export const ExportButtons: React.FC<ExportButtonsProps> = ({ tickets, title }) => {
+type ExportButtonsProps = LegacyExportButtonsProps | TicketExportButtonsProps;
+
+export function ExportButtons(props: ExportButtonsProps) {
+  if ("onExportCSV" in props && "onExportPDF" in props) {
+    const { onExportCSV, onExportPDF, isLoading = false } = props;
+
+    return (
+      <div className="flex items-center space-x-2">
+        <ActionButton
+          variant="outline"
+          size="sm"
+          icon={Download}
+          onClick={onExportCSV}
+          disabled={isLoading}
+        >
+          Export CSV
+        </ActionButton>
+        <ActionButton
+          variant="primary"
+          size="sm"
+          icon={FileText}
+          onClick={onExportPDF}
+          disabled={isLoading}
+        >
+          Export PDF
+        </ActionButton>
+      </div>
+    );
+  }
+
+  const { tickets, title } = props;
+
   return (
     <div className="flex items-center gap-2 sm:gap-3 print:hidden">
       <button
@@ -70,5 +70,4 @@ export const ExportButtons: React.FC<ExportButtonsProps> = ({ tickets, title }) 
       </button>
     </div>
   );
-};
->>>>>>> origin/master
+}

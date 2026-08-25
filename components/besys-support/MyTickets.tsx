@@ -49,9 +49,10 @@ export function MyTickets() {
       userInitials="JS"
       onSearch={handleHeaderSearch}
       searchValue={searchQuery}
+      role="EMPLOYEE"
     >
       <MyTicketsHeaderSection />
-      
+
       {/* Tickets Section */}
       <TicketsSection
         paginatedTickets={paginatedTickets}
@@ -62,7 +63,9 @@ export function MyTickets() {
         itemsPerPage={5}
         onRowClick={handleRowClick}
         onSearchChange={setSearchQuery}
-        onStatusFilterChange={(value: TicketStatus | "All") => setStatusFilter(value)}
+        onStatusFilterChange={(value: TicketStatus | "All") =>
+          setStatusFilter(value)
+        }
         onClearSearch={handleClearSearch}
         onPageChange={setCurrentPage}
       />

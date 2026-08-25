@@ -1,6 +1,6 @@
 import { TEAL_PRIMARY, DARK_GREEN, BORDER_GREY, LIGHT_TEAL_BG, BODY_TEXT_GREY, PRIMARY_TEXT } from "@/lib/colors";
 import { HEADING_LG, HEADING_MD, HEADING_XL, BODY_REGULAR, FONT_FAMILY, FONT_WEIGHT } from "@/lib/fonts";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 
 const steps = [
   {
@@ -25,7 +25,7 @@ export function StepsSection() {
     <section className="px-4 py-20 sm:px-6 lg:px-8" style={{ backgroundColor: 'white' }}>
       <div className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 
+          <h2
             className="sm:text-4xl"
             style={{
               fontFamily: FONT_FAMILY.primary,
@@ -100,7 +100,7 @@ function StepCard({ step }: StepCardProps) {
       >
         {step.title}
       </h3>
-      <p 
+      <p
         className="mt-3"
         style={{
           fontFamily: FONT_FAMILY.primary,

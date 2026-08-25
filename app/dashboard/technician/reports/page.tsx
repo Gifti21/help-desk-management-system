@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 import { useTickets } from "@/context/TicketContext";
 import { ExportButtons } from "@/components/reports/ExportButtons";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -38,7 +38,7 @@ export default function AgentReportsPage() {
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 bg-[#F4F7F6] min-h-screen">
-      
+
       {/* Header & Export Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
@@ -54,8 +54,8 @@ export default function AgentReportsPage() {
         </div>
 
         {/* Export CSV & Dynamic PDF Buttons */}
-        <ExportButtons 
-          tickets={filteredMonthlyTickets.length > 0 ? filteredMonthlyTickets : tickets} 
+        <ExportButtons
+          tickets={filteredMonthlyTickets.length > 0 ? filteredMonthlyTickets : tickets}
           title={`Besys HDMS Workload Report - ${months[selectedMonth]} ${new Date().getFullYear()}`}
         />
       </div>

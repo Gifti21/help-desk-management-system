@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { DARK_GREEN, BUTTONS, TEAL_PRIMARY } from "@/lib/colors";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { BODY_LG, FONT_FAMILY, FONT_WEIGHT } from "@/lib/fonts";
 
 interface NavbarProps {
@@ -29,9 +29,8 @@ export function Navbar({ showLoginButton = true }: NavbarProps) {
 
   return (
     <header
-      className={`sticky top-0 z-40 border-b text-white shadow-sm transition-[background-color,border-color,box-shadow,backdrop-filter] duration-200 ease-out ${
-        isScrolled ? "border-white/10 backdrop-blur-xl" : "border-transparent"
-      }`}
+      className={`sticky top-0 z-40 border-b text-white shadow-sm transition-[background-color,border-color,box-shadow,backdrop-filter] duration-200 ease-out ${isScrolled ? "border-white/10 backdrop-blur-xl" : "border-transparent"
+        }`}
       style={{
         backgroundColor: isScrolled ? 'rgba(22, 51, 43, 0.75)' : DARK_GREEN,
         backdropFilter: isScrolled ? "blur(12px)" : "none",

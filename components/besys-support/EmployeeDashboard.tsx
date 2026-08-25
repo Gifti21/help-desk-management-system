@@ -60,9 +60,10 @@ export function EmployeeDashboard() {
       userInitials="JS"
       onSearch={handleHeaderSearch}
       searchValue={searchQuery}
+      role="EMPLOYEE"
     >
       <DashboardHeaderSection />
-      
+
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         <StatCards stats={stats} isLoading={isLoading} />
@@ -78,7 +79,9 @@ export function EmployeeDashboard() {
         itemsPerPage={5}
         onRowClick={handleRowClick}
         onSearchChange={setSearchQuery}
-        onStatusFilterChange={(value: TicketStatus | "All") => setStatusFilter(value)}
+        onStatusFilterChange={(value: TicketStatus | "All") =>
+          setStatusFilter(value)
+        }
         onClearSearch={handleClearSearch}
         onPageChange={setCurrentPage}
       />

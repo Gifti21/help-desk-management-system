@@ -5,7 +5,7 @@ import { ArrowRight, MessageSquare } from 'lucide-react';
 import { PRIORITY_COLORS, PRIORITY_LABELS } from '@/constants/priorities';
 import { TICKET_STATUS_COLORS, TICKET_STATUS_LABELS } from '@/constants/ticketStatuses';
 import { Badge } from '@/components/ui/Badge';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import { formatDate } from '@/utils/formatDate';
 import { getUserDisplayName } from '@/lib/ticketMapper';
 import { BODY_TEXT_GREY, PRIMARY_TEXT } from '@/lib/colors';

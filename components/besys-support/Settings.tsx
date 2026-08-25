@@ -19,7 +19,8 @@ export function Settings() {
 
   // Modal states
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
+  const [isNotificationsModalOpen, setIsNotificationsModalOpen] =
+    useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const showSuccessToast = (message: string) => {
@@ -32,7 +33,11 @@ export function Settings() {
     showSuccessToast("Profile updated successfully");
   };
 
-  const handleChangePassword = (currentPassword: string, newPassword: string, confirmPassword: string) => {
+  const handleChangePassword = (
+    currentPassword: string,
+    newPassword: string,
+    confirmPassword: string,
+  ) => {
     // TODO: connect to backend endpoint
     showSuccessToast("Password updated successfully");
   };
@@ -43,12 +48,15 @@ export function Settings() {
   };
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: PAGE_BACKGROUND }}>
-      <Sidebar />
-      
+    <div
+      className="flex min-h-screen"
+      style={{ backgroundColor: PAGE_BACKGROUND }}
+    >
+      <Sidebar role="EMPLOYEE" />
+
       <div className="flex-1 lg:ml-[280px]">
         <DashboardHeader userName="Jamie Smith" userInitials="JS" />
-        
+
         <main className="p-4 sm:p-6 lg:p-8">
           <div className="mb-6 sm:mb-8">
             <h1

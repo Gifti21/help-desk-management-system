@@ -1,26 +1,26 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { 
-  Bell, 
-  CheckCheck, 
-  AlertCircle, 
-  Inbox, 
-  ShieldAlert, 
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Bell,
+  CheckCheck,
+  AlertCircle,
+  Inbox,
+  ShieldAlert,
   Filter
 } from "lucide-react";
 import { useTickets, AppNotification } from "@/context/TicketContext";
 import { BUTTONS } from "@/lib/colors";
 
 export default function TechnicianNotificationsPage() {
-  const { 
-    notifications, 
-    markNotificationsAsRead, 
-    markSingleNotificationAsRead 
+  const {
+    notifications,
+    markNotificationsAsRead,
+    markSingleNotificationAsRead
   } = useTickets();
-  
+
   const [activeTab, setActiveTab] = useState<"ALL" | "UNREAD">("ALL");
 
   // Deduplicate notifications to prevent identical cards from rendering multiple times
@@ -79,10 +79,10 @@ export default function TechnicianNotificationsPage() {
         </div>
 
         {unreadCount > 0 && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={markNotificationsAsRead} 
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={markNotificationsAsRead}
             className="self-start sm:self-auto border-slate-300 bg-white text-slate-800 hover:bg-slate-50 font-bold shadow-xs"
           >
             <CheckCheck className="w-4 h-4 mr-1.5 text-emerald-700" />
@@ -100,11 +100,10 @@ export default function TechnicianNotificationsPage() {
             backgroundColor: activeTab === "ALL" ? BUTTONS.primary : "transparent",
             color: activeTab === "ALL" ? BUTTONS.primaryText : "#475569",
           }}
-          className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-colors ${
-            activeTab === "ALL"
-              ? ""
-              : "hover:text-slate-900 bg-white border border-slate-200"
-          }`}
+          className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-colors ${activeTab === "ALL"
+            ? ""
+            : "hover:text-slate-900 bg-white border border-slate-200"
+            }`}
         >
           All Notifications ({uniqueNotifications.length})
         </button>
@@ -114,11 +113,10 @@ export default function TechnicianNotificationsPage() {
             backgroundColor: activeTab === "UNREAD" ? BUTTONS.primary : "transparent",
             color: activeTab === "UNREAD" ? BUTTONS.primaryText : "#475569",
           }}
-          className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-colors ${
-            activeTab === "UNREAD"
-              ? ""
-              : "hover:text-slate-900 bg-white border border-slate-200"
-          }`}
+          className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-colors ${activeTab === "UNREAD"
+            ? ""
+            : "hover:text-slate-900 bg-white border border-slate-200"
+            }`}
         >
           Unread ({unreadCount})
         </button>
@@ -135,11 +133,10 @@ export default function TechnicianNotificationsPage() {
             <Card
               key={item.id}
               onClick={() => markSingleNotificationAsRead(item.id)}
-              className={`p-4 transition-all duration-200 cursor-pointer shadow-xs ${
-                !item.read 
-                  ? "bg-emerald-50/50 border-emerald-300 hover:border-emerald-500" 
-                  : "bg-white border-slate-200 opacity-90 hover:opacity-100"
-              }`}
+              className={`p-4 transition-all duration-200 cursor-pointer shadow-xs ${!item.read
+                ? "bg-emerald-50/50 border-emerald-300 hover:border-emerald-500"
+                : "bg-white border-slate-200 opacity-90 hover:opacity-100"
+                }`}
             >
               <div className="flex items-start gap-4">
                 <div className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 shrink-0">

@@ -1,6 +1,6 @@
 import { DARK_GREEN, BORDER_GREY, PRIMARY_TEXT } from "@/lib/colors";
 import { HEADING_LG, BODY_REGULAR, FONT_FAMILY } from "@/lib/fonts";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 import type { Ticket } from "@/lib/types/ticket";
 
 interface TicketDescriptionProps {
@@ -9,7 +9,11 @@ interface TicketDescriptionProps {
 
 export function TicketDescription({ ticket }: TicketDescriptionProps) {
   return (
-    <Card variant="elevated" className="p-6 mb-6" style={{ borderColor: BORDER_GREY }}>
+    <Card
+      variant="elevated"
+      className="p-6 mb-6"
+      style={{ borderColor: BORDER_GREY }}
+    >
       <h2
         className="mb-3"
         style={{

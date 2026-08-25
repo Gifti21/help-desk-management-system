@@ -1,12 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { TICKET_STATUSES, TICKET_STATUS_LABELS } from '@/constants/ticketStatuses';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { BODY_TEXT_GREY, PRIMARY_TEXT } from '@/lib/colors';
-import { BODY_SM, FONT_FAMILY, HEADING_SM } from '@/lib/fonts';
-import type { TicketStatus } from '@/types/ticket';
+import { useState } from "react";
+import {
+  TICKET_STATUSES,
+  TICKET_STATUS_LABELS,
+} from "@/constants/ticketStatuses";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { BODY_TEXT_GREY, PRIMARY_TEXT } from "@/lib/colors";
+import { BODY_SM, FONT_FAMILY, HEADING_SM } from "@/lib/fonts";
+import type { TicketStatus } from "@/types/ticket";
 
 interface StatusUpdateFormProps {
   currentStatus: TicketStatus;
@@ -22,7 +25,7 @@ export function StatusUpdateForm({
   onSubmit,
 }: StatusUpdateFormProps) {
   const [status, setStatus] = useState<TicketStatus>(currentStatus);
-  const isClosed = currentStatus === 'CLOSED';
+  const isClosed = currentStatus === "CLOSED";
 
   return (
     <Card>
@@ -49,8 +52,8 @@ export function StatusUpdateForm({
           onChange={(event) => setStatus(event.target.value as TicketStatus)}
           className="w-full rounded-xl border px-4 py-3 outline-none disabled:cursor-not-allowed disabled:opacity-60"
           style={{
-            borderColor: '#E3ECE8',
-            backgroundColor: '#FFFFFF',
+            borderColor: "#E3ECE8",
+            backgroundColor: "#FFFFFF",
             color: PRIMARY_TEXT,
             fontFamily: FONT_FAMILY.primary,
             fontSize: BODY_SM.size,

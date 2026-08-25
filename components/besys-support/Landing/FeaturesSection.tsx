@@ -1,7 +1,7 @@
 import { Link2, MessageSquareText, ShieldCheck } from "lucide-react";
 import { DARK_GREEN, TEAL_PRIMARY, BORDER_GREY, BODY_TEXT_GREY, SECONDARY_BACKGROUND } from "@/lib/colors";
 import { HEADING_MD, BODY_REGULAR, FONT_FAMILY } from "@/lib/fonts";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 
 const featureCards = [
   {
@@ -55,7 +55,7 @@ function FeatureCard({ feature }: FeatureCardProps) {
       <div className="inline-flex rounded-2xl p-3 transition duration-200" style={{ backgroundColor: DARK_GREEN, color: TEAL_PRIMARY }}>
         <Icon className="h-6 w-6" />
       </div>
-      <h3 
+      <h3
         className="mt-6"
         style={{
           fontFamily: FONT_FAMILY.primary,
@@ -66,7 +66,7 @@ function FeatureCard({ feature }: FeatureCardProps) {
           color: DARK_GREEN,
         }}
       >{feature.title}</h3>
-      <p 
+      <p
         className="mt-3"
         style={{
           fontFamily: FONT_FAMILY.primary,

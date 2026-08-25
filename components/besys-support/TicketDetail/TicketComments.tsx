@@ -1,11 +1,26 @@
 import { useState } from "react";
 import { Send } from "lucide-react";
-import { DARK_GREEN, BORDER_GREY, BODY_TEXT_GREY, PRIMARY_TEXT, PAGE_BACKGROUND, INPUT_BORDER, TEAL_PRIMARY } from "@/lib/colors";
-import { HEADING_LG, BODY_REGULAR, BODY_SM, INPUT_REGULAR, FONT_FAMILY, FONT_WEIGHT } from "@/lib/fonts";
-import { Card } from "@/components/ui/Card";
+import {
+  DARK_GREEN,
+  BORDER_GREY,
+  BODY_TEXT_GREY,
+  PRIMARY_TEXT,
+  PAGE_BACKGROUND,
+  INPUT_BORDER,
+  TEAL_PRIMARY,
+} from "@/lib/colors";
+import {
+  HEADING_LG,
+  BODY_REGULAR,
+  BODY_SM,
+  INPUT_REGULAR,
+  FONT_FAMILY,
+  FONT_WEIGHT,
+} from "@/lib/fonts";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar } from "@/components/ui/Avatar";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import type { Ticket, Comment } from "@/lib/types/ticket";
 
 interface TicketCommentsProps {
@@ -23,7 +38,11 @@ export function TicketComments({ ticket }: TicketCommentsProps) {
   };
 
   return (
-    <Card variant="elevated" className="p-6" style={{ borderColor: BORDER_GREY }}>
+    <Card
+      variant="elevated"
+      className="p-6"
+      style={{ borderColor: BORDER_GREY }}
+    >
       <h2
         className="mb-6"
         style={{
@@ -55,18 +74,20 @@ export function TicketComments({ ticket }: TicketCommentsProps) {
               placeholder="Add a comment..."
               rows={3}
               className="w-full rounded-2xl border px-4 py-3 outline-none transition focus:ring-2 resize-none mb-3"
-              style={{
-                fontFamily: FONT_FAMILY.primary,
-                fontSize: INPUT_REGULAR.size,
-                lineHeight: INPUT_REGULAR.lineHeight,
-                fontWeight: INPUT_REGULAR.weight,
-                letterSpacing: INPUT_REGULAR.letterSpacing,
-                color: PRIMARY_TEXT,
-                borderColor: INPUT_BORDER,
-                backgroundColor: PAGE_BACKGROUND,
-                '--tw-ring-color': TEAL_PRIMARY,
-                '--tw-ring-color-light': 'rgba(47, 217, 196, 0.2)',
-              } as React.CSSProperties}
+              style={
+                {
+                  fontFamily: FONT_FAMILY.primary,
+                  fontSize: INPUT_REGULAR.size,
+                  lineHeight: INPUT_REGULAR.lineHeight,
+                  fontWeight: INPUT_REGULAR.weight,
+                  letterSpacing: INPUT_REGULAR.letterSpacing,
+                  color: PRIMARY_TEXT,
+                  borderColor: INPUT_BORDER,
+                  backgroundColor: PAGE_BACKGROUND,
+                  "--tw-ring-color": TEAL_PRIMARY,
+                  "--tw-ring-color-light": "rgba(47, 217, 196, 0.2)",
+                } as React.CSSProperties
+              }
             />
             <div className="flex justify-end">
               <Button

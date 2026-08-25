@@ -3,7 +3,7 @@
 import { ChevronRight, FileX } from "lucide-react";
 import { BORDER_GREY, BODY_TEXT_GREY, PRIMARY_TEXT, PAGE_BACKGROUND, SECONDARY_BACKGROUND, LIGHT_TEAL_BG } from "@/lib/colors";
 import { BODY_REGULAR, BODY_SM, FONT_FAMILY, FONT_WEIGHT } from "@/lib/fonts";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/Badge";
 
 type TicketStatus = "Open" | "In Progress" | "Resolved" | "Closed";

@@ -1,6 +1,6 @@
 import { Search, X } from "lucide-react";
 import { TEAL_PRIMARY, BODY_TEXT_GREY, SECONDARY_BACKGROUND } from "@/lib/colors";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/Select";
 import type { TicketStatus } from "@/lib/types/ticket";
 

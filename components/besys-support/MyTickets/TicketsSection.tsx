@@ -1,6 +1,6 @@
 import { DARK_GREEN, BORDER_GREY } from "@/lib/colors";
 import { HEADING_LG, FONT_FAMILY } from "@/lib/fonts";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 import { TicketTable } from "@/components/ui/TicketTable";
 import { TicketPagination } from "@/components/ui/TicketPagination";
 import { TicketSearchFilter } from "@/components/ui/TicketSearchFilter";
@@ -37,7 +37,11 @@ export function TicketsSection({
   onPageChange,
 }: TicketsSectionProps) {
   return (
-    <Card variant="elevated" className="p-6" style={{ borderColor: BORDER_GREY }}>
+    <Card
+      variant="elevated"
+      className="p-6"
+      style={{ borderColor: BORDER_GREY }}
+    >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h2
           style={{

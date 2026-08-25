@@ -3,7 +3,7 @@ import { ArrowRight, Clock3, Lock } from "lucide-react";
 import { HERO_GRADIENT, TEAL_PRIMARY, MUTED_GREY_GREEN } from "@/lib/colors";
 import { HEADING_XL, BODY_XL, BODY_REGULAR, FONT_FAMILY } from "@/lib/fonts";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 export function HeroSection() {
   return (
@@ -17,7 +17,7 @@ export function HeroSection() {
             For existing BESYS clients only
           </Badge>
         </div>
-        <h1 
+        <h1
           className="max-w-4xl sm:text-5xl lg:text-6xl"
           style={{
             fontFamily: FONT_FAMILY.primary,
@@ -30,7 +30,7 @@ export function HeroSection() {
         >
           Ask us anything <span className="ml-2" style={{ color: TEAL_PRIMARY }}>no emails, no calls</span>, just answers.
         </h1>
-        <p 
+        <p
           className="mt-6 max-w-2xl sm:text-xl"
           style={{
             fontFamily: FONT_FAMILY.primary,
@@ -51,7 +51,7 @@ export function HeroSection() {
             </Button>
           </Link>
         </div>
-        <div 
+        <div
           className="mt-6 flex flex-col items-center gap-3 sm:text-base"
           style={{
             fontFamily: FONT_FAMILY.primary,

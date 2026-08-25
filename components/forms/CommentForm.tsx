@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Textarea } from '@/components/ui/Textarea';
-import { BODY_TEXT_GREY, PRIMARY_TEXT } from '@/lib/colors';
-import { BODY_SM, FONT_FAMILY, HEADING_SM } from '@/lib/fonts';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/Textarea";
+import { BODY_TEXT_GREY, PRIMARY_TEXT } from "@/lib/colors";
+import { BODY_SM, FONT_FAMILY, HEADING_SM } from "@/lib/fonts";
 
 interface CommentFormProps {
   disabled?: boolean;
@@ -18,18 +18,18 @@ export function CommentForm({
   loading = false,
   onSubmit,
 }: CommentFormProps) {
-  const [content, setContent] = useState('');
-  const [error, setError] = useState('');
+  const [content, setContent] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async () => {
     if (!content.trim()) {
-      setError('Please enter a comment.');
+      setError("Please enter a comment.");
       return;
     }
 
-    setError('');
+    setError("");
     await onSubmit(content.trim());
-    setContent('');
+    setContent("");
   };
 
   return (
@@ -63,7 +63,11 @@ export function CommentForm({
         />
 
         <div className="flex justify-end">
-          <Button loading={loading} disabled={disabled} onClick={() => void handleSubmit()}>
+          <Button
+            loading={loading}
+            disabled={disabled}
+            onClick={() => void handleSubmit()}
+          >
             Post Comment
           </Button>
         </div>
