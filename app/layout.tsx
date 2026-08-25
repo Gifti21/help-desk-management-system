@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Providers } from "@/components/providers";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import "./globals.css";
 
@@ -15,7 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "BESYS Support | Help Desk Management System",
-  description: "Enterprise-grade support ticket management for BESYS Technologies. Track, assign, and resolve issues with real-time dashboards and reporting.",
+  description:
+    "Enterprise-grade support ticket management for BESYS Technologies. Track, assign, and resolve issues with real-time dashboards and reporting.",
 };
 
 export const viewport: Viewport = {
@@ -34,7 +36,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-full flex flex-col antialiased`}
       >
-        <ThemeProvider>{children}</ThemeProvider>
+        <Providers>
+          <ThemeProvider>{children}</ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

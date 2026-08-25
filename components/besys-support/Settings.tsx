@@ -5,6 +5,7 @@ import { DARK_GREEN, PAGE_BACKGROUND, BODY_TEXT_GREY } from "@/lib/colors";
 import { HEADING_LG, BODY_REGULAR, FONT_FAMILY } from "@/lib/fonts";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
+import { Footer } from "@/components/layout/Footer";
 import { ProfileSection } from "./Settings/ProfileSection";
 import { NotificationSettings } from "./Settings/NotificationSettings";
 import { QuickActions } from "./Settings/QuickActions";
@@ -49,15 +50,19 @@ export function Settings() {
 
   return (
     <div
-      className="flex min-h-screen"
+      className="min-h-screen flex flex-col"
       style={{ backgroundColor: PAGE_BACKGROUND }}
     >
       <Sidebar role="EMPLOYEE" />
 
-      <div className="flex-1 lg:ml-[280px]">
-        <DashboardHeader userName="Jamie Smith" userInitials="JS" />
+      <div className="flex-1 lg:pl-[280px] flex flex-col pb-[120px]">
+        <DashboardHeader
+          userName="Jamie Smith"
+          userInitials="JS"
+          role="EMPLOYEE"
+        />
 
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="mb-6 sm:mb-8">
             <h1
               className="mb-2"
@@ -106,6 +111,10 @@ export function Settings() {
 
           {successMessage && <SuccessToast message={successMessage} />}
         </main>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-40">
+        <Footer />
       </div>
 
       <ChangePasswordModal
