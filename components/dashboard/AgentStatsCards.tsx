@@ -2,12 +2,7 @@
 
 import React, { useMemo } from "react";
 import { Ticket } from "@/types/ticket";
-import {
-  Inbox,
-  Clock,
-  AlertTriangle,
-  CheckCircle2,
-} from "lucide-react";
+import { Inbox, Clock, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { FONT_FAMILY } from "@/lib/fonts";
 
 interface AgentStatsCardsProps {
@@ -20,21 +15,17 @@ export const AgentStatsCards: React.FC<AgentStatsCardsProps> = ({
   const metrics = useMemo(() => {
     const total = tickets.length;
 
-    const inProgress = tickets.filter(
-      (t) => t.status === "IN_PROGRESS"
-    ).length;
+    const inProgress = tickets.filter((t) => t.status === "IN_PROGRESS").length;
 
     const critical = tickets.filter(
       (t) =>
         t.priority === "CRITICAL" &&
         t.status !== "RESOLVED" &&
-        t.status !== "CLOSED"
+        t.status !== "CLOSED",
     ).length;
 
     const completed = tickets.filter(
-      (t) =>
-        t.status === "RESOLVED" ||
-        t.status === "CLOSED"
+      (t) => t.status === "RESOLVED" || t.status === "CLOSED",
     ).length;
 
     return {
@@ -46,7 +37,7 @@ export const AgentStatsCards: React.FC<AgentStatsCardsProps> = ({
   }, [tickets]);
 
   const cardClass =
-    "rounded-xl p-4 border transition-all duration-200 shadow-sm hover:shadow-md";
+    "rounded-xl p-4 border transition-all duration-250 ease-out hover:-translate-y-2 hover:border-[#2fd9c4] hover:shadow-[0_20px_50px_rgba(47,217,196,0.25)]";
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Bell, HelpCircle, X, Plus } from "lucide-react";
+import { Search, Bell, X, Plus } from "lucide-react";
 import {
   DARK_GREEN,
   TEAL_PRIMARY,
@@ -129,40 +129,45 @@ export function DashboardHeader({
           <Bell className="h-5 w-5" />
         </button>
 
-        <button
-          className="p-2 rounded-lg transition focus-visible:outline-none focus-visible:ring-2"
-          style={
-            {
-              color: BODY_TEXT_GREY,
-              "--tw-ring-color": TEAL_PRIMARY,
-            } as React.CSSProperties
-          }
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = LIGHT_TEAL_BG)
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = "transparent")
-          }
-        >
-          <HelpCircle className="h-5 w-5" />
-        </button>
-
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Avatar initials={userInitials} size="md" />
-          <span
-            className="hidden sm:block"
-            style={{
-              fontFamily: FONT_FAMILY.primary,
-              fontSize: BODY_REGULAR.size,
-              lineHeight: BODY_REGULAR.lineHeight,
-              fontWeight: FONT_WEIGHT.medium,
-              letterSpacing: BODY_REGULAR.letterSpacing,
-              color: DARK_GREEN,
-            }}
+        {role === "EMPLOYEE" ? (
+          <Link
+            href="/employee/settings"
+            aria-label="Open profile settings"
+            className="flex items-center gap-2 rounded-lg sm:gap-3"
           >
-            {userName}
-          </span>
-        </div>
+            <Avatar initials={userInitials} size="md" />
+            <span
+              className="hidden sm:block"
+              style={{
+                fontFamily: FONT_FAMILY.primary,
+                fontSize: BODY_REGULAR.size,
+                lineHeight: BODY_REGULAR.lineHeight,
+                fontWeight: FONT_WEIGHT.medium,
+                letterSpacing: BODY_REGULAR.letterSpacing,
+                color: DARK_GREEN,
+              }}
+            >
+              {userName}
+            </span>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Avatar initials={userInitials} size="md" />
+            <span
+              className="hidden sm:block"
+              style={{
+                fontFamily: FONT_FAMILY.primary,
+                fontSize: BODY_REGULAR.size,
+                lineHeight: BODY_REGULAR.lineHeight,
+                fontWeight: FONT_WEIGHT.medium,
+                letterSpacing: BODY_REGULAR.letterSpacing,
+                color: DARK_GREEN,
+              }}
+            >
+              {userName}
+            </span>
+          </div>
+        )}
       </div>
     </header>
   );

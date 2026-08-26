@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { PAGE_BACKGROUND } from "@/lib/colors";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
-import { Footer } from "@/components/layout/Footer";
 import { SuccessView } from "./CreateTicket/SuccessView";
 import { CreateTicketHeaderSection } from "./CreateTicket/CreateTicketHeaderSection";
 import { TicketForm } from "./CreateTicket/TicketForm";
@@ -55,7 +54,7 @@ export function CreateTicket() {
     >
       <Sidebar role="EMPLOYEE" />
 
-      <div className="flex-1 lg:pl-[280px] flex flex-col pb-[120px]">
+      <div className="flex-1 lg:pl-[280px] flex flex-col">
         <DashboardHeader
           userName="Jamie Smith"
           userInitials="JS"
@@ -81,10 +80,6 @@ export function CreateTicket() {
             />
           </div>
         </main>
-      </div>
-
-      <div className="fixed inset-x-0 bottom-0 z-40">
-        <Footer />
       </div>
     </div>
   );

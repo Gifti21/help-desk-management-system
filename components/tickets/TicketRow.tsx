@@ -10,13 +10,24 @@ interface TicketRowProps {
   onSelectTicket: (ticket: Ticket) => void;
 }
 
-export const TicketRow: React.FC<TicketRowProps> = ({ ticket, onSelectTicket }) => {
+export const TicketRow: React.FC<TicketRowProps> = ({
+  ticket,
+  onSelectTicket,
+}) => {
   return (
-    <tr className="hover:bg-slate-50 transition-colors text-xs border-b border-slate-100">
-      <td className="p-3.5 font-mono text-[#0E2621] font-bold">{ticket.ticketNumber || ticket.id}</td>
-      <td className="p-3.5 font-bold text-slate-900 max-w-xs truncate">{ticket.title}</td>
-      <td className="p-3.5 text-slate-600 font-medium">{ticket.creatorName || "Employee"}</td>
-      <td className="p-3.5 text-slate-600">{(ticket.category || ticket.department || "IT Support").toString()}</td>
+    <tr className="transition-colors text-xs border-b border-slate-100 hover:bg-[#dcfce7]">
+      <td className="p-3.5 font-mono text-[#0E2621] font-bold">
+        {ticket.ticketNumber || ticket.id}
+      </td>
+      <td className="p-3.5 font-bold text-slate-900 max-w-xs truncate">
+        {ticket.title}
+      </td>
+      <td className="p-3.5 text-slate-600 font-medium">
+        {ticket.creatorName || "Employee"}
+      </td>
+      <td className="p-3.5 text-slate-600">
+        {(ticket.category || ticket.department || "IT Support").toString()}
+      </td>
       <td className="p-3.5">
         <StatusBadge type="priority" value={ticket.priority} />
       </td>

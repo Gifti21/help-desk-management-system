@@ -177,20 +177,20 @@ export function TicketForm({
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 pt-4">
+        <div className="flex flex-col items-center justify-center gap-4 pt-4 sm:flex-row">
           <Button
             type="submit"
             disabled={!isFormReady || isSubmitting}
-            fullWidth
             size="md"
             variant="primary"
+            className="w-full sm:w-auto"
           >
             {isSubmitting ? "Creating..." : "Create Ticket"}
           </Button>
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-3 rounded-2xl border transition focus-visible:outline-none focus-visible:ring-2"
+            className="w-full rounded-2xl border px-6 py-3 transition focus-visible:outline-none focus-visible:ring-2 sm:w-auto"
             style={
               {
                 fontFamily: FONT_FAMILY.primary,

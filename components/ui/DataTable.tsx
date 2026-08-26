@@ -21,11 +21,17 @@ export const DataTable: React.FC<DataTableProps> = ({ tickets, onInspect }) => {
   const filteredTickets = useMemo(() => {
     return tickets.filter((t) => {
       const query = searchQuery.toLowerCase();
-      const catStr = (t.category || t.department || "").toString().toLowerCase();
+      const catStr = (t.category || t.department || "")
+        .toString()
+        .toLowerCase();
       const matchTitle = t.title.toLowerCase().includes(query);
-      const matchNumber = (t.ticketNumber || t.id).toLowerCase().includes(query);
+      const matchNumber = (t.ticketNumber || t.id)
+        .toLowerCase()
+        .includes(query);
       const matchCategory = catStr.includes(query);
-      const matchCreator = (t.creatorName || t.creatorEmail || "").toLowerCase().includes(query);
+      const matchCreator = (t.creatorName || t.creatorEmail || "")
+        .toLowerCase()
+        .includes(query);
 
       return matchTitle || matchNumber || matchCategory || matchCreator;
     });
@@ -81,11 +87,21 @@ export const DataTable: React.FC<DataTableProps> = ({ tickets, onInspect }) => {
         <table className="w-full text-left text-xs text-slate-700">
           <thead className="bg-slate-50 text-slate-600 font-mono uppercase text-[10px] border-b border-slate-200">
             <tr>
-              <th className="p-3 cursor-pointer hover:text-slate-900" onClick={() => toggleSort("ticketNumber")}>
-                <div className="flex items-center gap-1">ID <ArrowUpDown className="w-3 h-3" /></div>
+              <th
+                className="p-3 cursor-pointer hover:text-slate-900"
+                onClick={() => toggleSort("ticketNumber")}
+              >
+                <div className="flex items-center gap-1">
+                  ID <ArrowUpDown className="w-3 h-3" />
+                </div>
               </th>
-              <th className="p-3 cursor-pointer hover:text-slate-900" onClick={() => toggleSort("title")}>
-                <div className="flex items-center gap-1">Subject <ArrowUpDown className="w-3 h-3" /></div>
+              <th
+                className="p-3 cursor-pointer hover:text-slate-900"
+                onClick={() => toggleSort("title")}
+              >
+                <div className="flex items-center gap-1">
+                  Subject <ArrowUpDown className="w-3 h-3" />
+                </div>
               </th>
               <th className="p-3">Requester</th>
               <th className="p-3">Priority</th>
@@ -102,12 +118,25 @@ export const DataTable: React.FC<DataTableProps> = ({ tickets, onInspect }) => {
               </tr>
             ) : (
               paginatedTickets.map((ticket) => (
-                <tr key={ticket.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="p-3 font-mono text-[#0E2621] font-bold">{ticket.ticketNumber || ticket.id}</td>
-                  <td className="p-3 font-bold text-slate-900 max-w-xs truncate">{ticket.title}</td>
-                  <td className="p-3 text-slate-600">{ticket.creatorName || "Employee"}</td>
-                  <td className="p-3"><StatusBadge type="priority" value={ticket.priority} /></td>
-                  <td className="p-3"><StatusBadge type="status" value={ticket.status} /></td>
+                <tr
+                  key={ticket.id}
+                  className="transition-colors hover:bg-[#dcfce7]"
+                >
+                  <td className="p-3 font-mono text-[#0E2621] font-bold">
+                    {ticket.ticketNumber || ticket.id}
+                  </td>
+                  <td className="p-3 font-bold text-slate-900 max-w-xs truncate">
+                    {ticket.title}
+                  </td>
+                  <td className="p-3 text-slate-600">
+                    {ticket.creatorName || "Employee"}
+                  </td>
+                  <td className="p-3">
+                    <StatusBadge type="priority" value={ticket.priority} />
+                  </td>
+                  <td className="p-3">
+                    <StatusBadge type="status" value={ticket.status} />
+                  </td>
                   <td className="p-3 text-right">
                     <button
                       onClick={() => onInspect(ticket.id)}
@@ -125,7 +154,9 @@ export const DataTable: React.FC<DataTableProps> = ({ tickets, onInspect }) => {
 
       {/* Pagination Controls */}
       <div className="flex items-center justify-between text-xs text-slate-600 pt-2 font-mono">
-        <span>Showing Page {currentPage} of {totalPages}</span>
+        <span>
+          Showing Page {currentPage} of {totalPages}
+        </span>
         <div className="flex items-center gap-2">
           <button
             disabled={currentPage === 1}

@@ -128,7 +128,7 @@ export function Sidebar({ onLogout, role = "TECHNICIAN" }: SidebarProps) {
                 style={{ color: TEAL_PRIMARY }}
                 className="text-[10px] font-mono font-bold block uppercase tracking-wider"
               >
-                Support HDMS
+                {role === "EMPLOYEE" ? "Employee Portal" : "Support HDMS"}
               </span>
             </div>
           </div>
@@ -192,7 +192,7 @@ export function Sidebar({ onLogout, role = "TECHNICIAN" }: SidebarProps) {
                 />
               </div>
               <span className="text-sm font-semibold text-white">
-                BESYS Support
+                {role === "EMPLOYEE" ? "Employee Portal" : "BESYS Support"}
               </span>
             </div>
 
@@ -263,7 +263,9 @@ export function Sidebar({ onLogout, role = "TECHNICIAN" }: SidebarProps) {
                   priority
                 />
               </div>
-              <span className="text-sm font-semibold text-white">BESYS</span>
+              <span className="text-sm font-semibold text-white">
+                {role === "EMPLOYEE" ? "Employee Portal" : "BESYS"}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <Link
