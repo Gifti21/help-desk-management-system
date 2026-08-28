@@ -3,7 +3,7 @@
 import React from "react";
 import { Download, FileText } from "lucide-react";
 import { ActionButton } from "../admin/ActionButton";
-import { BUTTONS } from "@/lib/colors";
+import { BUTTONS, DARK_GREEN } from "@/lib/colors";
 import { Ticket } from "@/types/ticket";
 import { exportToCSV, exportToPDF } from "@/utils/exportUtils";
 
@@ -54,7 +54,8 @@ export function ExportButtons(props: ExportButtonsProps) {
     <div className="flex items-center gap-2 sm:gap-3 print:hidden">
       <button
         onClick={() => exportToCSV(tickets)}
-        className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-semibold shadow-sm transition-colors"
+        style={{ color: DARK_GREEN, borderColor: DARK_GREEN }}
+        className="inline-flex items-center gap-1.5 rounded-lg border bg-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors hover:bg-slate-50 sm:px-3.5 sm:py-2"
         title="Download CSV spreadsheet"
       >
         <Download className="w-3.5 h-3.5 text-slate-500" /> Export CSV

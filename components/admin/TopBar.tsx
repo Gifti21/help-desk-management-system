@@ -4,9 +4,9 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
 import { useTheme } from '../providers/ThemeProvider';
-import { useToast } from '../ui/toast';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { fonts } from '@/lib/fonts';
-import { Bell, User } from 'lucide-react';
+import { User } from 'lucide-react';
 
 interface TopBarProps {
     title: string;
@@ -16,12 +16,7 @@ interface TopBarProps {
 
 export function TopBar({ title, subtitle, actions }: TopBarProps) {
     const { colors } = useTheme();
-    const { toast } = useToast();
     const router = useRouter();
-
-    const handleNotifications = () => {
-        toast('No new notifications', 'info');
-    };
 
     const handleUserProfile = () => {
         router.push('/admin/profile');
@@ -69,15 +64,7 @@ export function TopBar({ title, subtitle, actions }: TopBarProps) {
                     {/* Theme toggle and user controls */}
                     <div className="flex items-center space-x-2">
                         <div className="hidden md:flex items-center space-x-2">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={handleNotifications}
-                                style={{ color: colors.foregroundMuted, cursor: 'pointer' }}
-                                title="Notifications"
-                            >
-                                <Bell className="h-5 w-5" />
-                            </Button>
+                            <NotificationBell role="ADMIN" />
 
                             <button
                                 onClick={handleUserProfile}

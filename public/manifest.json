@@ -1,0 +1,24 @@
+{
+  "name": "BESYS Support - Help Desk Management System",
+  "short_name": "BESYS Support",
+  "description": "Enterprise-grade support ticket management for BESYS Technologies",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#16332B",
+  "theme_color": "#2FD9C4",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/apple-icon", 
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ]
+}

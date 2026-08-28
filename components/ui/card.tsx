@@ -1,44 +1,55 @@
-import React from 'react';
-import { BORDER_GREY, CARD_BACKGROUND, PRIMARY_TEXT, BODY_TEXT_GREY } from '@/lib/colors';
-import { FONT_FAMILY, HEADING_MD, BODY_REGULAR } from '@/lib/fonts';
+import React from "react";
+import {
+  BORDER_GREY,
+  CARD_BACKGROUND,
+  PRIMARY_TEXT,
+  BODY_TEXT_GREY,
+} from "@/lib/colors";
+import { FONT_FAMILY, HEADING_MD, BODY_REGULAR } from "@/lib/fonts";
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'elevated' | 'bordered';
+  variant?: "default" | "elevated" | "bordered";
   children: React.ReactNode;
 }
 
-export function Card({ variant = 'default', className = '', children, ...props }: CardProps) {
+export function Card({
+  variant = "default",
+  className = "",
+  children,
+  ...props
+}: CardProps) {
   const getVariantStyles = () => {
     switch (variant) {
-      case 'elevated':
+      case "elevated":
         return {
           borderColor: BORDER_GREY,
-          backgroundColor: 'white',
-          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-          borderWidth: '1px',
-          borderStyle: 'solid',
+          backgroundColor: "white",
+          boxShadow:
+            "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+          borderWidth: "1px",
+          borderStyle: "solid",
         };
-      case 'bordered':
+      case "bordered":
         return {
           borderColor: BORDER_GREY,
           backgroundColor: CARD_BACKGROUND,
-          borderWidth: '1px',
-          borderStyle: 'solid',
+          borderWidth: "1px",
+          borderStyle: "solid",
         };
-      case 'default':
+      case "default":
       default:
         return {
           borderColor: BORDER_GREY,
-          backgroundColor: 'white',
-          borderWidth: '1px',
-          borderStyle: 'solid',
+          backgroundColor: "white",
+          borderWidth: "1px",
+          borderStyle: "solid",
         };
     }
   };
 
   return (
     <div
-      className={`rounded-2xl ${className}`}
+      className={`rounded-2xl transition-all duration-250 ease-out hover:-translate-y-2 hover:border-[#2fd9c4]! hover:shadow-[0_20px_50px_rgba(47,217,196,0.25)]! ${className}`}
       style={{
         ...getVariantStyles(),
         fontFamily: FONT_FAMILY.primary,
@@ -55,12 +66,13 @@ interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-export function CardHeader({ className = '', children, ...props }: CardHeaderProps) {
+export function CardHeader({
+  className = "",
+  children,
+  ...props
+}: CardHeaderProps) {
   return (
-    <div
-      className={`p-6 ${className}`}
-      {...props}
-    >
+    <div className={`p-6 ${className}`} {...props}>
       {children}
     </div>
   );
@@ -71,7 +83,11 @@ interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
   children: React.ReactNode;
 }
 
-export function CardTitle({ className = '', children, ...props }: CardTitleProps) {
+export function CardTitle({
+  className = "",
+  children,
+  ...props
+}: CardTitleProps) {
   return (
     <h3
       className={`${className}`}
@@ -95,7 +111,11 @@ interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-export function CardContent({ className = '', children, ...props }: CardContentProps) {
+export function CardContent({
+  className = "",
+  children,
+  ...props
+}: CardContentProps) {
   return (
     <div
       className={`p-6 pt-0 ${className}`}

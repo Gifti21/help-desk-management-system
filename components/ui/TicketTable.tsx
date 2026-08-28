@@ -1,14 +1,26 @@
 "use client";
 
 import { ChevronRight, FileX } from "lucide-react";
-import { BORDER_GREY, BODY_TEXT_GREY, PRIMARY_TEXT, PAGE_BACKGROUND, SECONDARY_BACKGROUND, LIGHT_TEAL_BG } from "@/lib/colors";
+import {
+  BORDER_GREY,
+  BODY_TEXT_GREY,
+  PRIMARY_TEXT,
+  PAGE_BACKGROUND,
+  SECONDARY_BACKGROUND,
+  LIGHT_TEAL_BG,
+} from "@/lib/colors";
 import { BODY_REGULAR, BODY_SM, FONT_FAMILY, FONT_WEIGHT } from "@/lib/fonts";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/Badge";
 
 type TicketStatus = "Open" | "In Progress" | "Resolved" | "Closed";
 type TicketPriority = "Low" | "Medium" | "High";
-type TicketCategory = "Hardware" | "Software" | "Network" | "Account Access" | "Other";
+type TicketCategory =
+  | "Hardware"
+  | "Software"
+  | "Network"
+  | "Account Access"
+  | "Other";
 
 interface Ticket {
   id: string;
@@ -22,11 +34,22 @@ interface Ticket {
 interface TicketTableProps {
   tickets: Ticket[];
   onRowClick: (ticketId: string) => void;
-  statusColors: Record<TicketStatus, { text: string; background: string; border: string }>;
-  priorityColors: Record<TicketPriority, { text: string; background: string; border: string }>;
+  statusColors: Record<
+    TicketStatus,
+    { text: string; background: string; border: string }
+  >;
+  priorityColors: Record<
+    TicketPriority,
+    { text: string; background: string; border: string }
+  >;
 }
 
-export function TicketTable({ tickets, onRowClick, statusColors, priorityColors }: TicketTableProps) {
+export function TicketTable({
+  tickets,
+  onRowClick,
+  statusColors,
+  priorityColors,
+}: TicketTableProps) {
   if (tickets.length === 0) {
     return (
       <div className="text-center py-12">
@@ -160,8 +183,12 @@ export function TicketTable({ tickets, onRowClick, statusColors, priorityColors 
                 className="cursor-pointer transition"
                 style={{ borderBottom: `1px solid ${BORDER_GREY}` }}
                 onClick={() => onRowClick(ticket.id)}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = SECONDARY_BACKGROUND}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#dcfce7")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = "transparent")
+                }
               >
                 <td
                   className="py-4"
@@ -209,7 +236,8 @@ export function TicketTable({ tickets, onRowClick, statusColors, priorityColors 
                 <td className="py-4">
                   <Badge
                     style={{
-                      backgroundColor: priorityColors[ticket.priority].background,
+                      backgroundColor:
+                        priorityColors[ticket.priority].background,
                       color: priorityColors[ticket.priority].text,
                       border: `1px solid ${priorityColors[ticket.priority].border}`,
                     }}
@@ -242,7 +270,10 @@ export function TicketTable({ tickets, onRowClick, statusColors, priorityColors 
                   {ticket.lastUpdated}
                 </td>
                 <td className="py-4 text-right">
-                  <ChevronRight className="h-5 w-5 inline" style={{ color: BODY_TEXT_GREY }} />
+                  <ChevronRight
+                    className="h-5 w-5 inline"
+                    style={{ color: BODY_TEXT_GREY }}
+                  />
                 </td>
               </tr>
             ))}
@@ -259,8 +290,12 @@ export function TicketTable({ tickets, onRowClick, statusColors, priorityColors 
             className="p-4 cursor-pointer transition"
             style={{ borderColor: BORDER_GREY }}
             onClick={() => onRowClick(ticket.id)}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = SECONDARY_BACKGROUND}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = PAGE_BACKGROUND}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "#dcfce7")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = PAGE_BACKGROUND)
+            }
           >
             <div className="flex items-start justify-between mb-3">
               <div>
@@ -290,7 +325,10 @@ export function TicketTable({ tickets, onRowClick, statusColors, priorityColors 
                   {ticket.title}
                 </p>
               </div>
-              <ChevronRight className="h-5 w-5" style={{ color: BODY_TEXT_GREY }} />
+              <ChevronRight
+                className="h-5 w-5"
+                style={{ color: BODY_TEXT_GREY }}
+              />
             </div>
             <div className="flex flex-wrap gap-2">
               <Badge

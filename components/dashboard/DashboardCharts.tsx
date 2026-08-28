@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   ResponsiveContainer,
@@ -12,8 +12,8 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-} from 'recharts';
-import type { ReactNode } from 'react';
+} from "recharts";
+import type { ReactNode } from "react";
 import {
   DARK_GREEN,
   TEAL_PRIMARY,
@@ -25,16 +25,16 @@ import {
   PAGE_BACKGROUND,
   BORDER_GREY,
   MUTED_GREY_GREEN,
-} from '@/lib/colors';
-import { FONT_FAMILY, HEADING_SM, BODY_SM, CAPTION_REGULAR } from '@/lib/fonts';
+} from "@/lib/colors";
+import { FONT_FAMILY, HEADING_SM, BODY_SM, CAPTION_REGULAR } from "@/lib/fonts";
 
 type TicketStatusItem = {
-  name: 'Open' | 'In Progress' | 'Resolved' | 'Closed' | string;
+  name: "Open" | "In Progress" | "Resolved" | "Closed" | string;
   value: number;
 };
 
 type PriorityItem = {
-  name: 'Critical' | 'High' | 'Medium' | 'Low' | string;
+  name: "Critical" | "High" | "Medium" | "Low" | string;
   value: number;
 };
 
@@ -44,8 +44,8 @@ type DashboardChartsProps = {
   loading?: boolean;
 };
 
-const statusColors = ['#2FD9C4', '#24C3B0', '#9BB0AB', '#16332B'];
-const priorityColors = ['#16332B', '#2FD9C4', '#24C3B0', '#AEECE4'];
+const statusColors = ["#2FD9C4", "#24C3B0", "#9BB0AB", "#16332B"];
+const priorityColors = ["#16332B", "#2FD9C4", "#24C3B0", "#AEECE4"];
 
 function ChartCard({
   title,
@@ -61,9 +61,7 @@ function ChartCard({
   empty?: boolean;
 }) {
   return (
-    <section
-      className="flex h-full flex-col rounded-2xl border p-5 shadow-xs transition hover:shadow-md bg-white border-slate-200"
-    >
+    <section className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all duration-250 ease-out hover:-translate-y-2 hover:border-[#2fd9c4] hover:shadow-[0_20px_50px_rgba(47,217,196,0.25)]">
       <div className="mb-5">
         <h3
           className="text-slate-900 font-extrabold"
@@ -87,17 +85,11 @@ function ChartCard({
 
       <div className="min-h-[280px] flex-1">
         {loading ? (
-          <div
-            className="flex h-[280px] w-full animate-pulse items-center justify-center rounded-xl bg-slate-100"
-          >
-            <div
-              className="h-24 w-24 rounded-full bg-slate-200"
-            />
+          <div className="flex h-[280px] w-full animate-pulse items-center justify-center rounded-xl bg-slate-100">
+            <div className="h-24 w-24 rounded-full bg-slate-200" />
           </div>
         ) : empty ? (
-          <div
-            className="flex h-[280px] items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 text-slate-500 text-xs"
-          >
+          <div className="flex h-[280px] items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 text-slate-500 text-xs">
             No chart data available.
           </div>
         ) : (
@@ -128,13 +120,13 @@ export default function DashboardCharts({
           <PieChart>
             <Tooltip
               contentStyle={{
-                backgroundColor: '#FFFFFF',
-                borderColor: '#E2E8F0',
+                backgroundColor: "#FFFFFF",
+                borderColor: "#E2E8F0",
                 borderRadius: 12,
-                color: '#0F172A',
-                fontFamily: 'Inter, sans-serif',
+                color: "#0F172A",
+                fontFamily: "Inter, sans-serif",
               }}
-              formatter={(value: any) => [`${value ?? 0}`, 'Tickets']}
+              formatter={(value: any) => [`${value ?? 0}`, "Tickets"]}
             />
             <Legend
               verticalAlign="bottom"
@@ -164,7 +156,10 @@ export default function DashboardCharts({
               strokeWidth={2}
             >
               {ticketStatusData.map((entry, index) => (
-                <Cell key={`ticket-${entry.name}-${index}`} fill={statusColors[index % statusColors.length]} />
+                <Cell
+                  key={`ticket-${entry.name}-${index}`}
+                  fill={statusColors[index % statusColors.length]}
+                />
               ))}
             </Pie>
           </PieChart>
@@ -178,37 +173,44 @@ export default function DashboardCharts({
         empty={!loading && !hasPriorityData}
       >
         <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={priorityData} margin={{ top: 10, right: 12, left: -12, bottom: 0 }}>
-            <CartesianGrid stroke="#E2E8F0" strokeDasharray="3 3" vertical={false} />
+          <BarChart
+            data={priorityData}
+            margin={{ top: 10, right: 12, left: -12, bottom: 0 }}
+          >
+            <CartesianGrid
+              stroke="#E2E8F0"
+              strokeDasharray="3 3"
+              vertical={false}
+            />
             <XAxis
               dataKey="name"
               tickLine={false}
-              axisLine={{ stroke: '#E2E8F0' }}
+              axisLine={{ stroke: "#E2E8F0" }}
               tick={{
-                fill: '#64748B',
-                fontFamily: 'Inter, sans-serif',
+                fill: "#64748B",
+                fontFamily: "Inter, sans-serif",
                 fontSize: 12,
               }}
             />
             <YAxis
               allowDecimals={false}
               tickLine={false}
-              axisLine={{ stroke: '#E2E8F0' }}
+              axisLine={{ stroke: "#E2E8F0" }}
               tick={{
-                fill: '#64748B',
-                fontFamily: 'Inter, sans-serif',
+                fill: "#64748B",
+                fontFamily: "Inter, sans-serif",
                 fontSize: 12,
               }}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#FFFFFF',
-                borderColor: '#E2E8F0',
+                backgroundColor: "#FFFFFF",
+                borderColor: "#E2E8F0",
                 borderRadius: 12,
-                color: '#0F172A',
-                fontFamily: 'Inter, sans-serif',
+                color: "#0F172A",
+                fontFamily: "Inter, sans-serif",
               }}
-              formatter={(value: any) => [`${value ?? 0}`, 'Tickets']}
+              formatter={(value: any) => [`${value ?? 0}`, "Tickets"]}
             />
             <Legend
               verticalAlign="bottom"
@@ -227,7 +229,10 @@ export default function DashboardCharts({
             />
             <Bar dataKey="value" radius={[10, 10, 0, 0]} barSize={36}>
               {priorityData.map((entry, index) => (
-                <Cell key={`priority-${entry.name}-${index}`} fill={priorityColors[index % priorityColors.length]} />
+                <Cell
+                  key={`priority-${entry.name}-${index}`}
+                  fill={priorityColors[index % priorityColors.length]}
+                />
               ))}
             </Bar>
           </BarChart>

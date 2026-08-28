@@ -86,7 +86,7 @@ export default function DepartmentsPage() {
     const [departments, setDepartments] = useState(mockDepartments);
     const [currentPage, setCurrentPage] = useState(1);
     const [actionsMenuOpen, setActionsMenuOpen] = useState<string | null>(null);
-    const itemsPerPage = 4;
+    const itemsPerPage = 5; // Consistent pagination: 5 items per page
     const [addModal, setAddModal] = useState(false);
     const [editModal, setEditModal] = useState<{ isOpen: boolean; department: any }>({ isOpen: false, department: null });
     const [formData, setFormData] = useState({ name: '' });

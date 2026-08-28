@@ -10,7 +10,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
-import { Footer } from "@/components/layout/Footer";
 
 export function TicketNotFound() {
   const router = useRouter();
@@ -21,7 +20,7 @@ export function TicketNotFound() {
       style={{ backgroundColor: PAGE_BACKGROUND }}
     >
       <Sidebar role="EMPLOYEE" />
-      <div className="flex-1 lg:pl-[280px] flex flex-col pb-[120px]">
+      <div className="flex-1 lg:pl-[280px] flex flex-col">
         <DashboardHeader
           userName="Jamie Smith"
           userInitials="JS"
@@ -69,10 +68,6 @@ export function TicketNotFound() {
             </Button>
           </Card>
         </main>
-      </div>
-
-      <div className="fixed inset-x-0 bottom-0 z-40">
-        <Footer />
       </div>
     </div>
   );

@@ -4,7 +4,16 @@ import React, { useMemo, useState } from "react";
 import { Ticket, Status } from "@/types/ticket";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatDate } from "@/utils/formatDate";
-import { Search, Filter, AlertCircle, RefreshCw, ArrowUpDown, Play, CheckCircle2, XCircle } from "lucide-react";
+import {
+  Search,
+  Filter,
+  AlertCircle,
+  RefreshCw,
+  ArrowUpDown,
+  Play,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 
 interface AgentTicketListProps {
   onStartProgress?: (ticketId: string) => void;
@@ -68,7 +77,10 @@ export function AgentTicketList({
       {/* Search & Filter Bar - Clean White Card */}
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-[#1B2D2A] dark:bg-[#0F2D2A]">
         <div className="relative flex-1 min-w-[220px]">
-          <Search size={16} className="absolute left-3 top-3 text-slate-400 dark:text-teal-400" />
+          <Search
+            size={16}
+            className="absolute left-3 top-3 text-slate-400 dark:text-teal-400"
+          />
           <input
             type="text"
             value={searchQuery}
@@ -126,32 +138,51 @@ export function AgentTicketList({
             <tbody className="divide-y divide-slate-200 bg-white text-slate-700 dark:divide-[#1B2D2A] dark:bg-[#111C1A] dark:text-slate-200">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
+                  <td
+                    colSpan={7}
+                    className="px-6 py-10 text-center text-slate-500 dark:text-slate-400"
+                  >
                     Loading tickets...
                   </td>
                 </tr>
               ) : tickets.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
+                  <td
+                    colSpan={7}
+                    className="px-6 py-10 text-center text-slate-500 dark:text-slate-400"
+                  >
                     No tickets found assigned to you matching these filters.
                   </td>
                 </tr>
               ) : (
                 tickets.map((t) => (
-                  <tr key={t.id} className="transition hover:bg-slate-50/80 dark:hover:bg-[#0F2D2A]/60">
+                  <tr
+                    key={t.id}
+                    className="transition hover:bg-[#dcfce7] dark:hover:bg-[#0F2D2A]/60"
+                  >
                     <td className="px-6 py-4">
-                      <p className="font-semibold text-slate-900 dark:text-slate-100">{t.ticketNumber}</p>
-                      <p className="line-clamp-1 text-xs text-slate-500 dark:text-slate-400">{t.title}</p>
+                      <p className="font-semibold text-slate-900 dark:text-slate-100">
+                        {t.ticketNumber}
+                      </p>
+                      <p className="line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
+                        {t.title}
+                      </p>
                     </td>
-                    <td className="px-6 py-4 font-medium text-slate-800 dark:text-slate-200">{String(t.creatorName || '')}</td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{String(t.category || '')}</td>
+                    <td className="px-6 py-4 font-medium text-slate-800 dark:text-slate-200">
+                      {String(t.creatorName || "")}
+                    </td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
+                      {String(t.category || "")}
+                    </td>
                     <td className="px-6 py-4">
                       <StatusBadge type="priority" value={t.priority} />
                     </td>
                     <td className="px-6 py-4">
                       <StatusBadge type="status" value={t.status} />
                     </td>
-                    <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">{formatDate(t.updatedAt)}</td>
+                    <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
+                      {formatDate(t.updatedAt)}
+                    </td>
                     <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => onSelectTicket(t)}

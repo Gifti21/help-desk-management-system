@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   title: "BESYS Support | Help Desk Management System",
   description:
     "Enterprise-grade support ticket management for BESYS Technologies. Track, assign, and resolve issues with real-time dashboards and reporting.",
+  keywords: "help desk, ticket management, support system, BESYS Technologies, IT support",
+  authors: [{ name: "BESYS Technologies" }],
+  creator: "BESYS Technologies",
+  publisher: "BESYS Technologies",
+  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {

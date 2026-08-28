@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
 import {
   ArrowRightLeft,
   MessageSquareText,
   UserPlus2,
   CircleDotDashed,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   DARK_GREEN,
   TEAL_PRIMARY,
@@ -17,10 +17,10 @@ import {
   PAGE_BACKGROUND,
   BORDER_GREY,
   MUTED_GREY_GREEN,
-} from '@/lib/colors';
-import { FONT_FAMILY, HEADING_SM, BODY_SM, CAPTION_REGULAR } from '@/lib/fonts';
+} from "@/lib/colors";
+import { FONT_FAMILY, HEADING_SM, BODY_SM, CAPTION_REGULAR } from "@/lib/fonts";
 
-type ActivityType = 'status' | 'comment' | 'assignment' | string;
+type ActivityType = "status" | "comment" | "assignment" | string;
 
 export type ActivityItem = {
   id: string;
@@ -37,7 +37,7 @@ type RecentActivityProps = {
 };
 
 const typeMap: Record<
-  'status' | 'comment' | 'assignment',
+  "status" | "comment" | "assignment",
   { icon: typeof CircleDotDashed; bg: string; color: string }
 > = {
   status: {
@@ -52,18 +52,18 @@ const typeMap: Record<
   },
   assignment: {
     icon: UserPlus2,
-    bg: 'rgba(47, 217, 196, 0.14)',
+    bg: "rgba(47, 217, 196, 0.14)",
     color: DARK_GREEN,
   },
 };
 
 export default function RecentActivity({
   activities,
-  title = 'Recent Activity',
+  title = "Recent Activity",
 }: RecentActivityProps) {
   return (
     <section
-      className="rounded-2xl border p-5 shadow-sm"
+      className="rounded-2xl border p-5 shadow-sm transition-all duration-250 ease-out hover:-translate-y-2 hover:border-[#2fd9c4] hover:shadow-[0_20px_50px_rgba(47,217,196,0.25)]"
       style={{
         backgroundColor: PAGE_BACKGROUND,
         borderColor: BORDER_GREY,
@@ -119,7 +119,7 @@ export default function RecentActivity({
             return (
               <article
                 key={activity.id}
-                className="flex gap-4 rounded-2xl border p-4 transition hover:shadow-sm"
+                className="flex gap-4 rounded-2xl border p-4 transition-all duration-250 ease-out hover:-translate-y-2 hover:border-[#2fd9c4] hover:shadow-[0_20px_50px_rgba(47,217,196,0.25)]"
                 style={{
                   backgroundColor: PAGE_BACKGROUND,
                   borderColor: BORDER_GREY,
