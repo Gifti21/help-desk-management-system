@@ -117,6 +117,7 @@ export function Sidebar({ onLogout, role = "TECHNICIAN" }: SidebarProps) {
                 src="/besys_logo.webp"
                 alt="Besys Technologies Logo"
                 fill
+                sizes="36px"
                 className="object-cover rounded-full"
                 priority
               />
@@ -200,6 +201,7 @@ export function Sidebar({ onLogout, role = "TECHNICIAN" }: SidebarProps) {
                   src="/besys_logo.webp"
                   alt="Besys Logo"
                   fill
+                  sizes="32px"
                   className="object-cover rounded-full"
                   priority
                 />
@@ -289,6 +291,7 @@ export function Sidebar({ onLogout, role = "TECHNICIAN" }: SidebarProps) {
                   src="/besys_logo.webp"
                   alt="Besys Logo"
                   fill
+                  sizes="28px"
                   className="object-cover rounded-full"
                   priority
                 />
