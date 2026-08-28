@@ -248,17 +248,21 @@ export function ResponsiveNavigation({
             onClick={() => {
               window.location.href = '/';
             }}
-            className="flex items-center w-full px-3 py-2 rounded-md transition-all duration-200 hover:bg-red-600/20"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 hover:shadow-md group"
             style={{
-              fontSize: fonts.body.sm.size,
-              fontWeight: fonts.body.regular.weight,
-              lineHeight: fonts.body.sm.lineHeight,
-              color: "rgba(255, 255, 255, 0.7)",
-              backgroundColor: "transparent",
+              color: '#ffffff',
+              backgroundColor: '#7f1d1d',
+              border: '1px solid #991b1b',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#991b1b';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#7f1d1d';
             }}
           >
-            <LogOut className="mr-3 h-4 w-4" />
-            Logout
+            <LogOut className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+            <span>Logout</span>
           </button>
         </div>
       </div>
@@ -317,15 +321,21 @@ export function ResponsiveNavigation({
             )}
             <button
               onClick={() => {
-                // Add logout logic here
                 window.location.href = '/';
               }}
-              className="flex items-center px-3 py-1 rounded-md transition-all duration-200 hover:bg-red-600/20"
+              className="flex items-center px-3 py-1 rounded-md transition-all duration-200"
               style={{
                 fontSize: fonts.button.sm.size,
                 fontWeight: fonts.button.sm.weight,
-                color: "rgba(255, 255, 255, 0.7)",
-                backgroundColor: "transparent",
+                color: '#ffffff',
+                backgroundColor: '#7f1d1d',
+                border: '1px solid #991b1b',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#991b1b';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#7f1d1d';
               }}
             >
               <LogOut className="h-3 w-3" />
@@ -513,15 +523,21 @@ export function ResponsiveNavigation({
             )}
             <button
               onClick={() => {
-                // Add logout logic here
                 window.location.href = '/';
               }}
-              className="flex items-center px-2 py-1 rounded-md transition-all duration-200 hover:bg-red-600/20"
+              className="flex items-center px-2 py-1 rounded-md transition-all duration-200"
               style={{
                 fontSize: fonts.button.sm.size,
                 fontWeight: fonts.button.sm.weight,
-                color: "rgba(255, 255, 255, 0.7)",
-                backgroundColor: "transparent",
+                color: '#ffffff',
+                backgroundColor: '#7f1d1d',
+                border: '1px solid #991b1b',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#991b1b';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#7f1d1d';
               }}
             >
               <LogOut className="h-4 w-4" />

@@ -147,7 +147,7 @@ const mockTickets = [
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 5; // Consistent pagination: 5 items per page
   const { colors: theme } = useTheme();
   const { toast } = useToast();
 
@@ -528,10 +528,21 @@ export default function AdminDashboard() {
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card
-            className="shadow-sm transition-colors"
+            className="shadow-sm transition-all duration-300 hover:shadow-xl hover:scale-[1.02] cursor-pointer rounded-2xl border-2"
             style={{
               backgroundColor: "var(--card)",
               borderColor: "var(--card-border)",
+              borderRadius: "16px",
+              boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1)",
+              transition: "all 0.3s ease-in-out",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = theme.primary;
+              e.currentTarget.style.boxShadow = `0 10px 25px -5px rgba(20, 184, 166, 0.3), 0 0 20px rgba(20, 184, 166, 0.2)`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "var(--card-border)";
+              e.currentTarget.style.boxShadow = "0 1px 3px 0 rgba(0, 0, 0, 0.1)";
             }}
           >
             <div className="p-6">
@@ -626,10 +637,21 @@ export default function AdminDashboard() {
           </Card>
 
           <Card
-            className="shadow-sm transition-colors"
+            className="shadow-sm transition-all duration-300 hover:shadow-xl hover:scale-[1.02] cursor-pointer rounded-2xl border-2"
             style={{
               backgroundColor: "var(--card)",
               borderColor: "var(--card-border)",
+              borderRadius: "16px",
+              boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1)",
+              transition: "all 0.3s ease-in-out",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = theme.primary;
+              e.currentTarget.style.boxShadow = `0 10px 25px -5px rgba(20, 184, 166, 0.3), 0 0 20px rgba(20, 184, 166, 0.2)`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "var(--card-border)";
+              e.currentTarget.style.boxShadow = "0 1px 3px 0 rgba(0, 0, 0, 0.1)";
             }}
           >
             <div className="p-6">
@@ -655,10 +677,21 @@ export default function AdminDashboard() {
           </Card>
 
           <Card
-            className="shadow-sm transition-colors"
+            className="shadow-sm transition-all duration-300 hover:shadow-xl hover:scale-[1.02] cursor-pointer rounded-2xl border-2"
             style={{
               backgroundColor: "var(--card)",
               borderColor: "var(--card-border)",
+              borderRadius: "16px",
+              boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1)",
+              transition: "all 0.3s ease-in-out",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = theme.primary;
+              e.currentTarget.style.boxShadow = `0 10px 25px -5px rgba(20, 184, 166, 0.3), 0 0 20px rgba(20, 184, 166, 0.2)`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "var(--card-border)";
+              e.currentTarget.style.boxShadow = "0 1px 3px 0 rgba(0, 0, 0, 0.1)";
             }}
           >
             <div className="p-6">
@@ -746,17 +779,16 @@ export default function AdminDashboard() {
                     >
                       Previous
                     </ActionButton>
-                    <div className="flex items-center gap-2 px-3">
-                      <span
-                        style={{
-                          fontSize: fonts.body.sm.size,
-                          color: theme.foreground,
-                          fontWeight: fonts.fontWeight.medium,
-                        }}
-                      >
-                        Page {currentPage} of {totalPages}
-                      </span>
-                    </div>
+                    <span
+                      style={{
+                        fontSize: fonts.body.sm.size,
+                        color: theme.foreground,
+                        fontWeight: fonts.fontWeight.medium,
+                        padding: '0 12px'
+                      }}
+                    >
+                      Page {currentPage} of {totalPages}
+                    </span>
                     <ActionButton
                       variant="outline"
                       size="sm"

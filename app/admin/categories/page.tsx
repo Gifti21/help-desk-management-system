@@ -77,7 +77,7 @@ export default function CategoriesPage() {
     const [categories, setCategories] = useState(mockCategories);
     const [currentPage, setCurrentPage] = useState(1);
     const [actionsMenuOpen, setActionsMenuOpen] = useState<string | null>(null);
-    const itemsPerPage = 4;
+    const itemsPerPage = 5; // Consistent pagination: 5 items per page
     const [addModal, setAddModal] = useState(false);
     const [editModal, setEditModal] = useState<{ isOpen: boolean; category: any }>({ isOpen: false, category: null });
     const [viewModal, setViewModal] = useState<{ isOpen: boolean; category: any }>({ isOpen: false, category: null });
@@ -317,32 +317,9 @@ export default function CategoriesPage() {
                             >
                                 Previous
                             </ActionButton>
-                            <div className="flex items-center gap-1">
-                                {(() => {
-                                    const maxVisiblePages = 4;
-                                    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-                                    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-                                    if (endPage - startPage < maxVisiblePages - 1) {
-                                        startPage = Math.max(1, endPage - maxVisiblePages + 1);
-                                    }
-
-                                    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(page => (
-                                        <button
-                                            key={page}
-                                            onClick={() => setCurrentPage(page)}
-                                            className="w-8 h-8 rounded flex items-center justify-center transition-colors"
-                                            style={{
-                                                backgroundColor: currentPage === page ? theme.primary : 'transparent',
-                                                color: currentPage === page ? '#16332B' : theme.foreground,
-                                                fontSize: fonts.body.sm.size
-                                            }}
-                                        >
-                                            {page}
-                                        </button>
-                                    ));
-                                })()}
-                            </div>
+                            <span style={{ fontSize: fonts.body.sm.size, color: theme.foreground, fontWeight: fonts.fontWeight.medium, padding: '0 12px' }}>
+                                Page {currentPage} of {totalPages}
+                            </span>
                             <ActionButton
                                 variant="outline"
                                 size="sm"

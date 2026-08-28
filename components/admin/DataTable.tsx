@@ -29,10 +29,21 @@ export function DataTable({
 }: DataTableProps) {
   return (
     <Card
-      className="shadow-sm transition-colors"
+      className="shadow-sm transition-all duration-300 hover:shadow-xl hover:scale-[1.01] cursor-pointer rounded-2xl border-2"
       style={{
         backgroundColor: "white",
         borderColor: colors.borderGrey,
+        borderRadius: "16px",
+        boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1)",
+        transition: "all 0.3s ease-in-out",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = colors.tealPrimary;
+        e.currentTarget.style.boxShadow = `0 10px 25px -5px rgba(20, 184, 166, 0.3), 0 0 20px rgba(20, 184, 166, 0.2)`;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = colors.borderGrey;
+        e.currentTarget.style.boxShadow = "0 1px 3px 0 rgba(0, 0, 0, 0.1)";
       }}
     >
       {(title || actions) && (

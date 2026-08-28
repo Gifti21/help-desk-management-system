@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Bell, X, Plus } from "lucide-react";
+import { Search, X, Plus } from "lucide-react";
 import {
   DARK_GREEN,
   TEAL_PRIMARY,
@@ -23,6 +23,7 @@ import {
 } from "@/lib/fonts";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/Avatar";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 interface DashboardHeaderProps {
   userName: string;
@@ -111,23 +112,7 @@ export function DashboardHeader({
           </Link>
         )}
 
-        <button
-          className="p-2 rounded-lg transition focus-visible:outline-none focus-visible:ring-2"
-          style={
-            {
-              color: BODY_TEXT_GREY,
-              "--tw-ring-color": TEAL_PRIMARY,
-            } as React.CSSProperties
-          }
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = LIGHT_TEAL_BG)
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = "transparent")
-          }
-        >
-          <Bell className="h-5 w-5" />
-        </button>
+        <NotificationBell role={role} />
 
         {role === "EMPLOYEE" ? (
           <Link

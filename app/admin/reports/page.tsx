@@ -260,7 +260,7 @@ export default function ReportsPage() {
   const [deptsPage, setDeptsPage] = useState(1);
   const [catsPage, setCatsPage] = useState(1);
   const [ticketsPage, setTicketsPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 5; // Consistent pagination: 5 items per page
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");

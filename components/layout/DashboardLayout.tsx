@@ -27,7 +27,7 @@ export function DashboardLayout({
     >
       <Sidebar role={role} />
 
-      <div className="flex-1 lg:pl-[280px] flex flex-col">
+      <div className="flex-1 lg:pl-64 flex flex-col">
         <DashboardHeader
           userName={userName}
           userInitials={userInitials}

@@ -21,6 +21,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import type { Ticket, Comment } from "@/lib/types/ticket";
 
 interface TicketCommentsProps {
@@ -29,11 +30,13 @@ interface TicketCommentsProps {
 
 export function TicketComments({ ticket }: TicketCommentsProps) {
   const [newComment, setNewComment] = useState("");
+  const { toast } = useToast();
 
   const handleAddComment = () => {
     if (newComment.trim()) {
       // In a real app, this would send to the backend
       setNewComment("");
+      toast("Comment posted successfully!", "success");
     }
   };
 
