@@ -22,7 +22,11 @@ export const authOptions: NextAuthOptions = {
           include: { department: true }
         });
 
-        if (!user || !user.isActive) {
+        if (!user) {
+          return null;
+        }
+
+        if (!user.isActive) {
           return null;
         }
 

@@ -1,0 +1,239 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { z } from 'zod';
+
+// Validation schema for ticket creation
+const ticketCreateSchema = z.object({
+    title: z.string().min(1, 'Title is required').max(200),
+    description: z.string().min(1, 'Description is required'),
+    priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
+    categoryId: z.string().uuid('Invalid category ID'),
+    departmentId: z.string().uuid('Invalid department ID'),
+    requesterId: z.string().uuid('Invalid requester ID'),
+    assigneeId: z.string().uuid('Invalid assignee ID').optional(),
+});
+
+/**
+ * GET /api/admin/tickets - Get all tickets (Admin only)
+ */
+export async function GET(request: NextRequest) {
+    try {
+        const session = await getServerSession(authOptions);
+
+        if (!session || session.user.role !== 'admin') {
+            return NextResponse.json(
+                { error: 'Unauthorized - Admin access required' },
+                { status: 401 }
+            );
+        }
+
+        // Get query parameters for filtering
+        const { searchParams } = new URL(request.url);
+        const status = searchParams.get('status');
+        const priority = searchParams.get('priority');
+        const categoryId = searchParams.get('categoryId');
+        const departmentId = searchParams.get('departmentId');
+        const assigneeId = searchParams.get('assigneeId');
+
+        // Build where clause
+        const where: any = {};
+        if (status) where.status = status;
+        if (priority) where.priority = priority;
+        if (categoryId) where.categoryId = categoryId;
+        if (departmentId) where.departmentId = departmentId;
+        if (assigneeId) where.assigneeId = assigneeId;
+
+        const tickets = await prisma.ticket.findMany({
+            where,
+            include: {
+                category: {
+                    select: {
+                        id: true,
+                        name: true,
+                    }
+                },
+                department: {
+                    select: {
+                        id: true,
+                        name: true,
+                    }
+                },
+                requester: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    }
+                },
+                assignee: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    }
+                },
+                _count: {
+                    select: {
+                        comments: true,
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: 'desc',
+            }
+        });
+
+        return NextResponse.json({
+            success: true,
+            data: tickets,
+        });
+    } catch (error) {
+        console.error('GET /api/admin/tickets error:', error);
+        return NextResponse.json(
+            { error: 'Failed to fetch tickets' },
+            { status: 500 }
+        );
+    }
+}
+
+/**
+ * POST /api/admin/tickets - Create a new ticket (Admin only)
+ */
+export async function POST(request: NextRequest) {
+    try {
+        const session = await getServerSession(authOptions);
+
+        if (!session || session.user.role !== 'admin') {
+            return NextResponse.json(
+                { error: 'Unauthorized - Admin access required' },
+                { status: 401 }
+            );
+        }
+
+        const body = await request.json();
+
+        // Validate request body
+        const validation = ticketCreateSchema.safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json(
+                { error: 'Validation failed', details: validation.error.errors },
+                { status: 400 }
+            );
+        }
+
+        const { title, description, priority, categoryId, departmentId, requesterId, assigneeId } = validation.data;
+
+        // Verify category exists
+        const category = await prisma.category.findUnique({
+            where: { id: categoryId }
+        });
+        if (!category) {
+            return NextResponse.json(
+                { error: 'Category not found' },
+                { status: 404 }
+            );
+        }
+
+        // Verify department exists
+        const department = await prisma.department.findUnique({
+            where: { id: departmentId }
+        });
+        if (!department) {
+            return NextResponse.json(
+                { error: 'Department not found' },
+                { status: 404 }
+            );
+        }
+
+        // Verify requester exists
+        const requester = await prisma.user.findUnique({
+            where: { id: requesterId }
+        });
+        if (!requester) {
+            return NextResponse.json(
+                { error: 'Requester not found' },
+                { status: 404 }
+            );
+        }
+
+        // Verify assignee exists (if provided)
+        if (assigneeId) {
+            const assignee = await prisma.user.findUnique({
+                where: { id: assigneeId }
+            });
+            if (!assignee) {
+                return NextResponse.json(
+                    { error: 'Assignee not found' },
+                    { status: 404 }
+                );
+            }
+            // Check assignee role
+            if (assignee.role !== 'agent' && assignee.role !== 'admin') {
+                return NextResponse.json(
+                    { error: 'Assignee must be an agent or admin' },
+                    { status: 400 }
+                );
+            }
+        }
+
+        // Create ticket
+        const ticket = await prisma.ticket.create({
+            data: {
+                title,
+                description,
+                priority,
+                status: 'OPEN',
+                categoryId,
+                departmentId,
+                requesterId,
+                assigneeId,
+            },
+            include: {
+                category: {
+                    select: {
+                        id: true,
+                        name: true,
+                    }
+                },
+                department: {
+                    select: {
+                        id: true,
+                        name: true,
+                    }
+                },
+                requester: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    }
+                },
+                assignee: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    }
+                }
+            }
+        });
+
+        return NextResponse.json({
+            success: true,
+            data: ticket,
+        }, { status: 201 });
+
+    } catch (error) {
+        console.error('POST /api/admin/tickets error:', error);
+        return NextResponse.json(
+            { error: 'Failed to create ticket' },
+            { status: 500 }
+        );
+    }
+}
