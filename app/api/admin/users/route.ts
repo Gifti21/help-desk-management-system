@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getSessionUser } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
 
 // Validation schema for user creation
 const userCreateSchema = z.object({
-    email: z.string().email('Invalid email address'),
+    email: z.string().min(1, 'Email is required').email('Invalid email address'),
     firstName: z.string().min(1, 'First name is required').max(50),
     lastName: z.string().min(1, 'Last name is required').max(50),
     password: z.string().min(6, 'Password must be at least 6 characters'),
-    role: z.enum(['admin', 'agent', 'employee'], {
-        errorMap: () => ({ message: 'Role must be admin, agent, or employee' })
-    }),
-    departmentId: z.string().uuid('Invalid department ID'),
+    role: z.enum(['admin', 'agent', 'employee'], { message: 'Role must be admin, agent, or employee' }),
+    departmentId: z.string().min(1, 'Department is required'),
     isActive: z.boolean().optional().default(true),
 });
 
@@ -23,9 +20,9 @@ const userCreateSchema = z.object({
  */
 export async function GET(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const sessionUser = await getSessionUser();
 
-        if (!session || session.user.role !== 'admin') {
+        if (!sessionUser || sessionUser.role !== 'ADMIN') {
             return NextResponse.json(
                 { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
@@ -66,7 +63,7 @@ export async function GET(request: NextRequest) {
         });
 
         // Remove password hash from response
-        const usersWithoutPassword = users.map(({ passwordHash, ...user }) => user);
+        const usersWithoutPassword = users.map(({ passwordHash, ...userRest }) => userRest);
 
         return NextResponse.json({
             success: true,
@@ -86,9 +83,9 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const sessionUser = await getSessionUser();
 
-        if (!session || session.user.role !== 'admin') {
+        if (!sessionUser || sessionUser.role !== 'ADMIN') {
             return NextResponse.json(
                 { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
@@ -96,12 +93,18 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
+        console.log('[CREATE USER] Request body received:', { ...body, password: body.password ? '[HIDDEN]' : undefined });
 
         // Validate request body
         const validation = userCreateSchema.safeParse(body);
         if (!validation.success) {
+            console.error('[CREATE USER] Validation failed:', validation.error.issues);
             return NextResponse.json(
-                { error: 'Validation failed', details: validation.error.errors },
+                {
+                    error: 'Validation failed',
+                    details: validation.error.issues,
+                    message: validation.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ')
+                },
                 { status: 400 }
             );
         }
@@ -136,13 +139,13 @@ export async function POST(request: NextRequest) {
         const passwordHash = await bcrypt.hash(password, 10);
 
         // Create user
-        const user = await prisma.user.create({
+        const newUser = await prisma.user.create({
             data: {
                 email: email.toLowerCase(),
                 firstName,
                 lastName,
                 passwordHash,
-                role,
+                role: role.toUpperCase() as 'ADMIN' | 'AGENT' | 'EMPLOYEE',
                 departmentId,
                 isActive,
             },
@@ -157,7 +160,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Remove password hash from response
-        const { passwordHash: _, ...userWithoutPassword } = user;
+        const { passwordHash: _, ...userWithoutPassword } = newUser;
 
         return NextResponse.json({
             success: true,

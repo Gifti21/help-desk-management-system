@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getSessionUser } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
 
 // Validation schema for user update
 const userUpdateSchema = z.object({
-    email: z.string().email().optional(),
-    firstName: z.string().min(1).max(50).optional(),
-    lastName: z.string().min(1).max(50).optional(),
-    password: z.string().min(6).optional(),
-    role: z.enum(['admin', 'agent', 'employee']).optional(),
-    departmentId: z.string().uuid().optional(),
+    email: z.string().email('Invalid email address').optional(),
+    firstName: z.string().min(1, 'First name is required').max(50).optional(),
+    lastName: z.string().min(1, 'Last name is required').max(50).optional(),
+    password: z.string().min(6, 'Password must be at least 6 characters').optional(),
+    role: z.enum(['admin', 'agent', 'employee'], { message: 'Role must be admin, agent, or employee' }).optional(),
+    departmentId: z.string().min(1, 'Department is required').optional(),
     isActive: z.boolean().optional(),
 });
 
@@ -24,16 +23,16 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const sessionUser = await getSessionUser();
 
-        if (!session || session.user.role !== 'admin') {
+        if (!sessionUser || sessionUser.role !== 'ADMIN') {
             return NextResponse.json(
                 { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
             );
         }
 
-        const user = await prisma.user.findUnique({
+        const foundUser = await prisma.user.findUnique({
             where: { id: params.id },
             include: {
                 department: {
@@ -51,7 +50,7 @@ export async function GET(
             }
         });
 
-        if (!user) {
+        if (!foundUser) {
             return NextResponse.json(
                 { error: 'User not found' },
                 { status: 404 }
@@ -59,7 +58,7 @@ export async function GET(
         }
 
         // Remove password hash from response
-        const { passwordHash, ...userWithoutPassword } = user;
+        const { passwordHash, ...userWithoutPassword } = foundUser;
 
         return NextResponse.json({
             success: true,
@@ -83,9 +82,9 @@ export async function PATCH(
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const sessionUser = await getSessionUser();
 
-        if (!session || session.user.role !== 'admin') {
+        if (!sessionUser || sessionUser.role !== 'ADMIN') {
             return NextResponse.json(
                 { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
@@ -150,7 +149,7 @@ export async function PATCH(
         if (email) updateData.email = email.toLowerCase();
         if (firstName) updateData.firstName = firstName;
         if (lastName) updateData.lastName = lastName;
-        if (role) updateData.role = role;
+        if (role) updateData.role = role.toUpperCase() as 'ADMIN' | 'AGENT' | 'EMPLOYEE';
         if (departmentId) updateData.departmentId = departmentId;
         if (isActive !== undefined) updateData.isActive = isActive;
         if (password) {
@@ -158,7 +157,7 @@ export async function PATCH(
         }
 
         // Update user
-        const user = await prisma.user.update({
+        const updatedUser = await prisma.user.update({
             where: { id: params.id },
             data: updateData,
             include: {
@@ -172,7 +171,7 @@ export async function PATCH(
         });
 
         // Remove password hash from response
-        const { passwordHash, ...userWithoutPassword } = user;
+        const { passwordHash, ...userWithoutPassword } = updatedUser;
 
         return NextResponse.json({
             success: true,
@@ -196,9 +195,9 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const sessionUser = await getSessionUser();
 
-        if (!session || session.user.role !== 'admin') {
+        if (!sessionUser || sessionUser.role !== 'ADMIN') {
             return NextResponse.json(
                 { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
@@ -206,7 +205,7 @@ export async function DELETE(
         }
 
         // Check if user exists
-        const user = await prisma.user.findUnique({
+        const userToDelete = await prisma.user.findUnique({
             where: { id: params.id },
             include: {
                 _count: {
@@ -218,7 +217,7 @@ export async function DELETE(
             }
         });
 
-        if (!user) {
+        if (!userToDelete) {
             return NextResponse.json(
                 { error: 'User not found' },
                 { status: 404 }
@@ -226,12 +225,12 @@ export async function DELETE(
         }
 
         // Prevent deletion if user has tickets
-        if (user._count.requestedTickets > 0 || user._count.assignedTickets > 0) {
+        if (userToDelete._count.requestedTickets > 0 || userToDelete._count.assignedTickets > 0) {
             return NextResponse.json(
                 {
                     error: 'Cannot delete user with existing tickets',
-                    requestedTickets: user._count.requestedTickets,
-                    assignedTickets: user._count.assignedTickets
+                    requestedTickets: userToDelete._count.requestedTickets,
+                    assignedTickets: userToDelete._count.assignedTickets
                 },
                 { status: 409 }
             );

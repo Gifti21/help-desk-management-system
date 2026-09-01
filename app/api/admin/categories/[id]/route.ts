@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getSessionUser } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
@@ -17,9 +16,9 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const user = await getSessionUser();
 
-        if (!session || session.user.role !== 'admin') {
+        if (!user || user.role !== 'ADMIN') {
             return NextResponse.json(
                 { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
@@ -66,9 +65,9 @@ export async function PATCH(
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const user = await getSessionUser();
 
-        if (!session || session.user.role !== 'admin') {
+        if (!user || user.role !== 'ADMIN') {
             return NextResponse.json(
                 { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
@@ -152,9 +151,9 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const user = await getSessionUser();
 
-        if (!session || session.user.role !== 'admin') {
+        if (!user || user.role !== 'ADMIN') {
             return NextResponse.json(
                 { error: 'Unauthorized - Admin access required' },
                 { status: 401 }

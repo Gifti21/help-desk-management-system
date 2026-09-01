@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import type { UserRole } from "@/types/user";
 
 export const authOptions: NextAuthOptions = {
+  debug: true,
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -13,20 +14,28 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        console.log('[AUTH] authorize() called');
+        console.log('[AUTH] Email:', credentials?.email);
+
         if (!credentials?.email || !credentials?.password) {
+          console.log('[AUTH] Missing credentials');
           return null;
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email: credentials.email.toLowerCase() },
           include: { department: true }
         });
 
+        console.log('[AUTH] User found:', !!user);
+
         if (!user) {
+          console.log('[AUTH] User not found in database');
           return null;
         }
 
         if (!user.isActive) {
+          console.log('[AUTH] User is not active');
           return null;
         }
 
@@ -35,10 +44,13 @@ export const authOptions: NextAuthOptions = {
           user.passwordHash
         );
 
+        console.log('[AUTH] Password valid:', isPasswordValid);
+
         if (!isPasswordValid) {
           return null;
         }
 
+        console.log('[AUTH] Login successful for:', user.email);
         return {
           id: user.id,
           email: user.email,

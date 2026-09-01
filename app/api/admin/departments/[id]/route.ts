@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getSessionUser } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
-const updateDepartmentSchema = z.object({
-    name: z.string()
-        .min(1, 'Department name is required')
-        .max(100, 'Department name must be less than 100 characters')
-        .trim(),
+const departmentUpdateSchema = z.object({
+    name: z.string().min(1).max(100).optional(),
 });
 
 /**
@@ -19,19 +15,12 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const user = await getSessionUser();
 
-        if (!session?.user) {
+        if (!user || user.role !== 'ADMIN') {
             return NextResponse.json(
-                { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+                { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
-            );
-        }
-
-        if (session.user.role !== 'ADMIN') {
-            return NextResponse.json(
-                { success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } },
-                { status: 403 }
             );
         }
 
@@ -42,14 +31,14 @@ export async function GET(
                     select: {
                         users: true,
                         tickets: true,
-                    },
-                },
-            },
+                    }
+                }
+            }
         });
 
         if (!department) {
             return NextResponse.json(
-                { success: false, error: { code: 'NOT_FOUND', message: 'Department not found' } },
+                { error: 'Department not found' },
                 { status: 404 }
             );
         }
@@ -58,10 +47,11 @@ export async function GET(
             success: true,
             data: department,
         });
-    } catch (error: any) {
-        console.error('Error fetching department:', error);
+
+    } catch (error) {
+        console.error('GET /api/admin/departments/[id] error:', error);
         return NextResponse.json(
-            { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch department' } },
+            { error: 'Failed to fetch department' },
             { status: 500 }
         );
     }
@@ -75,86 +65,75 @@ export async function PATCH(
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const user = await getSessionUser();
 
-        if (!session?.user) {
+        if (!user || user.role !== 'ADMIN') {
             return NextResponse.json(
-                { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+                { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
             );
         }
 
-        if (session.user.role !== 'ADMIN') {
-            return NextResponse.json(
-                { success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } },
-                { status: 403 }
-            );
-        }
-
         const body = await request.json();
-        const validation = updateDepartmentSchema.safeParse(body);
 
+        const validation = departmentUpdateSchema.safeParse(body);
         if (!validation.success) {
             return NextResponse.json(
-                {
-                    success: false,
-                    error: {
-                        code: 'VALIDATION_ERROR',
-                        message: 'Validation failed',
-                        details: validation.error.errors,
-                    },
-                },
+                { error: 'Validation failed', details: validation.error.errors },
                 { status: 400 }
             );
         }
 
-        // Check if department exists
-        const existing = await prisma.department.findUnique({
-            where: { id: params.id },
+        const existingDepartment = await prisma.department.findUnique({
+            where: { id: params.id }
         });
 
-        if (!existing) {
+        if (!existingDepartment) {
             return NextResponse.json(
-                { success: false, error: { code: 'NOT_FOUND', message: 'Department not found' } },
+                { error: 'Department not found' },
                 { status: 404 }
             );
         }
 
-        // Check for duplicate name (excluding current department)
-        const duplicate = await prisma.department.findFirst({
-            where: {
-                name: validation.data.name,
-                id: { not: params.id },
-            },
-        });
+        const { name } = validation.data;
 
-        if (duplicate) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: {
-                        code: 'DUPLICATE_ERROR',
-                        message: 'Department name already exists',
+        if (name) {
+            const duplicate = await prisma.department.findFirst({
+                where: {
+                    name: {
+                        equals: name,
+                        mode: 'insensitive'
                     },
-                },
-                { status: 400 }
-            );
+                    id: {
+                        not: params.id
+                    }
+                }
+            });
+
+            if (duplicate) {
+                return NextResponse.json(
+                    { error: 'Department with this name already exists' },
+                    { status: 409 }
+                );
+            }
         }
 
         const department = await prisma.department.update({
             where: { id: params.id },
-            data: validation.data,
+            data: {
+                ...(name && { name }),
+            }
         });
 
         return NextResponse.json({
             success: true,
             data: department,
-            message: 'Department updated successfully',
         });
-    } catch (error: any) {
-        console.error('Error updating department:', error);
+
+    } catch (error) {
+        console.error('PATCH /api/admin/departments/[id] error:', error);
         return NextResponse.json(
-            { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update department' } },
+            { error: 'Failed to update department' },
             { status: 500 }
         );
     }
@@ -162,30 +141,21 @@ export async function PATCH(
 
 /**
  * DELETE /api/admin/departments/[id] - Delete department (Admin only)
- * Prevents deletion if department has users or tickets
  */
 export async function DELETE(
     request: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const user = await getSessionUser();
 
-        if (!session?.user) {
+        if (!user || user.role !== 'ADMIN') {
             return NextResponse.json(
-                { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+                { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
             );
         }
 
-        if (session.user.role !== 'ADMIN') {
-            return NextResponse.json(
-                { success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } },
-                { status: 403 }
-            );
-        }
-
-        // Check if department exists and has any users or tickets
         const department = await prisma.department.findUnique({
             where: { id: params.id },
             include: {
@@ -193,14 +163,14 @@ export async function DELETE(
                     select: {
                         users: true,
                         tickets: true,
-                    },
-                },
-            },
+                    }
+                }
+            }
         });
 
         if (!department) {
             return NextResponse.json(
-                { success: false, error: { code: 'NOT_FOUND', message: 'Department not found' } },
+                { error: 'Department not found' },
                 { status: 404 }
             );
         }
@@ -208,32 +178,27 @@ export async function DELETE(
         if (department._count.users > 0 || department._count.tickets > 0) {
             return NextResponse.json(
                 {
-                    success: false,
-                    error: {
-                        code: 'CONSTRAINT_ERROR',
-                        message: 'Cannot delete department with existing users or tickets',
-                        details: {
-                            users: department._count.users,
-                            tickets: department._count.tickets,
-                        },
-                    },
+                    error: 'Cannot delete department with existing users or tickets',
+                    userCount: department._count.users,
+                    ticketCount: department._count.tickets
                 },
-                { status: 400 }
+                { status: 409 }
             );
         }
 
         await prisma.department.delete({
-            where: { id: params.id },
+            where: { id: params.id }
         });
 
         return NextResponse.json({
             success: true,
             message: 'Department deleted successfully',
         });
-    } catch (error: any) {
-        console.error('Error deleting department:', error);
+
+    } catch (error) {
+        console.error('DELETE /api/admin/departments/[id] error:', error);
         return NextResponse.json(
-            { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to delete department' } },
+            { error: 'Failed to delete department' },
             { status: 500 }
         );
     }

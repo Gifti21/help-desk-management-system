@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageLayout } from '../../../components/admin/PageLayout';
 import { TopBar } from '../../../components/admin/TopBar';
 import { StatCard } from '../../../components/admin/StatCard';
@@ -23,68 +23,22 @@ import {
     X,
     MoreVertical,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Loader2
 } from 'lucide-react';
-
-// Mock department data - matching database schema exactly
-// Database schema: id, name, createdAt (only these fields exist)
-const mockDepartments = [
-    {
-        id: 'dept-1',
-        name: 'IT Support',
-        createdAt: '2023-01-15T10:00:00Z'
-    },
-    {
-        id: 'dept-2',
-        name: 'Human Resources',
-        createdAt: '2023-01-15T09:30:00Z'
-    },
-    {
-        id: 'dept-3',
-        name: 'Engineering',
-        createdAt: '2023-01-20T11:00:00Z'
-    },
-    {
-        id: 'dept-4',
-        name: 'Operations',
-        createdAt: '2023-03-10T14:00:00Z'
-    },
-    {
-        id: 'dept-5',
-        name: 'Finance',
-        createdAt: '2023-02-20T08:30:00Z'
-    },
-    {
-        id: 'dept-6',
-        name: 'Security',
-        createdAt: '2023-04-05T10:15:00Z'
-    },
-    {
-        id: 'dept-7',
-        name: 'Marketing',
-        createdAt: '2023-04-15T11:30:00Z'
-    },
-    {
-        id: 'dept-8',
-        name: 'Sales',
-        createdAt: '2023-05-01T09:00:00Z'
-    },
-    {
-        id: 'dept-9',
-        name: 'Customer Service',
-        createdAt: '2023-05-10T14:15:00Z'
-    },
-    {
-        id: 'dept-10',
-        name: 'Legal',
-        createdAt: '2023-06-01T10:00:00Z'
-    }
-];
+import {
+    getDepartments,
+    createDepartment,
+    updateDepartment,
+    deleteDepartment,
+    type Department
+} from '@/lib/api/departments';
 
 export default function DepartmentsPage() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [departments, setDepartments] = useState(mockDepartments);
+    const [departments, setDepartments] = useState<Department[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [isLoadingData, setIsLoadingData] = useState(true);
     const [actionsMenuOpen, setActionsMenuOpen] = useState<string | null>(null);
     const itemsPerPage = 5; // Consistent pagination: 5 items per page
     const [addModal, setAddModal] = useState(false);
@@ -104,6 +58,24 @@ export default function DepartmentsPage() {
 
     const { colors: theme } = useTheme();
     const { toast } = useToast();
+
+    // Load departments from API on mount
+    useEffect(() => {
+        loadDepartments();
+    }, []);
+
+    const loadDepartments = async () => {
+        try {
+            setIsLoadingData(true);
+            const data = await getDepartments();
+            setDepartments(data);
+        } catch (error) {
+            console.error('Failed to load departments:', error);
+            toast('Failed to load departments', 'error');
+        } finally {
+            setIsLoadingData(false);
+        }
+    };
 
     // Filter departments
     const filteredDepartments = departments.filter(dept => {
@@ -146,42 +118,51 @@ export default function DepartmentsPage() {
     };
 
     // Submit CRUD operations
-    const handleAddDepartment = () => {
-        const newDepartment = {
-            id: `dept-${Date.now()}`,
-            name: formData.name,
-            createdAt: new Date().toISOString()
-        };
-        setDepartments(prev => [...prev, newDepartment]);
-        setAddModal(false);
-        toast(`Department "${newDepartment.name}" created successfully`, 'success');
+    const handleAddDepartment = async () => {
+        try {
+            setIsLoading(true);
+            const newDepartment = await createDepartment({ name: formData.name });
+            setDepartments(prev => [...prev, newDepartment]);
+            setAddModal(false);
+            toast(`Department "${newDepartment.name}" created successfully`, 'success');
+        } catch (error: any) {
+            toast(error.message || 'Failed to create department', 'error');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const handleUpdateDepartment = () => {
+    const handleUpdateDepartment = async () => {
         if (!editModal.department) return;
-        setDepartments(prev => prev.map(dept =>
-            dept.id === editModal.department.id
-                ? { ...dept, name: formData.name }
-                : dept
-        ));
-        setEditModal({ isOpen: false, department: null });
-        toast(`Department "${formData.name}" updated successfully`, 'success');
+        try {
+            setIsLoading(true);
+            const updated = await updateDepartment(editModal.department.id, { name: formData.name });
+            setDepartments(prev => prev.map(dept =>
+                dept.id === editModal.department.id ? updated : dept
+            ));
+            setEditModal({ isOpen: false, department: null });
+            toast(`Department "${updated.name}" updated successfully`, 'success');
+        } catch (error: any) {
+            toast(error.message || 'Failed to update department', 'error');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleConfirmDelete = async () => {
         if (!confirmDialog.department) return;
 
-        setIsLoading(true);
-
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        setDepartments(prev => prev.filter(dept => dept.id !== confirmDialog.department.id));
-
-        toast(`${confirmDialog.department.name} has been permanently deleted.`, 'success');
-
-        setIsLoading(false);
-        setConfirmDialog({ isOpen: false, type: null, department: null });
+        try {
+            setIsLoading(true);
+            await deleteDepartment(confirmDialog.department.id);
+            setDepartments(prev => prev.filter(dept => dept.id !== confirmDialog.department.id));
+            toast(`${confirmDialog.department.name} has been permanently deleted.`, 'success');
+            setConfirmDialog({ isOpen: false, type: null, department: null });
+        } catch (error: any) {
+            toast(error.message || 'Failed to delete department', 'error');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleExportData = () => {
@@ -351,76 +332,88 @@ export default function DepartmentsPage() {
             />
 
             <div className="p-6 space-y-6">
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                    <div className="animate-slideInLeft" style={{ animationDelay: '100ms' }}>
-                        <StatCard
-                            title="Total Departments"
-                            value={totalDepartments.toString()}
-                            icon={Building2}
-                            iconColor={theme.primary}
-                        />
+                {/* Loading State */}
+                {isLoadingData ? (
+                    <div className="flex items-center justify-center py-12">
+                        <Loader2 className="h-8 w-8 animate-spin" style={{ color: theme.primary }} />
+                        <span className="ml-3" style={{ color: theme.foregroundMuted, fontSize: fonts.body.regular.size }}>
+                            Loading departments...
+                        </span>
                     </div>
-                    <div className="animate-slideInLeft" style={{ animationDelay: '200ms' }}>
-                        <StatCard
-                            title="Recently Created"
-                            value={departments.filter(d => {
-                                const daysSince = Math.floor((Date.now() - new Date(d.createdAt).getTime()) / (1000 * 60 * 60 * 24));
-                                return daysSince <= 30;
-                            }).length.toString()}
-                            subtitle="Last 30 days"
-                            icon={Activity}
-                            iconColor={theme.success}
-                        />
-                    </div>
-                </div>
-
-                {/* Search and Filters */}
-                <SearchFilter
-                    searchValue={searchTerm}
-                    onSearchChange={(value) => { setSearchTerm(value); handleFilterChange(); }}
-                    searchPlaceholder="Search departments..."
-                    filters={filters}
-                />
-
-                {/* Departments Table */}
-                <DataTable
-                    title={`Departments (${filteredDepartments.length})`}
-                    columns={departmentColumns}
-                    data={paginatedDepartments}
-                    emptyMessage="No departments found matching your criteria."
-                />
-
-                {/* Pagination Controls */}
-                {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-4 py-3 rounded-lg" style={{ backgroundColor: theme.card, border: `1px solid ${theme.cardBorder}` }}>
-                        <div style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>
-                            Showing {startIndex + 1} to {Math.min(endIndex, filteredDepartments.length)} of {filteredDepartments.length} departments
+                ) : (
+                    <>
+                        {/* Stats Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                            <div className="animate-slideInLeft" style={{ animationDelay: '100ms' }}>
+                                <StatCard
+                                    title="Total Departments"
+                                    value={totalDepartments.toString()}
+                                    icon={Building2}
+                                    iconColor={theme.primary}
+                                />
+                            </div>
+                            <div className="animate-slideInLeft" style={{ animationDelay: '200ms' }}>
+                                <StatCard
+                                    title="Recently Created"
+                                    value={departments.filter(d => {
+                                        const daysSince = Math.floor((Date.now() - new Date(d.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+                                        return daysSince <= 30;
+                                    }).length.toString()}
+                                    subtitle="Last 30 days"
+                                    icon={Activity}
+                                    iconColor={theme.success}
+                                />
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <ActionButton
-                                variant="outline"
-                                size="sm"
-                                icon={ChevronLeft}
-                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                disabled={currentPage === 1}
-                            >
-                                Previous
-                            </ActionButton>
-                            <span style={{ fontSize: fonts.body.sm.size, color: theme.foreground, fontWeight: fonts.fontWeight.medium, padding: '0 12px' }}>
-                                Page {currentPage} of {totalPages}
-                            </span>
-                            <ActionButton
-                                variant="outline"
-                                size="sm"
-                                icon={ChevronRight}
-                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                disabled={currentPage === totalPages}
-                            >
-                                Next
-                            </ActionButton>
-                        </div>
-                    </div>
+
+                        {/* Search and Filters */}
+                        <SearchFilter
+                            searchValue={searchTerm}
+                            onSearchChange={(value) => { setSearchTerm(value); handleFilterChange(); }}
+                            searchPlaceholder="Search departments..."
+                            filters={filters}
+                        />
+
+                        {/* Departments Table */}
+                        <DataTable
+                            title={`Departments (${filteredDepartments.length})`}
+                            columns={departmentColumns}
+                            data={paginatedDepartments}
+                            emptyMessage="No departments found matching your criteria."
+                        />
+
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="flex items-center justify-between px-4 py-3 rounded-lg" style={{ backgroundColor: theme.card, border: `1px solid ${theme.cardBorder}` }}>
+                                <div style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>
+                                    Showing {startIndex + 1} to {Math.min(endIndex, filteredDepartments.length)} of {filteredDepartments.length} departments
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <ActionButton
+                                        variant="outline"
+                                        size="sm"
+                                        icon={ChevronLeft}
+                                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                        disabled={currentPage === 1}
+                                    >
+                                        Previous
+                                    </ActionButton>
+                                    <span style={{ fontSize: fonts.body.sm.size, color: theme.foreground, fontWeight: fonts.fontWeight.medium, padding: '0 12px' }}>
+                                        Page {currentPage} of {totalPages}
+                                    </span>
+                                    <ActionButton
+                                        variant="outline"
+                                        size="sm"
+                                        icon={ChevronRight}
+                                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                        disabled={currentPage === totalPages}
+                                    >
+                                        Next
+                                    </ActionButton>
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 
@@ -458,9 +451,16 @@ export default function DepartmentsPage() {
                                 variant="primary"
                                 size="md"
                                 onClick={handleAddDepartment}
-                                disabled={!formData.name.trim()}
+                                disabled={!formData.name.trim() || isLoading}
                             >
-                                Create Department
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                        Creating...
+                                    </>
+                                ) : (
+                                    'Create Department'
+                                )}
                             </ActionButton>
                         </div>
                     </div>
@@ -498,9 +498,16 @@ export default function DepartmentsPage() {
                                 variant="primary"
                                 size="md"
                                 onClick={handleUpdateDepartment}
-                                disabled={!formData.name.trim()}
+                                disabled={!formData.name.trim() || isLoading}
                             >
-                                Update Department
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                        Updating...
+                                    </>
+                                ) : (
+                                    'Update Department'
+                                )}
                             </ActionButton>
                         </div>
                     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageLayout } from "../../../components/admin/PageLayout";
 import { TopBar } from "../../../components/admin/TopBar";
 import { ActionButton } from "../../../components/admin/ActionButton";
@@ -15,7 +15,8 @@ import {
 } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
 import { fonts } from "@/lib/fonts";
-import { Globe, Database, Shield, Save, RotateCcw } from "lucide-react";
+import { Globe, Database, Shield, Save, RotateCcw, Loader2 } from "lucide-react";
+import { getSettings, updateAdminProfile, type SettingsData } from "@/lib/api/settings";
 
 export default function SettingsPage() {
   const [generalSettings, setGeneralSettings] = useState({
@@ -35,14 +36,51 @@ export default function SettingsPage() {
 
   const [resetDialog, setResetDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingData, setIsFetchingData] = useState(true);
+  const [settingsData, setSettingsData] = useState<SettingsData | null>(null);
 
   const { toast } = useToast();
   const { colors: theme } = useTheme();
+
+  // Load settings data on mount
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      setIsFetchingData(true);
+      const data = await getSettings();
+      setSettingsData(data);
+
+      // Update admin email from current user
+      setGeneralSettings(prev => ({
+        ...prev,
+        adminEmail: data.currentAdmin.email
+      }));
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+      toast('Failed to load system information', 'error');
+    } finally {
+      setIsFetchingData(false);
+    }
+  };
   const fieldStyle = {
     backgroundColor: "#f3f4f6",
     color: "#111827",
     borderColor: "#d1d5db",
   };
+
+  // Show loading state while fetching initial data
+  if (isFetchingData) {
+    return (
+      <PageLayout>
+        <div className="flex items-center justify-center h-screen">
+          <Loader2 className="h-8 w-8 animate-spin" style={{ color: theme.primary }} />
+        </div>
+      </PageLayout>
+    );
+  }
 
   const handleSaveSettings = async () => {
     setIsLoading(true);
@@ -403,126 +441,136 @@ export default function SettingsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span
-                    style={{
-                      fontSize: fonts.body.sm.size,
-                      color: theme.foregroundMuted,
-                    }}
-                  >
-                    System Version:
-                  </span>
-                  <span
-                    style={{
-                      fontSize: fonts.body.sm.size,
-                      fontWeight: fonts.fontWeight.medium,
-                      color: theme.foreground,
-                    }}
-                  >
-                    v2.1.0
-                  </span>
+            {isFetchingData ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" style={{ color: theme.primary }} />
+              </div>
+            ) : settingsData ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span
+                      style={{
+                        fontSize: fonts.body.sm.size,
+                        color: theme.foregroundMuted,
+                      }}
+                    >
+                      System Version:
+                    </span>
+                    <span
+                      style={{
+                        fontSize: fonts.body.sm.size,
+                        fontWeight: fonts.fontWeight.medium,
+                        color: theme.foreground,
+                      }}
+                    >
+                      {settingsData.systemInfo.version}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span
+                      style={{
+                        fontSize: fonts.body.sm.size,
+                        color: theme.foregroundMuted,
+                      }}
+                    >
+                      Database Status:
+                    </span>
+                    <span
+                      style={{
+                        fontSize: fonts.body.sm.size,
+                        fontWeight: fonts.fontWeight.medium,
+                        color: settingsData.systemInfo.dbStatus === 'Connected' ? "#15803d" : "#dc2626",
+                      }}
+                    >
+                      {settingsData.systemInfo.dbStatus}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span
+                      style={{
+                        fontSize: fonts.body.sm.size,
+                        color: theme.foregroundMuted,
+                      }}
+                    >
+                      Environment:
+                    </span>
+                    <span
+                      style={{
+                        fontSize: fonts.body.sm.size,
+                        fontWeight: fonts.fontWeight.medium,
+                        color: theme.foreground,
+                      }}
+                    >
+                      {settingsData.systemInfo.environment}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span
-                    style={{
-                      fontSize: fonts.body.sm.size,
-                      color: theme.foregroundMuted,
-                    }}
-                  >
-                    Database Status:
-                  </span>
-                  <span
-                    style={{
-                      fontSize: fonts.body.sm.size,
-                      fontWeight: fonts.fontWeight.medium,
-                      color: "#15803d",
-                    }}
-                  >
-                    Connected
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span
-                    style={{
-                      fontSize: fonts.body.sm.size,
-                      color: theme.foregroundMuted,
-                    }}
-                  >
-                    Last Backup:
-                  </span>
-                  <span
-                    style={{
-                      fontSize: fonts.body.sm.size,
-                      fontWeight: fonts.fontWeight.medium,
-                      color: theme.foreground,
-                    }}
-                  >
-                    2 hours ago
-                  </span>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span
+                      style={{
+                        fontSize: fonts.body.sm.size,
+                        color: theme.foregroundMuted,
+                      }}
+                    >
+                      Total Users:
+                    </span>
+                    <span
+                      style={{
+                        fontSize: fonts.body.sm.size,
+                        fontWeight: fonts.fontWeight.medium,
+                        color: theme.foreground,
+                      }}
+                    >
+                      {settingsData.systemInfo.totalUsers}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span
+                      style={{
+                        fontSize: fonts.body.sm.size,
+                        color: theme.foregroundMuted,
+                      }}
+                    >
+                      Active Users:
+                    </span>
+                    <span
+                      style={{
+                        fontSize: fonts.body.sm.size,
+                        fontWeight: fonts.fontWeight.medium,
+                        color: theme.foreground,
+                      }}
+                    >
+                      {settingsData.systemInfo.activeUsers}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span
+                      style={{
+                        fontSize: fonts.body.sm.size,
+                        color: theme.foregroundMuted,
+                      }}
+                    >
+                      Total Tickets:
+                    </span>
+                    <span
+                      style={{
+                        fontSize: fonts.body.sm.size,
+                        fontWeight: fonts.fontWeight.medium,
+                        color: theme.foreground,
+                      }}
+                    >
+                      {settingsData.systemInfo.totalTickets}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span
-                    style={{
-                      fontSize: fonts.body.sm.size,
-                      color: theme.foregroundMuted,
-                    }}
-                  >
-                    Uptime:
-                  </span>
-                  <span
-                    style={{
-                      fontSize: fonts.body.sm.size,
-                      fontWeight: fonts.fontWeight.medium,
-                      color: theme.foreground,
-                    }}
-                  >
-                    7 days, 14 hours
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span
-                    style={{
-                      fontSize: fonts.body.sm.size,
-                      color: theme.foregroundMuted,
-                    }}
-                  >
-                    Active Users:
-                  </span>
-                  <span
-                    style={{
-                      fontSize: fonts.body.sm.size,
-                      fontWeight: fonts.fontWeight.medium,
-                      color: theme.foreground,
-                    }}
-                  >
-                    142
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span
-                    style={{
-                      fontSize: fonts.body.sm.size,
-                      color: theme.foregroundMuted,
-                    }}
-                  >
-                    Storage Used:
-                  </span>
-                  <span
-                    style={{
-                      fontSize: fonts.body.sm.size,
-                      fontWeight: fonts.fontWeight.medium,
-                      color: theme.foreground,
-                    }}
-                  >
-                    2.4 GB / 10 GB
-                  </span>
-                </div>
+            ) : (
+              <div className="text-center py-8" style={{ color: theme.foregroundMuted }}>
+                Failed to load system information
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>

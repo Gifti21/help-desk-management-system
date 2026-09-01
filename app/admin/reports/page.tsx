@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PageLayout } from "../../../components/admin/PageLayout";
 import { TopBar } from "../../../components/admin/TopBar";
 import { StatCard } from "../../../components/admin/StatCard";
@@ -20,7 +20,7 @@ import {
 import { exportToCSV, exportToPDF } from "@/lib/export-utils";
 import {
   LayoutDashboard,
-  Users,
+  Users as UsersIcon,
   Building2,
   Tag,
   FileText,
@@ -30,223 +30,13 @@ import {
   Download,
   FileDown,
   RefreshCw,
+  Loader2,
 } from "lucide-react";
-
-// Real database data - matching schema exactly
-const departments = [
-  { id: "dept-1", name: "IT Support", createdAt: "2023-01-15T10:00:00Z" },
-  { id: "dept-2", name: "Human Resources", createdAt: "2023-01-15T09:30:00Z" },
-  { id: "dept-3", name: "Engineering", createdAt: "2023-01-20T11:00:00Z" },
-  { id: "dept-4", name: "Operations", createdAt: "2023-03-10T14:00:00Z" },
-  { id: "dept-5", name: "Finance", createdAt: "2023-02-20T08:30:00Z" },
-  { id: "dept-6", name: "Security", createdAt: "2023-04-05T10:15:00Z" },
-  { id: "dept-7", name: "Marketing", createdAt: "2023-04-15T11:30:00Z" },
-  { id: "dept-8", name: "Sales", createdAt: "2023-05-01T09:00:00Z" },
-];
-
-const users = [
-  {
-    id: "u1",
-    firstName: "Admin",
-    lastName: "User",
-    email: "admin@company.com",
-    role: "ADMIN",
-    isActive: true,
-    departmentId: "dept-1",
-    createdAt: "2023-01-15T10:00:00Z",
-  },
-  {
-    id: "u2",
-    firstName: "John",
-    lastName: "Smith",
-    email: "john@company.com",
-    role: "AGENT",
-    isActive: true,
-    departmentId: "dept-1",
-    createdAt: "2023-01-16T10:00:00Z",
-  },
-  {
-    id: "u3",
-    firstName: "Mary",
-    lastName: "Jones",
-    email: "mary@company.com",
-    role: "EMPLOYEE",
-    isActive: true,
-    departmentId: "dept-2",
-    createdAt: "2023-01-17T10:00:00Z",
-  },
-  {
-    id: "u4",
-    firstName: "Robert",
-    lastName: "Brown",
-    email: "robert@company.com",
-    role: "EMPLOYEE",
-    isActive: true,
-    departmentId: "dept-3",
-    createdAt: "2023-01-18T10:00:00Z",
-  },
-  {
-    id: "u5",
-    firstName: "Lisa",
-    lastName: "Wilson",
-    email: "lisa@company.com",
-    role: "AGENT",
-    isActive: true,
-    departmentId: "dept-1",
-    createdAt: "2023-01-19T10:00:00Z",
-  },
-  {
-    id: "u6",
-    firstName: "David",
-    lastName: "Miller",
-    email: "david@company.com",
-    role: "EMPLOYEE",
-    isActive: false,
-    departmentId: "dept-4",
-    createdAt: "2023-01-20T10:00:00Z",
-  },
-  {
-    id: "u7",
-    firstName: "Sarah",
-    lastName: "Davis",
-    email: "sarah@company.com",
-    role: "AGENT",
-    isActive: true,
-    departmentId: "dept-2",
-    createdAt: "2023-01-21T10:00:00Z",
-  },
-  {
-    id: "u8",
-    firstName: "James",
-    lastName: "Garcia",
-    email: "james@company.com",
-    role: "EMPLOYEE",
-    isActive: true,
-    departmentId: "dept-5",
-    createdAt: "2023-01-22T10:00:00Z",
-  },
-];
-
-const categories = [
-  { id: "cat-1", name: "Hardware Issue", createdAt: "2023-01-15T10:00:00Z" },
-  { id: "cat-2", name: "Software Bug", createdAt: "2023-01-15T10:00:00Z" },
-  { id: "cat-3", name: "Network Problem", createdAt: "2023-01-16T10:00:00Z" },
-  { id: "cat-4", name: "Access Request", createdAt: "2023-01-17T10:00:00Z" },
-  { id: "cat-5", name: "Training", createdAt: "2023-01-18T10:00:00Z" },
-];
-
-const tickets = [
-  {
-    id: "t1",
-    title: "Laptop not booting",
-    status: "OPEN",
-    priority: "HIGH",
-    categoryId: "cat-1",
-    departmentId: "dept-1",
-    requesterId: "u3",
-    assigneeId: "u2",
-    createdAt: "2023-02-01T09:00:00Z",
-  },
-  {
-    id: "t2",
-    title: "Email not sending",
-    status: "IN_PROGRESS",
-    priority: "MEDIUM",
-    categoryId: "cat-2",
-    departmentId: "dept-1",
-    requesterId: "u4",
-    assigneeId: "u2",
-    createdAt: "2023-02-02T10:00:00Z",
-  },
-  {
-    id: "t3",
-    title: "VPN connection issue",
-    status: "RESOLVED",
-    priority: "HIGH",
-    categoryId: "cat-3",
-    departmentId: "dept-1",
-    requesterId: "u3",
-    assigneeId: "u5",
-    createdAt: "2023-02-03T11:00:00Z",
-  },
-  {
-    id: "t4",
-    title: "Need database access",
-    status: "OPEN",
-    priority: "LOW",
-    categoryId: "cat-4",
-    departmentId: "dept-3",
-    requesterId: "u4",
-    assigneeId: null,
-    createdAt: "2023-02-04T14:00:00Z",
-  },
-  {
-    id: "t5",
-    title: "Printer jam",
-    status: "CLOSED",
-    priority: "LOW",
-    categoryId: "cat-1",
-    departmentId: "dept-2",
-    requesterId: "u3",
-    assigneeId: "u7",
-    createdAt: "2023-02-05T15:00:00Z",
-  },
-  {
-    id: "t6",
-    title: "Software installation",
-    status: "IN_PROGRESS",
-    priority: "MEDIUM",
-    categoryId: "cat-2",
-    departmentId: "dept-3",
-    requesterId: "u8",
-    assigneeId: "u2",
-    createdAt: "2023-02-06T09:30:00Z",
-  },
-  {
-    id: "t7",
-    title: "Network slow",
-    status: "OPEN",
-    priority: "HIGH",
-    categoryId: "cat-3",
-    departmentId: "dept-1",
-    requesterId: "u4",
-    assigneeId: "u5",
-    createdAt: "2023-02-07T10:30:00Z",
-  },
-  {
-    id: "t8",
-    title: "Password reset",
-    status: "RESOLVED",
-    priority: "LOW",
-    categoryId: "cat-4",
-    departmentId: "dept-2",
-    requesterId: "u3",
-    assigneeId: "u7",
-    createdAt: "2023-02-08T11:30:00Z",
-  },
-  {
-    id: "t9",
-    title: "Training on new system",
-    status: "OPEN",
-    priority: "MEDIUM",
-    categoryId: "cat-5",
-    departmentId: "dept-4",
-    requesterId: "u6",
-    assigneeId: null,
-    createdAt: "2023-02-09T13:00:00Z",
-  },
-  {
-    id: "t10",
-    title: "Monitor not working",
-    status: "CLOSED",
-    priority: "MEDIUM",
-    categoryId: "cat-1",
-    departmentId: "dept-5",
-    requesterId: "u8",
-    assigneeId: "u2",
-    createdAt: "2023-02-10T14:30:00Z",
-  },
-];
+import { getReports, type ReportsData } from "@/lib/api/reports";
+import { getUsers, type User } from "@/lib/api/users";
+import { getDepartments, type Department } from "@/lib/api/departments";
+import { getCategories, type Category } from "@/lib/api/categories";
+import { getTickets, type Ticket } from "@/lib/api/tickets";
 
 export default function ReportsPage() {
   const theme = useTheme();
@@ -255,25 +45,72 @@ export default function ReportsPage() {
     "overview" | "users" | "departments" | "categories" | "tickets"
   >("overview");
 
+  // Data states
+  const [reportsData, setReportsData] = useState<ReportsData | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+
   // Pagination states
   const [usersPage, setUsersPage] = useState(1);
   const [deptsPage, setDeptsPage] = useState(1);
   const [catsPage, setCatsPage] = useState(1);
   const [ticketsPage, setTicketsPage] = useState(1);
-  const itemsPerPage = 5; // Consistent pagination: 5 items per page
+  const itemsPerPage = 5;
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
 
-  // Computed values
-  const totalUsers = users.length;
+  // Load data from API on mount
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setIsLoadingData(true);
+      const [reportsResult, usersData, deptData, catData, ticketsData] = await Promise.all([
+        getReports(),
+        getUsers(),
+        getDepartments(),
+        getCategories(),
+        getTickets()
+      ]);
+      setReportsData(reportsResult);
+      setUsers(usersData);
+      setDepartments(deptData);
+      setCategories(catData);
+      setTickets(ticketsData);
+    } catch (error) {
+      console.error('Failed to load reports data:', error);
+      toast('Failed to load reports data', 'error');
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
+
+  // Show loading state
+  if (isLoadingData || !reportsData) {
+    return (
+      <PageLayout>
+        <div className="flex items-center justify-center h-screen">
+          <Loader2 className="h-8 w-8 animate-spin" style={{ color: theme.colors.primary }} />
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // Computed values from real data
+  const totalUsers = reportsData.overview.totalUsers;
   const activeUsers = users.filter((u) => u.isActive).length;
-  const totalDepartments = departments.length;
-  const totalCategories = categories.length;
-  const totalTickets = tickets.length;
-  const openTickets = tickets.filter((t) => t.status === "OPEN").length;
+  const totalDepartments = reportsData.overview.totalDepartments;
+  const totalCategories = reportsData.overview.totalCategories;
+  const totalTickets = reportsData.overview.totalTickets;
+  const openTickets = reportsData.overview.openTickets;
 
   // Filtered data
   const filteredUsers = users.filter((user) => {
@@ -749,7 +586,7 @@ export default function ReportsPage() {
         >
           {[
             { id: "overview", label: "Overview", icon: LayoutDashboard },
-            { id: "users", label: "Users", icon: Users },
+            { id: "users", label: "Users", icon: UsersIcon },
             { id: "departments", label: "Departments", icon: Building2 },
             { id: "categories", label: "Categories", icon: Tag },
             { id: "tickets", label: "Tickets", icon: FileText },
@@ -851,7 +688,7 @@ export default function ReportsPage() {
         {activeTab === "overview" && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <StatCard title="Total Users" value={totalUsers} icon={Users} />
+              <StatCard title="Total Users" value={totalUsers} icon={UsersIcon} />
               <StatCard
                 title="Active Users"
                 value={activeUsers}
@@ -975,7 +812,7 @@ export default function ReportsPage() {
         {activeTab === "users" && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <StatCard title="Total Users" value={totalUsers} icon={Users} />
+              <StatCard title="Total Users" value={totalUsers} icon={UsersIcon} />
               <StatCard
                 title="Active Users"
                 value={activeUsers}
@@ -984,7 +821,7 @@ export default function ReportsPage() {
               <StatCard
                 title="Inactive Users"
                 value={totalUsers - activeUsers}
-                icon={Users}
+                icon={UsersIcon}
               />
             </div>
 
@@ -1055,7 +892,7 @@ export default function ReportsPage() {
               <StatCard
                 title="Avg Users/Dept"
                 value={Math.round(totalUsers / totalDepartments)}
-                icon={Users}
+                icon={UsersIcon}
               />
               <StatCard
                 title="Avg Tickets/Dept"

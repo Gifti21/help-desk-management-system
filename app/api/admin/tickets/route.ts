@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getSessionUser } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
@@ -9,10 +8,10 @@ const ticketCreateSchema = z.object({
     title: z.string().min(1, 'Title is required').max(200),
     description: z.string().min(1, 'Description is required'),
     priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-    categoryId: z.string().uuid('Invalid category ID'),
-    departmentId: z.string().uuid('Invalid department ID'),
-    requesterId: z.string().uuid('Invalid requester ID'),
-    assigneeId: z.string().uuid('Invalid assignee ID').optional(),
+    categoryId: z.string().min(1, 'Category is required'),
+    departmentId: z.string().min(1, 'Department is required'),
+    requesterId: z.string().min(1, 'Requester is required'),
+    assigneeId: z.string().min(1).optional(),
 });
 
 /**
@@ -20,9 +19,9 @@ const ticketCreateSchema = z.object({
  */
 export async function GET(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const user = await getSessionUser();
 
-        if (!session || session.user.role !== 'admin') {
+        if (!user || user.role !== 'ADMIN') {
             return NextResponse.json(
                 { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
@@ -105,9 +104,9 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const user = await getSessionUser();
 
-        if (!session || session.user.role !== 'admin') {
+        if (!user || user.role !== 'ADMIN') {
             return NextResponse.json(
                 { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
@@ -172,7 +171,7 @@ export async function POST(request: NextRequest) {
                 );
             }
             // Check assignee role
-            if (assignee.role !== 'agent' && assignee.role !== 'admin') {
+            if (assignee.role !== 'AGENT' && assignee.role !== 'ADMIN') {
                 return NextResponse.json(
                     { error: 'Assignee must be an agent or admin' },
                     { status: 400 }

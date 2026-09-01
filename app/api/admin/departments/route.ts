@@ -18,17 +18,10 @@ export async function GET() {
     try {
         const session = await getServerSession(authOptions);
 
-        if (!session?.user) {
+        if (!session?.user || session.user.role !== 'ADMIN') {
             return NextResponse.json(
-                { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+                { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
-            );
-        }
-
-        if (session.user.role !== 'ADMIN') {
-            return NextResponse.json(
-                { success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } },
-                { status: 403 }
             );
         }
 
@@ -41,17 +34,19 @@ export async function GET() {
                     },
                 },
             },
-            orderBy: { name: 'asc' },
+            orderBy: {
+                createdAt: 'desc',
+            },
         });
 
         return NextResponse.json({
             success: true,
             data: departments,
         });
-    } catch (error: any) {
-        console.error('Error fetching departments:', error);
+    } catch (error) {
+        console.error('GET /api/admin/departments error:', error);
         return NextResponse.json(
-            { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch departments' } },
+            { error: 'Failed to fetch departments' },
             { status: 500 }
         );
     }
@@ -64,71 +59,56 @@ export async function POST(request: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
 
-        if (!session?.user) {
+        if (!session?.user || session.user.role !== 'ADMIN') {
             return NextResponse.json(
-                { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+                { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
             );
         }
 
-        if (session.user.role !== 'ADMIN') {
-            return NextResponse.json(
-                { success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } },
-                { status: 403 }
-            );
-        }
-
         const body = await request.json();
-        const validation = departmentSchema.safeParse(body);
 
+        const validation = departmentSchema.safeParse(body);
         if (!validation.success) {
             return NextResponse.json(
-                {
-                    success: false,
-                    error: {
-                        code: 'VALIDATION_ERROR',
-                        message: 'Validation failed',
-                        details: validation.error.errors,
-                    },
-                },
+                { error: 'Validation failed', details: validation.error.errors },
                 { status: 400 }
             );
         }
 
-        // Check for duplicate department name
-        const existing = await prisma.department.findUnique({
-            where: { name: validation.data.name },
+        const { name } = validation.data;
+
+        const existingDepartment = await prisma.department.findFirst({
+            where: {
+                name: {
+                    equals: name,
+                    mode: 'insensitive',
+                },
+            },
         });
 
-        if (existing) {
+        if (existingDepartment) {
             return NextResponse.json(
-                {
-                    success: false,
-                    error: {
-                        code: 'DUPLICATE_ERROR',
-                        message: 'Department name already exists',
-                    },
-                },
-                { status: 400 }
+                { error: 'Department with this name already exists' },
+                { status: 409 }
             );
         }
 
         const department = await prisma.department.create({
-            data: validation.data,
+            data: {
+                name,
+            },
         });
 
+        return NextResponse.json({
+            success: true,
+            data: department,
+        }, { status: 201 });
+
+    } catch (error) {
+        console.error('POST /api/admin/departments error:', error);
         return NextResponse.json(
-            {
-                success: true,
-                data: department,
-                message: 'Department created successfully',
-            },
-            { status: 201 }
-        );
-    } catch (error: any) {
-        console.error('Error creating department:', error);
-        return NextResponse.json(
-            { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create department' } },
+            { error: 'Failed to create department' },
             { status: 500 }
         );
     }

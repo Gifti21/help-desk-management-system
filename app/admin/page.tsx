@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PageLayout } from "../../components/admin/PageLayout";
 import { TopBar } from "../../components/admin/TopBar";
 import { StatCard } from "../../components/admin/StatCard";
@@ -23,138 +23,54 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
-
-// Mock data - matching Prisma Ticket schema with relational objects
-const mockTickets = [
-  {
-    id: "tick-001",
-    title: "Network Outage in HQ",
-    description:
-      "Unable to access internal servers from Bole branch. Multiple users affected since morning.",
-    status: "OPEN",
-    priority: "CRITICAL",
-    categoryId: "cat-5",
-    category: { id: "cat-5", name: "Network" },
-    departmentId: "dept-1",
-    department: { id: "dept-1", name: "IT Support" },
-    requesterId: "user-101",
-    requester: {
-      id: "user-101",
-      firstName: "Sarah",
-      lastName: "Abebe",
-      email: "sarah.abebe@besys.com",
-    },
-    assigneeId: "user-201",
-    assignee: {
-      id: "user-201",
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@besys.com",
-    },
-    comments: [],
-    createdAt: "2024-10-24T08:30:00Z",
-    updatedAt: "2024-10-24T08:30:00Z",
-    closedAt: null,
-  },
-  {
-    id: "tick-002",
-    title: "Payroll Access Request",
-    description:
-      "Employee needs access to payroll portal and salary statements.",
-    status: "RESOLVED",
-    priority: "MEDIUM",
-    categoryId: "cat-4",
-    category: { id: "cat-4", name: "Access Request" },
-    departmentId: "dept-5",
-    department: { id: "dept-5", name: "Finance" },
-    requesterId: "user-102",
-    requester: {
-      id: "user-102",
-      firstName: "Mike",
-      lastName: "Ross",
-      email: "mike.ross@besys.com",
-    },
-    assigneeId: "user-202",
-    assignee: {
-      id: "user-202",
-      firstName: "Alex",
-      lastName: "Smith",
-      email: "alex.smith@besys.com",
-    },
-    comments: [],
-    createdAt: "2024-10-23T14:20:00Z",
-    updatedAt: "2024-10-23T16:45:00Z",
-    closedAt: "2024-10-23T16:45:00Z",
-  },
-  {
-    id: "tick-003",
-    title: "Software License Renewal",
-    description:
-      "Renewal for core productivity software licenses before end of quarter.",
-    status: "IN_PROGRESS",
-    priority: "HIGH",
-    categoryId: "cat-2",
-    category: { id: "cat-2", name: "Software" },
-    departmentId: "dept-3",
-    department: { id: "dept-3", name: "Procurement" },
-    requesterId: "user-103",
-    requester: {
-      id: "user-103",
-      firstName: "Elena",
-      lastName: "Vance",
-      email: "elena.vance@besys.com",
-    },
-    assigneeId: "user-203",
-    assignee: {
-      id: "user-203",
-      firstName: "Kevin",
-      lastName: "Brown",
-      email: "kevin.brown@besys.com",
-    },
-    comments: [],
-    createdAt: "2024-10-22T09:15:00Z",
-    updatedAt: "2024-10-22T11:05:00Z",
-    closedAt: null,
-  },
-  {
-    id: "tick-004",
-    title: "Password Reset Request",
-    description:
-      "User is unable to log in and password reset emails are not delivered.",
-    status: "CLOSED",
-    priority: "LOW",
-    categoryId: "cat-1",
-    category: { id: "cat-1", name: "Account" },
-    departmentId: "dept-1",
-    department: { id: "dept-1", name: "IT Services" },
-    requesterId: "user-104",
-    requester: {
-      id: "user-104",
-      firstName: "John",
-      lastName: "Smith",
-      email: "john.smith@besys.com",
-    },
-    assigneeId: null,
-    assignee: null,
-    comments: [],
-    createdAt: "2024-10-21T12:00:00Z",
-    updatedAt: "2024-10-22T08:00:00Z",
-    closedAt: "2024-10-22T08:00:00Z",
-  },
-];
+import { getDashboardData, type DashboardData } from "@/lib/api/dashboard";
 
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Consistent pagination: 5 items per page
+  const itemsPerPage = 5;
   const { colors: theme } = useTheme();
   const { toast } = useToast();
+
+  // Data states
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load dashboard data on mount
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      const data = await getDashboardData();
+      setDashboardData(data);
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error);
+      toast('Failed to load dashboard data', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Reset to page 1 when search term changes
   React.useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
+
+  // Show loading state
+  if (isLoading || !dashboardData) {
+    return (
+      <PageLayout>
+        <div className="flex items-center justify-center h-screen">
+          <Loader2 className="h-8 w-8 animate-spin" style={{ color: theme.primary }} />
+        </div>
+      </PageLayout>
+    );
+  }
 
   const getStatusBadge = (status: string) => {
     // Match database enum: OPEN, IN_PROGRESS, RESOLVED, CLOSED
@@ -418,18 +334,18 @@ export default function AdminDashboard() {
 
   // Button handlers
   const handleExportData = () => {
+    if (!dashboardData) return;
+
     // Export dashboard data as CSV
     const csvData = [
       ["Metric", "Value"],
-      ["Total Tickets", "2,842"],
-      ["Open Tickets", "142"],
-      ["Closed Today", "64"],
-      ["Overdue", "28"],
+      ["Total Tickets", dashboardData.stats.totalTickets.toString()],
+      ["Open Tickets", dashboardData.stats.openTickets.toString()],
+      ["Closed Today", dashboardData.stats.closedToday.toString()],
+      ["Overdue", dashboardData.stats.overdueTickets.toString()],
       ["", ""],
       ["Department", "Tickets"],
-      ["IT Services", "842"],
-      ["HR & Ops", "428"],
-      ["Finance", "310"],
+      ...dashboardData.charts.ticketsByDepartment.map(d => [d.department, d.count.toString()])
     ]
       .map((row) => row.join(","))
       .join("\n");
@@ -443,13 +359,12 @@ export default function AdminDashboard() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    toast("CSV exported successfully", "success");
   };
 
   const handleRefresh = () => {
     toast("Refreshing dashboard...", "info");
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000); // Wait 1 second to show toast before refresh
+    loadDashboardData();
   };
 
   const topBarActions = (
@@ -488,7 +403,11 @@ export default function AdminDashboard() {
             className="animate-slideInLeft"
             style={{ animationDelay: "100ms" }}
           >
-            <StatCard title="Total Tickets" value="2,842" icon={Ticket} />
+            <StatCard
+              title="Total Tickets"
+              value={dashboardData.stats.totalTickets.toLocaleString()}
+              icon={Ticket}
+            />
           </div>
           <div
             className="animate-slideInLeft"
@@ -496,7 +415,7 @@ export default function AdminDashboard() {
           >
             <StatCard
               title="Open Tickets"
-              value="142"
+              value={dashboardData.stats.openTickets.toLocaleString()}
               icon={AlertTriangle}
               iconColor="#ea580c"
             />
@@ -507,7 +426,7 @@ export default function AdminDashboard() {
           >
             <StatCard
               title="Closed Today"
-              value="64"
+              value={dashboardData.stats.closedToday.toLocaleString()}
               icon={CheckCircle}
               iconColor="#15803d"
             />
@@ -518,7 +437,7 @@ export default function AdminDashboard() {
           >
             <StatCard
               title="Overdue"
-              value="28"
+              value={dashboardData.stats.overdueTickets.toLocaleString()}
               icon={Clock}
               iconColor="#dc2626"
             />
@@ -557,7 +476,11 @@ export default function AdminDashboard() {
                 Tickets by Status
               </h3>
               <PieChart
-                series={[132, 55, 33]}
+                series={[
+                  dashboardData.charts.ticketsByStatus.resolved,
+                  dashboardData.charts.ticketsByStatus.pending,
+                  dashboardData.charts.ticketsByStatus.overdue
+                ]}
                 labels={["Resolved", "Pending", "Overdue"]}
                 colors={[theme.primary, "#f59e0b", "#ef4444"]}
                 height={240}
@@ -585,7 +508,7 @@ export default function AdminDashboard() {
                       color: theme.foreground,
                     }}
                   >
-                    132
+                    {dashboardData.charts.ticketsByStatus.resolved}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -607,7 +530,7 @@ export default function AdminDashboard() {
                       color: theme.foreground,
                     }}
                   >
-                    55
+                    {dashboardData.charts.ticketsByStatus.pending}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -629,7 +552,7 @@ export default function AdminDashboard() {
                       color: theme.foreground,
                     }}
                   >
-                    33
+                    {dashboardData.charts.ticketsByStatus.overdue}
                   </span>
                 </div>
               </div>
@@ -666,8 +589,11 @@ export default function AdminDashboard() {
                 Tickets by Department
               </h3>
               <BarChart
-                categories={["IT Services", "HR & Ops", "Finance"]}
-                series={[{ name: "Tickets", data: [842, 428, 310] }]}
+                categories={dashboardData.charts.ticketsByDepartment.map(d => d.department)}
+                series={[{
+                  name: "Tickets",
+                  data: dashboardData.charts.ticketsByDepartment.map(d => d.count)
+                }]}
                 height={240}
                 horizontal={false}
                 xAxisTitle="Department"
@@ -706,8 +632,11 @@ export default function AdminDashboard() {
                 Tickets by Month
               </h3>
               <LineChart
-                categories={["Jun", "Jul", "Aug", "Sep", "Oct"]}
-                series={[{ name: "Tickets", data: [290, 245, 350, 280, 320] }]}
+                categories={dashboardData.charts.monthlyTickets.labels}
+                series={[{
+                  name: "Tickets",
+                  data: dashboardData.charts.monthlyTickets.data
+                }]}
                 height={240}
                 xAxisTitle="Month"
                 yAxisTitle="Tickets"
@@ -725,7 +654,7 @@ export default function AdminDashboard() {
 
         {/* Global Ticket Log */}
         {(() => {
-          const filteredTickets = mockTickets.filter(
+          const filteredTickets = dashboardData.recentTickets.filter(
             (ticket) =>
               ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
               ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||

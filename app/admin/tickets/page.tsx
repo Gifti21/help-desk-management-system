@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PageLayout } from '../../../components/admin/PageLayout';
 import { TopBar } from '../../../components/admin/TopBar';
 import { StatCard } from '../../../components/admin/StatCard';
@@ -10,10 +10,9 @@ import { SearchFilter } from '../../../components/admin/SearchFilter';
 import { ConfirmationDialog } from '../../../components/ui/confirmation-dialog';
 import { useToast } from '../../../components/ui/toast';
 import { useTheme } from '../../../components/providers/ThemeProvider';
-import { Input } from '../../../components/ui/input';
 import { fonts } from '@/lib/fonts';
 import {
-    Ticket,
+    Ticket as TicketIcon,
     AlertTriangle,
     Users,
     Download,
@@ -28,8 +27,18 @@ import {
     MoreVertical,
     ChevronLeft,
     ChevronRight,
-    RefreshCw
+    RefreshCw,
+    Loader2
 } from 'lucide-react';
+import {
+    getTickets,
+    updateTicket,
+    deleteTicket,
+    type Ticket
+} from '@/lib/api/tickets';
+import { getUsers, type User } from '@/lib/api/users';
+import { getCategories, type Category } from '@/lib/api/categories';
+import { getDepartments, type Department } from '@/lib/api/departments';
 
 // Mock data matching database schema exactly
 const initialMockTickets = [
@@ -138,34 +147,65 @@ export default function TicketsPage() {
     const [priorityFilter, setPriorityFilter] = useState('ALL');
     const [departmentFilter, setDepartmentFilter] = useState('ALL');
     const [categoryFilter, setCategoryFilter] = useState('ALL');
-    const [tickets, setTickets] = useState(initialMockTickets);
+    const [tickets, setTickets] = useState<Ticket[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [departments, setDepartments] = useState<Department[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [actionsMenuOpen, setActionsMenuOpen] = useState<string | null>(null);
-    const itemsPerPage = 5; // Consistent pagination: 5 items per page
+    const [isLoadingData, setIsLoadingData] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const itemsPerPage = 5;
 
     // Modals state
-    const [viewModal, setViewModal] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
-    const [assignModal, setAssignModal] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
-    const [reassignModal, setReassignModal] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
-    const [statusModal, setStatusModal] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
-    const [priorityModal, setPriorityModal] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
-    const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
-    const [closeDialog, setCloseDialog] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
-    const [reopenDialog, setReopenDialog] = useState<{ isOpen: boolean; ticket: any }>({ isOpen: false, ticket: null });
+    const [viewModal, setViewModal] = useState<{ isOpen: boolean; ticket: Ticket | null }>({ isOpen: false, ticket: null });
+    const [assignModal, setAssignModal] = useState<{ isOpen: boolean; ticket: Ticket | null }>({ isOpen: false, ticket: null });
+    const [reassignModal, setReassignModal] = useState<{ isOpen: boolean; ticket: Ticket | null }>({ isOpen: false, ticket: null });
+    const [statusModal, setStatusModal] = useState<{ isOpen: boolean; ticket: Ticket | null }>({ isOpen: false, ticket: null });
+    const [priorityModal, setPriorityModal] = useState<{ isOpen: boolean; ticket: Ticket | null }>({ isOpen: false, ticket: null });
+    const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; ticket: Ticket | null }>({ isOpen: false, ticket: null });
+    const [closeDialog, setCloseDialog] = useState<{ isOpen: boolean; ticket: Ticket | null }>({ isOpen: false, ticket: null });
+    const [reopenDialog, setReopenDialog] = useState<{ isOpen: boolean; ticket: Ticket | null }>({ isOpen: false, ticket: null });
 
     const { colors: theme } = useTheme();
     const { toast } = useToast();
 
+    // Load data from API on mount
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadData = async () => {
+        try {
+            setIsLoadingData(true);
+            const [ticketsData, usersData, categoriesData, departmentsData] = await Promise.all([
+                getTickets(),
+                getUsers(),
+                getCategories(),
+                getDepartments()
+            ]);
+            setTickets(ticketsData);
+            setUsers(usersData);
+            setCategories(categoriesData);
+            setDepartments(departmentsData);
+        } catch (error) {
+            console.error('Failed to load data:', error);
+            toast('Failed to load data', 'error');
+        } finally {
+            setIsLoadingData(false);
+        }
+    };
+
     const filteredTickets = tickets.filter(ticket => {
-        const requesterFullName = `${ticket.requester.firstName} ${ticket.requester.lastName}`.toLowerCase();
+        const requesterFullName = ticket.requester ? `${ticket.requester.firstName} ${ticket.requester.lastName}`.toLowerCase() : '';
         const matchesSearch = ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
             requesterFullName.includes(searchTerm.toLowerCase());
 
         const matchesStatus = statusFilter === 'ALL' || ticket.status === statusFilter;
         const matchesPriority = priorityFilter === 'ALL' || ticket.priority === priorityFilter;
-        const matchesDepartment = departmentFilter === 'ALL' || ticket.department.name === departmentFilter;
-        const matchesCategory = categoryFilter === 'ALL' || ticket.category.name === categoryFilter;
+        const matchesDepartment = departmentFilter === 'ALL' || ticket.department?.name === departmentFilter;
+        const matchesCategory = categoryFilter === 'ALL' || ticket.category?.name === categoryFilter;
 
         return matchesSearch && matchesStatus && matchesPriority && matchesDepartment && matchesCategory;
     });
@@ -181,55 +221,94 @@ export default function TicketsPage() {
         setCurrentPage(1);
     };
 
-    // Handler functions
-    const handleAssign = (ticketId: string, agentName: string) => {
-        setTickets(prev => prev.map(t =>
-            t.id === ticketId ? { ...t, assignee: agentName } : t
-        ));
-        setAssignModal({ isOpen: false, ticket: null });
-        setReassignModal({ isOpen: false, ticket: null });
-        toast(`Ticket ${ticketId} assigned to ${agentName}`, 'success');
+    // Handler functions - Connected to Backend API
+    const handleAssign = async (ticketId: string, assigneeId: string) => {
+        try {
+            setIsSubmitting(true);
+            const updatedTicket = await updateTicket(ticketId, { assigneeId });
+            setTickets(prev => prev.map(t => t.id === ticketId ? updatedTicket : t));
+            setAssignModal({ isOpen: false, ticket: null });
+            setReassignModal({ isOpen: false, ticket: null });
+            const assignee = users.find(u => u.id === assigneeId);
+            toast(`Ticket assigned to ${assignee?.firstName} ${assignee?.lastName}`, 'success');
+        } catch (error: any) {
+            toast(error.message || 'Failed to assign ticket', 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handleStatusChange = (ticketId: string, newStatus: string) => {
-        setTickets(prev => prev.map(t =>
-            t.id === ticketId ? { ...t, status: newStatus } : t
-        ));
-        setStatusModal({ isOpen: false, ticket: null });
-        toast(`Ticket ${ticketId} status updated to ${newStatus.replace('_', ' ')}`, 'success');
+    const handleStatusChange = async (ticketId: string, newStatus: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED') => {
+        try {
+            setIsSubmitting(true);
+            const updatedTicket = await updateTicket(ticketId, { status: newStatus });
+            setTickets(prev => prev.map(t => t.id === ticketId ? updatedTicket : t));
+            setStatusModal({ isOpen: false, ticket: null });
+            toast(`Ticket status updated to ${newStatus.replace('_', ' ')}`, 'success');
+        } catch (error: any) {
+            toast(error.message || 'Failed to update status', 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handlePriorityChange = (ticketId: string, newPriority: string) => {
-        setTickets(prev => prev.map(t =>
-            t.id === ticketId ? { ...t, priority: newPriority } : t
-        ));
-        setPriorityModal({ isOpen: false, ticket: null });
-        toast(`Ticket ${ticketId} priority updated to ${newPriority}`, 'success');
+    const handlePriorityChange = async (ticketId: string, newPriority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL') => {
+        try {
+            setIsSubmitting(true);
+            const updatedTicket = await updateTicket(ticketId, { priority: newPriority });
+            setTickets(prev => prev.map(t => t.id === ticketId ? updatedTicket : t));
+            setPriorityModal({ isOpen: false, ticket: null });
+            toast(`Ticket priority updated to ${newPriority}`, 'success');
+        } catch (error: any) {
+            toast(error.message || 'Failed to update priority', 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handleClose = () => {
+    const handleClose = async () => {
         if (!closeDialog.ticket) return;
-        setTickets(prev => prev.map(t =>
-            t.id === closeDialog.ticket.id ? { ...t, status: 'CLOSED' } : t
-        ));
-        setCloseDialog({ isOpen: false, ticket: null });
-        toast(`Ticket ${closeDialog.ticket.id} closed successfully`, 'success');
+        try {
+            setIsSubmitting(true);
+            const updatedTicket = await updateTicket(closeDialog.ticket.id, { status: 'CLOSED' });
+            setTickets(prev => prev.map(t => t.id === closeDialog.ticket!.id ? updatedTicket : t));
+            setCloseDialog({ isOpen: false, ticket: null });
+            toast('Ticket closed successfully', 'success');
+        } catch (error: any) {
+            toast(error.message || 'Failed to close ticket', 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handleReopen = () => {
+    const handleReopen = async () => {
         if (!reopenDialog.ticket) return;
-        setTickets(prev => prev.map(t =>
-            t.id === reopenDialog.ticket.id ? { ...t, status: 'OPEN' } : t
-        ));
-        setReopenDialog({ isOpen: false, ticket: null });
-        toast(`Ticket ${reopenDialog.ticket.id} reopened successfully`, 'success');
+        try {
+            setIsSubmitting(true);
+            const updatedTicket = await updateTicket(reopenDialog.ticket.id, { status: 'OPEN' });
+            setTickets(prev => prev.map(t => t.id === reopenDialog.ticket!.id ? updatedTicket : t));
+            setReopenDialog({ isOpen: false, ticket: null });
+            toast('Ticket reopened successfully', 'success');
+        } catch (error: any) {
+            toast(error.message || 'Failed to reopen ticket', 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (!deleteDialog.ticket) return;
-        setTickets(prev => prev.filter(t => t.id !== deleteDialog.ticket.id));
-        setDeleteDialog({ isOpen: false, ticket: null });
-        toast(`Ticket ${deleteDialog.ticket.id} deleted successfully`, 'success');
+        try {
+            setIsSubmitting(true);
+            await deleteTicket(deleteDialog.ticket.id);
+            setTickets(prev => prev.filter(t => t.id !== deleteDialog.ticket!.id));
+            setDeleteDialog({ isOpen: false, ticket: null });
+            toast('Ticket deleted successfully', 'success');
+        } catch (error: any) {
+            toast(error.message || 'Failed to delete ticket', 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleExport = () => {
@@ -238,12 +317,12 @@ export default function TicketsPage() {
             ...filteredTickets.map(t => [
                 t.id,
                 t.title,
-                t.category.name,
-                t.department.name,
+                t.category?.name || 'N/A',
+                t.department?.name || 'N/A',
                 t.priority,
                 t.status,
                 t.assignee ? `${t.assignee.firstName} ${t.assignee.lastName}` : 'Unassigned',
-                `${t.requester.firstName} ${t.requester.lastName}`,
+                t.requester ? `${t.requester.firstName} ${t.requester.lastName}` : 'N/A',
                 new Date(t.createdAt).toLocaleDateString()
             ])
         ].map(row => row.join(',')).join('\n');
@@ -476,10 +555,7 @@ export default function TicketsPage() {
             onChange: setDepartmentFilter,
             options: [
                 { label: 'All Departments', value: 'ALL' },
-                { label: 'IT Support', value: 'IT Support' },
-                { label: 'Operations', value: 'Operations' },
-                { label: 'HR', value: 'HR' },
-                { label: 'Security', value: 'Security' }
+                ...departments.map(dept => ({ label: dept.name, value: dept.name }))
             ]
         },
         {
@@ -488,36 +564,48 @@ export default function TicketsPage() {
             onChange: setCategoryFilter,
             options: [
                 { label: 'All Categories', value: 'ALL' },
-                { label: 'Hardware', value: 'Hardware' },
-                { label: 'Software', value: 'Software' },
-                { label: 'Network', value: 'Network' },
-                { label: 'Access', value: 'Access' },
-                { label: 'Security', value: 'Security' }
+                ...categories.map(cat => ({ label: cat.name, value: cat.name }))
             ]
         }
     ];
 
     const totalTickets = tickets.length;
-    const openTickets = tickets.filter((t: any) => t.status === 'OPEN').length;
-    const inProgressTickets = tickets.filter((t: any) => t.status === 'IN_PROGRESS').length;
-    const unassignedTickets = tickets.filter((t: any) => !t.assignee).length;
+    const openTickets = tickets.filter(t => t.status === 'OPEN').length;
+    const inProgressTickets = tickets.filter(t => t.status === 'IN_PROGRESS').length;
+    const unassignedTickets = tickets.filter(t => !t.assignee).length;
+
+    // Show loading state
+    if (isLoadingData) {
+        return (
+            <PageLayout>
+                <div className="flex items-center justify-center h-screen">
+                    <Loader2 className="h-8 w-8 animate-spin" style={{ color: theme.primary }} />
+                </div>
+            </PageLayout>
+        );
+    }
 
     return (
         <PageLayout>
             <TopBar
                 title="Ticket Management"
-                subtitle="View, assign, update, and manage all support tickets (Admin View Only - No Ticket Creation)"
+                subtitle="View, assign, update, and manage all support tickets"
                 actions={
-                    <ActionButton variant="outline" size="sm" icon={Download} onClick={handleExport}>
-                        Export
-                    </ActionButton>
+                    <div className="flex gap-2">
+                        <ActionButton variant="outline" size="sm" icon={RefreshCw} onClick={loadData} disabled={isLoadingData}>
+                            Refresh
+                        </ActionButton>
+                        <ActionButton variant="outline" size="sm" icon={Download} onClick={handleExport}>
+                            Export
+                        </ActionButton>
+                    </div>
                 }
             />
 
             <div className="p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div className="animate-slideInLeft" style={{ animationDelay: '100ms' }}>
-                        <StatCard title="Total Tickets" value={totalTickets.toString()} icon={Ticket} iconColor={theme.primary} />
+                        <StatCard title="Total Tickets" value={totalTickets.toString()} icon={TicketIcon} iconColor={theme.primary} />
                     </div>
                     <div className="animate-slideInLeft" style={{ animationDelay: '200ms' }}>
                         <StatCard title="Open Tickets" value={openTickets.toString()} icon={AlertTriangle} iconColor="#f59e0b" />

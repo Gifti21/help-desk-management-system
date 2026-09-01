@@ -197,7 +197,7 @@ export function LoginForm({
           </div>
         </div>
 
-        <Button type="submit" fullWidth size="md">
+        <Button type="submit" size="md" className="w-full">
           Log in
           <ArrowRight className="h-5 w-5" />
         </Button>

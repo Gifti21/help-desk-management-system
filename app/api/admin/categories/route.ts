@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getSessionUser } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
@@ -14,9 +13,9 @@ const categorySchema = z.object({
  */
 export async function GET() {
     try {
-        const session = await getServerSession(authOptions);
+        const user = await getSessionUser();
 
-        if (!session || session.user.role !== 'admin') {
+        if (!user || user.role !== 'ADMIN') {
             return NextResponse.json(
                 { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
@@ -54,9 +53,9 @@ export async function GET() {
  */
 export async function POST(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const user = await getSessionUser();
 
-        if (!session || session.user.role !== 'admin') {
+        if (!user || user.role !== 'ADMIN') {
             return NextResponse.json(
                 { error: 'Unauthorized - Admin access required' },
                 { status: 401 }
