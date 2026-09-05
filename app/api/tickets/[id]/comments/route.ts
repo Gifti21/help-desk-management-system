@@ -20,6 +20,30 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const ticket = await prisma.ticket.findUnique({
+      where: { id },
+      select: { requesterId: true },
+    });
+
+    if (!ticket) {
+      return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
+    }
+
+    const accessible = await prisma.ticket.findUnique({
+      where: { id },
+      select: { requesterId: true, assigneeId: true, departmentId: true },
+    });
+
+    if (
+      !accessible ||
+      (user.role === "EMPLOYEE" && accessible.requesterId !== user.id) ||
+      (user.role === "AGENT" &&
+        accessible.assigneeId !== user.id &&
+        accessible.departmentId !== user.departmentId)
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const comments = await prisma.comment.findMany({
       where: { ticketId: id },
       include: {
@@ -56,6 +80,33 @@ export async function POST(
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const ticket = await prisma.ticket.findUnique({
+      where: { id },
+      select: { requesterId: true },
+    });
+
+    if (!ticket) {
+      return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
+    }
+
+    if (user.role === "EMPLOYEE" && ticket.requesterId !== user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    if (
+      user.role === "AGENT" &&
+      ticket.requesterId !== user.id &&
+      !(await prisma.ticket.findFirst({
+        where: {
+          id,
+          OR: [{ assigneeId: user.id }, { departmentId: user.departmentId }],
+        },
+        select: { id: true },
+      }))
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const body = await req.json();

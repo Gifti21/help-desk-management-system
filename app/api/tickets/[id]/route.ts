@@ -66,8 +66,14 @@ export async function GET(
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
     }
 
-    // Check access permissions
-    if (user.role === "EMPLOYEE" && ticket.requesterId !== user.id) {
+    const canAccess =
+      user.role === "ADMIN" ||
+      (user.role === "EMPLOYEE" && ticket.requesterId === user.id) ||
+      (user.role === "AGENT" &&
+        (ticket.assigneeId === user.id ||
+          ticket.departmentId === user.departmentId));
+
+    if (!canAccess) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -105,9 +111,52 @@ export async function PATCH(
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
     }
 
-    // Check permissions
     if (user.role === "EMPLOYEE" && ticket.requesterId !== user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    if (user.role === "EMPLOYEE" && ticket.status === "CLOSED") {
+      return NextResponse.json(
+        { error: "Closed tickets can only be edited by an admin" },
+        { status: 403 },
+      );
+    }
+
+    if (user.role === "AGENT" && ticket.assigneeId !== user.id) {
+      return NextResponse.json(
+        { error: "Only the assigned agent can update this ticket" },
+        { status: 403 },
+      );
+    }
+
+    if (user.role !== "ADMIN" && validatedData.assigneeId !== undefined) {
+      return NextResponse.json(
+        { error: "Only admins can assign tickets" },
+        { status: 403 },
+      );
+    }
+
+    if (
+      user.role === "EMPLOYEE" &&
+      (validatedData.status !== undefined ||
+        validatedData.assigneeId !== undefined ||
+        validatedData.departmentId !== undefined)
+    ) {
+      return NextResponse.json(
+        { error: "Employees cannot change ticket workflow fields" },
+        { status: 403 },
+      );
+    }
+
+    if (
+      user.role === "AGENT" &&
+      validatedData.status === "OPEN" &&
+      ticket.status === "CLOSED"
+    ) {
+      return NextResponse.json(
+        { error: "Only admins can reopen closed tickets" },
+        { status: 403 },
+      );
     }
 
     const updateData: any = validatedData;

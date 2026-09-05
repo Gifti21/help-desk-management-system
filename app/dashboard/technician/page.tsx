@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTickets } from "@/context/TicketContext";
+import { useAuth } from "@/hooks/useAuth";
 import { usePagination } from "@/hooks/usePagination";
 import { TicketDrawer } from "@/components/dashboard/TicketDrawer";
 import { CreateTicketModal } from "@/components/dashboard/CreateTicketModal";
@@ -29,6 +30,7 @@ import {
 import { FONT_FAMILY } from "@/lib/fonts";
 
 export default function TechnicianDashboard() {
+  const { user } = useAuth();
   const {
     tickets: rawTickets = [],
     updateTicketStatus,
@@ -335,8 +337,7 @@ export default function TechnicianDashboard() {
   // ==========================================
   const filteredWorkload = useMemo(() => {
     return tickets.filter((t) => {
-      const matchesScope =
-        scopeFilter === "ALL" || t.assigneeId === "agent_bontu";
+      const matchesScope = scopeFilter === "ALL" || t.assigneeId === user?.id;
       const matchesSearch =
         searchQuery === "" ||
         t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -368,6 +369,7 @@ export default function TechnicianDashboard() {
     statusFilter,
     priorityFilter,
     departmentFilter,
+    user?.id,
   ]);
 
   const pagination = usePagination({

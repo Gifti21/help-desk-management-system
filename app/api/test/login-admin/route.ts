@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/session";
 import bcrypt from "bcryptjs";
+import { developmentOnly } from "@/lib/development-only";
 
 /**
  * POST /api/test/login-admin - Auto-login as admin for testing
  */
 export async function POST(request: NextRequest) {
+  const blocked = developmentOnly();
+  if (blocked) return blocked;
   try {
     console.log("=== AUTO LOGIN ADMIN TEST ===");
 
@@ -39,7 +42,6 @@ export async function POST(request: NextRequest) {
         department = await prisma.department.create({
           data: {
             name: "Administration",
-            description: "Administrative Department",
           },
         });
       }
@@ -51,7 +53,7 @@ export async function POST(request: NextRequest) {
       admin = await prisma.user.create({
         data: {
           email: "admin@helpdesk.com",
-          password: hashedPassword,
+          passwordHash: hashedPassword,
           firstName: "Admin",
           lastName: "User",
           role: "ADMIN",

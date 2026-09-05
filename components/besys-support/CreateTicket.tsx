@@ -25,7 +25,8 @@ export function CreateTicket() {
   const [isLoadingFormData, setIsLoadingFormData] = useState(true);
   const [formData, setFormData] = useState<{
     categories: Array<{ id: string; name: string }>;
-  }>({ categories: [] });
+    departments: Array<{ id: string; name: string }>;
+  }>({ categories: [], departments: [] });
   const [error, setError] = useState("");
 
   // Load form data on mount
@@ -38,25 +39,28 @@ export function CreateTicket() {
       setIsLoadingFormData(true);
       setError(""); // Clear any previous errors
 
-      console.log('Loading form data...');
+      console.log("Loading form data...");
       const data = await getTicketFormData();
-      console.log('Form data loaded:', data);
+      console.log("Form data loaded:", data);
 
-      setFormData({ categories: data.categories });
+      setFormData(data);
 
-      // Check if categories exist
       if (data.categories.length === 0) {
-        setError('No categories available. Please ask an admin to create ticket categories first through the admin portal (/admin/categories).');
+        setError(
+          "No categories available. Please ask an admin to create ticket categories first through the admin portal (/admin/categories).",
+        );
       }
-
-      console.log(`Loaded ${data.categories.length} categories`);
     } catch (error: any) {
-      console.error('Failed to load form data:', error);
-      let errorMessage = error.message || 'Failed to load form data';
+      console.error("Failed to load form data:", error);
+      let errorMessage = error.message || "Failed to load form data";
 
       // Special handling for authentication errors
-      if (errorMessage.includes('Unauthorized') || errorMessage.includes('Employee access required')) {
-        errorMessage = 'Please login as an employee to create tickets. Go to /test-employee-login to test.';
+      if (
+        errorMessage.includes("Unauthorized") ||
+        errorMessage.includes("Employee access required")
+      ) {
+        errorMessage =
+          "Please login as an employee to create tickets. Go to /test-employee-login to test.";
       }
 
       setError(errorMessage);
@@ -65,7 +69,12 @@ export function CreateTicket() {
     }
   };
 
-  const isFormReady = title.trim().length > 0 && description.trim().length > 0 && categoryId && categoryId.length > 0 && !isLoadingFormData;
+  const isFormReady =
+    title.trim().length > 0 &&
+    description.trim().length > 0 &&
+    categoryId &&
+    categoryId.length > 0 &&
+    !isLoadingFormData;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,7 +87,7 @@ export function CreateTicket() {
       await createEmployeeTicket({
         title: title.trim(),
         description: description.trim(),
-        priority: priority as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
+        priority: priority as "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
         categoryId,
       });
 
@@ -89,8 +98,8 @@ export function CreateTicket() {
         router.push("/employee/dashboard");
       }, 2000);
     } catch (error: any) {
-      console.error('Failed to create ticket:', error);
-      setError(error.message || 'Failed to create ticket');
+      console.error("Failed to create ticket:", error);
+      setError(error.message || "Failed to create ticket");
       setIsSubmitting(false);
     }
   };

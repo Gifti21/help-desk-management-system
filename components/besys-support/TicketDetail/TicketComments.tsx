@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Send } from "lucide-react";
 import {
   DARK_GREEN,
@@ -30,13 +30,60 @@ interface TicketCommentsProps {
 
 export function TicketComments({ ticket }: TicketCommentsProps) {
   const [newComment, setNewComment] = useState("");
+  const [comments, setComments] = useState(ticket.comments);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleAddComment = () => {
-    if (newComment.trim()) {
-      // In a real app, this would send to the backend
-      setNewComment("");
-      toast("Comment posted successfully!", "success");
+  useEffect(() => {
+    setComments(ticket.comments);
+  }, [ticket.comments]);
+
+  const handleAddComment = async () => {
+    if (newComment.trim() && !isSubmitting) {
+      setIsSubmitting(true);
+      try {
+        const response = await fetch(`/api/tickets/${ticket.id}/comments`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ content: newComment.trim() }),
+        });
+
+        if (!response.ok) {
+          const result = await response.json();
+          throw new Error(result.error || "Failed to post comment");
+        }
+
+        const comment = await response.json();
+        const authorName = comment.author
+          ? `${comment.author.firstName} ${comment.author.lastName}`
+          : "You";
+        setComments((current) => [
+          ...current,
+          {
+            id: comment.id,
+            author: authorName,
+            initials: authorName
+              .split(" ")
+              .map((name: string) => name[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase(),
+            role: "Employee",
+            timestamp: new Date(comment.createdAt).toLocaleString(),
+            message: comment.content,
+          },
+        ]);
+        setNewComment("");
+        toast("Comment posted successfully!", "success");
+      } catch (error) {
+        toast(
+          error instanceof Error ? error.message : "Failed to post comment",
+          "error",
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -57,11 +104,11 @@ export function TicketComments({ ticket }: TicketCommentsProps) {
           color: DARK_GREEN,
         }}
       >
-        Comments ({ticket.comments.length})
+        Comments ({comments.length})
       </h2>
 
       <div className="space-y-6 mb-6">
-        {ticket.comments.map((comment: Comment) => (
+        {comments.map((comment: Comment) => (
           <CommentItem key={comment.id} comment={comment} />
         ))}
       </div>
@@ -97,7 +144,7 @@ export function TicketComments({ ticket }: TicketCommentsProps) {
                 variant="primary"
                 size="md"
                 onClick={handleAddComment}
-                disabled={!newComment.trim()}
+                disabled={!newComment.trim() || isSubmitting}
               >
                 <Send className="h-4 w-4 mr-2" />
                 Post Comment

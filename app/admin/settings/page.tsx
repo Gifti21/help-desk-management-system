@@ -15,8 +15,19 @@ import {
 } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
 import { fonts } from "@/lib/fonts";
-import { Globe, Database, Shield, Save, RotateCcw, Loader2 } from "lucide-react";
-import { getSettings, updateAdminProfile, type SettingsData } from "@/lib/api/settings";
+import {
+  Globe,
+  Database,
+  Shield,
+  Save,
+  RotateCcw,
+  Loader2,
+} from "lucide-react";
+import {
+  getSettings,
+  updateAdminProfile,
+  type SettingsData,
+} from "@/lib/api/settings";
 
 export default function SettingsPage() {
   const [generalSettings, setGeneralSettings] = useState({
@@ -54,13 +65,13 @@ export default function SettingsPage() {
       setSettingsData(data);
 
       // Update admin email from current user
-      setGeneralSettings(prev => ({
+      setGeneralSettings((prev) => ({
         ...prev,
-        adminEmail: data.currentAdmin.email
+        adminEmail: data.currentAdmin.email,
       }));
     } catch (error) {
-      console.error('Failed to load settings:', error);
-      toast('Failed to load system information', 'error');
+      console.error("Failed to load settings:", error);
+      toast("Failed to load system information", "error");
     } finally {
       setIsFetchingData(false);
     }
@@ -76,7 +87,10 @@ export default function SettingsPage() {
     return (
       <PageLayout>
         <div className="flex items-center justify-center h-screen">
-          <Loader2 className="h-8 w-8 animate-spin" style={{ color: theme.primary }} />
+          <Loader2
+            className="h-8 w-8 animate-spin"
+            style={{ color: theme.primary }}
+          />
         </div>
       </PageLayout>
     );
@@ -84,12 +98,17 @@ export default function SettingsPage() {
 
   const handleSaveSettings = async () => {
     setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await updateAdminProfile({ email: generalSettings.adminEmail });
       toast("All system settings have been updated successfully.", "success");
+    } catch (error) {
+      toast(
+        error instanceof Error ? error.message : "Failed to update settings",
+        "error",
+      );
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleResetSettings = async () => {
@@ -443,7 +462,10 @@ export default function SettingsPage() {
           <CardContent>
             {isFetchingData ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin" style={{ color: theme.primary }} />
+                <Loader2
+                  className="h-6 w-6 animate-spin"
+                  style={{ color: theme.primary }}
+                />
               </div>
             ) : settingsData ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -480,7 +502,10 @@ export default function SettingsPage() {
                       style={{
                         fontSize: fonts.body.sm.size,
                         fontWeight: fonts.fontWeight.medium,
-                        color: settingsData.systemInfo.dbStatus === 'Connected' ? "#15803d" : "#dc2626",
+                        color:
+                          settingsData.systemInfo.dbStatus === "Connected"
+                            ? "#15803d"
+                            : "#dc2626",
                       }}
                     >
                       {settingsData.systemInfo.dbStatus}
@@ -567,7 +592,10 @@ export default function SettingsPage() {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8" style={{ color: theme.foregroundMuted }}>
+              <div
+                className="text-center py-8"
+                style={{ color: theme.foregroundMuted }}
+              >
                 Failed to load system information
               </div>
             )}

@@ -1,11 +1,14 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcrypt';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcrypt";
+import { developmentOnly } from "@/lib/development-only";
 
 export async function GET() {
+  const blocked = developmentOnly();
+  if (blocked) return blocked;
   try {
     const user = await prisma.user.findUnique({
-      where: { email: 'admin@helpdesk.com' },
+      where: { email: "admin@helpdesk.com" },
       select: {
         id: true,
         email: true,
@@ -18,11 +21,11 @@ export async function GET() {
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' });
+      return NextResponse.json({ error: "User not found" });
     }
 
     // Test password
-    const isValid = await bcrypt.compare('admin123', user.passwordHash);
+    const isValid = await bcrypt.compare("admin123", user.passwordHash);
 
     return NextResponse.json({
       user: {
@@ -31,7 +34,7 @@ export async function GET() {
         role: user.role,
         isActive: user.isActive,
       },
-      passwordTest: isValid ? 'Password matches' : 'Password does not match',
+      passwordTest: isValid ? "Password matches" : "Password does not match",
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

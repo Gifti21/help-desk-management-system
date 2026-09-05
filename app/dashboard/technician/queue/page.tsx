@@ -5,24 +5,29 @@ import { TicketFilters } from "@/components/tickets/TicketFilters";
 import { TicketTable } from "@/components/tickets/TicketTable";
 import { TicketDrawer } from "@/components/dashboard/TicketDrawer";
 import { useTickets } from "@/context/TicketContext";
+import { useAuth } from "@/hooks/useAuth";
 import { usePagination } from "@/hooks/usePagination";
 import { Ticket } from "@/types/ticket";
 import { ShieldCheck, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function AssignedQueuePage() {
-  const { tickets, updateTicketStatus, updateTicketPriority, addComment } = useTickets();
+  const { user } = useAuth();
+  const { tickets, updateTicketStatus, updateTicketPriority, addComment } =
+    useTickets();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [priorityFilter, setPriorityFilter] = useState("ALL");
   const [departmentFilter, setDepartmentFilter] = useState("ALL");
-  const [scopeFilter, setScopeFilter] = useState<"ALL" | "ASSIGNED_TO_ME">("ASSIGNED_TO_ME");
+  const [scopeFilter, setScopeFilter] = useState<"ALL" | "ASSIGNED_TO_ME">(
+    "ASSIGNED_TO_ME",
+  );
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
 
   // Filter queue items assigned to this support agent or all queue
   const filteredTickets = useMemo(() => {
     return tickets.filter((t) => {
-      const matchesScope = scopeFilter === "ALL" || t.assigneeId === "agent_bontu";
+      const matchesScope = scopeFilter === "ALL" || t.assigneeId === user?.id;
       const matchesSearch =
         searchQuery === "" ||
         t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -30,24 +35,42 @@ export default function AssignedQueuePage() {
         t.creatorName.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesStatus = statusFilter === "ALL" || t.status === statusFilter;
-      const matchesPriority = priorityFilter === "ALL" || t.priority === priorityFilter;
+      const matchesPriority =
+        priorityFilter === "ALL" || t.priority === priorityFilter;
       const matchesDepartment =
         departmentFilter === "ALL" ||
-        (t.category || t.department || "").toString().toLowerCase().includes(departmentFilter.toLowerCase());
+        (t.category || t.department || "")
+          .toString()
+          .toLowerCase()
+          .includes(departmentFilter.toLowerCase());
 
-      return matchesScope && matchesSearch && matchesStatus && matchesPriority && matchesDepartment;
+      return (
+        matchesScope &&
+        matchesSearch &&
+        matchesStatus &&
+        matchesPriority &&
+        matchesDepartment
+      );
     });
-  }, [tickets, scopeFilter, searchQuery, statusFilter, priorityFilter, departmentFilter]);
+  }, [
+    tickets,
+    scopeFilter,
+    searchQuery,
+    statusFilter,
+    priorityFilter,
+    departmentFilter,
+    user?.id,
+  ]);
 
   // Enforces strictly 5 items per page
-  const pagination = usePagination({ 
-    totalItems: filteredTickets.length, 
-    pageSize: 5 
+  const pagination = usePagination({
+    totalItems: filteredTickets.length,
+    pageSize: 5,
   });
-  
+
   const visibleTickets = useMemo(
     () => pagination.paginate(filteredTickets),
-    [filteredTickets, pagination]
+    [filteredTickets, pagination],
   );
 
   const selectedTicket = useMemo(() => {
@@ -66,11 +89,13 @@ export default function AssignedQueuePage() {
               Support Agent Assigned Tickets
             </h1>
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" /> Bontu Queue
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" /> Bontu
+              Queue
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-600 mt-1">
-            Filter, inspect, update statuses, add comments, and re-open resolved tickets across system departments.
+            Filter, inspect, update statuses, add comments, and re-open resolved
+            tickets across system departments.
           </p>
         </div>
       </div>
@@ -114,8 +139,8 @@ export default function AssignedQueuePage() {
                 disabled={!pagination.hasPrevious}
                 className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
                   pagination.hasPrevious
-                    ? 'text-slate-700 hover:bg-slate-100 cursor-pointer'
-                    : 'text-slate-300 cursor-not-allowed'
+                    ? "text-slate-700 hover:bg-slate-100 cursor-pointer"
+                    : "text-slate-300 cursor-not-allowed"
                 }`}
                 aria-label="Previous Page"
               >
@@ -132,8 +157,8 @@ export default function AssignedQueuePage() {
                       aria-label={`Page ${p}`}
                       className={`transition-all rounded-full ${
                         isActive
-                          ? 'w-6 h-2.5 bg-[#2FD9C4]'
-                          : 'w-2.5 h-2.5 bg-slate-300 hover:bg-slate-400 cursor-pointer'
+                          ? "w-6 h-2.5 bg-[#2FD9C4]"
+                          : "w-2.5 h-2.5 bg-slate-300 hover:bg-slate-400 cursor-pointer"
                       }`}
                     />
                   );
@@ -145,8 +170,8 @@ export default function AssignedQueuePage() {
                 disabled={!pagination.hasNext}
                 className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${
                   pagination.hasNext
-                    ? 'text-slate-700 hover:bg-slate-100 cursor-pointer'
-                    : 'text-slate-300 cursor-not-allowed'
+                    ? "text-slate-700 hover:bg-slate-100 cursor-pointer"
+                    : "text-slate-300 cursor-not-allowed"
                 }`}
                 aria-label="Next Page"
               >
@@ -162,8 +187,12 @@ export default function AssignedQueuePage() {
         ticket={selectedTicket}
         isOpen={!!selectedTicket}
         onClose={() => setSelectedTicketId(null)}
-        onUpdateStatus={(ticketId, status) => updateTicketStatus(ticketId, status)}
-        onUpdatePriority={(ticketId, priority) => updateTicketPriority(ticketId, priority)}
+        onUpdateStatus={(ticketId, status) =>
+          updateTicketStatus(ticketId, status)
+        }
+        onUpdatePriority={(ticketId, priority) =>
+          updateTicketPriority(ticketId, priority)
+        }
         onAddComment={(ticketId, content) => {
           addComment(ticketId, content, "Bontu");
         }}

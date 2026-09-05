@@ -4,9 +4,14 @@ import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { User, BellRing, Save, Check, Shield, Lock, Mail } from "lucide-react";
+import {
+  changeAgentPassword,
+  getAgentProfile,
+  updateAgentProfile,
+} from "@/lib/api/agent";
 
 export default function SettingsPage() {
-  const [firstName, setFirstName] = useState("Bontu");
+  const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [autoRefreshQueue, setAutoRefreshQueue] = useState(true);
@@ -23,8 +28,16 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Load saved preferences from localStorage on mount
+  // Load the database profile and browser-only queue preferences.
   useEffect(() => {
+    void getAgentProfile()
+      .then((profile) => {
+        setFirstName(profile.firstName);
+        setLastName(profile.lastName);
+        setEmail(profile.email);
+      })
+      .catch((error) => console.error("Failed to load agent profile:", error));
+
     try {
       const savedSettings = localStorage.getItem("hdms_agent_settings");
       if (savedSettings) {
@@ -32,8 +45,10 @@ export default function SettingsPage() {
         if (parsed.firstName) setFirstName(parsed.firstName);
         if (parsed.lastName) setLastName(parsed.lastName);
         if (parsed.email) setEmail(parsed.email);
-        if (parsed.autoRefreshQueue !== undefined) setAutoRefreshQueue(parsed.autoRefreshQueue);
-        if (parsed.soundAlerts !== undefined) setSoundAlerts(parsed.soundAlerts);
+        if (parsed.autoRefreshQueue !== undefined)
+          setAutoRefreshQueue(parsed.autoRefreshQueue);
+        if (parsed.soundAlerts !== undefined)
+          setSoundAlerts(parsed.soundAlerts);
         if (parsed.agentStatus) setAgentStatus(parsed.agentStatus);
         if (parsed.defaultView) setDefaultView(parsed.defaultView);
       }
@@ -44,7 +59,7 @@ export default function SettingsPage() {
     }
   }, []);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError("");
 
@@ -64,6 +79,24 @@ export default function SettingsPage() {
       }
     }
 
+    try {
+      await updateAgentProfile({ firstName, lastName, email });
+      if (newPassword) {
+        await changeAgentPassword({
+          currentPassword,
+          newPassword,
+          confirmPassword,
+        });
+      }
+    } catch (error) {
+      setPasswordError(
+        error instanceof Error
+          ? error.message
+          : "Failed to save account settings",
+      );
+      return;
+    }
+
     const settingsPayload = {
       firstName,
       lastName,
@@ -76,7 +109,10 @@ export default function SettingsPage() {
     };
 
     try {
-      localStorage.setItem("hdms_agent_settings", JSON.stringify(settingsPayload));
+      localStorage.setItem(
+        "hdms_agent_settings",
+        JSON.stringify(settingsPayload),
+      );
 
       if (newPassword) {
         setCurrentPassword("");
@@ -102,9 +138,12 @@ export default function SettingsPage() {
   return (
     <div className="p-4 sm:p-6 md:p-8 space-y-6 max-w-4xl mx-auto transition-colors">
       <div>
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Workspace Settings</h1>
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          Workspace Settings
+        </h1>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Manage your account preferences, contact info, security parameters, and support workstation configurations.
+          Manage your account preferences, contact info, security parameters,
+          and support workstation configurations.
         </p>
       </div>
 
@@ -113,12 +152,16 @@ export default function SettingsPage() {
         <Card className="p-6 space-y-4 bg-white dark:bg-[#0C1815] border-slate-200 dark:border-[#1E3E35] shadow-sm">
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-[#1E3E35] pb-3">
             <User className="w-5 h-5 text-emerald-600 dark:text-[#2FD9C4]" />
-            <h2 className="text-base font-semibold text-slate-900 dark:text-white">Profile & Availability</h2>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-white">
+              Profile & Availability
+            </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">First Name</label>
+              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">
+                First Name
+              </label>
               <input
                 type="text"
                 value={firstName}
@@ -130,7 +173,9 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">Last Name</label>
+              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">
+                Last Name
+              </label>
               <input
                 type="text"
                 value={lastName}
@@ -157,7 +202,9 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">Agent Work Status</label>
+              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">
+                Agent Work Status
+              </label>
               <select
                 value={agentStatus}
                 onChange={(e) => setAgentStatus(e.target.value)}
@@ -174,7 +221,9 @@ export default function SettingsPage() {
         <Card className="p-6 space-y-4 bg-white dark:bg-[#0C1815] border-slate-200 dark:border-[#1E3E35] shadow-sm">
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-[#1E3E35] pb-3">
             <Lock className="w-5 h-5 text-emerald-600 dark:text-[#2FD9C4]" />
-            <h2 className="text-base font-semibold text-slate-900 dark:text-white">Security & Password</h2>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-white">
+              Security & Password
+            </h2>
           </div>
 
           {passwordError && (
@@ -185,7 +234,9 @@ export default function SettingsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">Current Password</label>
+              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">
+                Current Password
+              </label>
               <input
                 type="password"
                 value={currentPassword}
@@ -196,7 +247,9 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">New Password</label>
+              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">
+                New Password
+              </label>
               <input
                 type="password"
                 value={newPassword}
@@ -207,7 +260,9 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">Confirm New Password</label>
+              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">
+                Confirm New Password
+              </label>
               <input
                 type="password"
                 value={confirmPassword}
@@ -223,12 +278,16 @@ export default function SettingsPage() {
         <Card className="p-6 space-y-4 bg-white dark:bg-[#0C1815] border-slate-200 dark:border-[#1E3E35] shadow-sm">
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-[#1E3E35] pb-3">
             <BellRing className="w-5 h-5 text-emerald-600 dark:text-[#2FD9C4]" />
-            <h2 className="text-base font-semibold text-slate-900 dark:text-white">Queue & Alert Automation</h2>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-white">
+              Queue & Alert Automation
+            </h2>
           </div>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">Default Queue Filter</label>
+              <label className="text-[11px] text-slate-500 dark:text-slate-400 font-mono uppercase tracking-wider block">
+                Default Queue Filter
+              </label>
               <select
                 value={defaultView}
                 onChange={(e) => setDefaultView(e.target.value)}
@@ -236,15 +295,22 @@ export default function SettingsPage() {
               >
                 <option value="ALL">Show All Assigned Tickets</option>
                 <option value="OPEN">Open & In-Progress Only</option>
-                <option value="CRITICAL">Critical & Overdue Priority Only</option>
+                <option value="CRITICAL">
+                  Critical & Overdue Priority Only
+                </option>
               </select>
             </div>
 
             <div className="pt-2 space-y-3">
               <label className="flex items-center justify-between cursor-pointer">
                 <div>
-                  <span className="text-sm font-medium text-slate-800 dark:text-slate-200 block">Auto-Refresh Assigned Queue</span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">Poll live database changes in the background every 30 seconds.</span>
+                  <span className="text-sm font-medium text-slate-800 dark:text-slate-200 block">
+                    Auto-Refresh Assigned Queue
+                  </span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    Poll live database changes in the background every 30
+                    seconds.
+                  </span>
                 </div>
                 <input
                   type="checkbox"
@@ -256,8 +322,12 @@ export default function SettingsPage() {
 
               <label className="flex items-center justify-between cursor-pointer pt-2 border-t border-slate-100 dark:border-[#1E3E35]/60">
                 <div>
-                  <span className="text-sm font-medium text-slate-800 dark:text-slate-200 block">Critical Audio Chime</span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">Play an alert chime when high-priority tickets are assigned.</span>
+                  <span className="text-sm font-medium text-slate-800 dark:text-slate-200 block">
+                    Critical Audio Chime
+                  </span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    Play an alert chime when high-priority tickets are assigned.
+                  </span>
                 </div>
                 <input
                   type="checkbox"
@@ -274,10 +344,13 @@ export default function SettingsPage() {
         <Card className="p-6 space-y-3 bg-slate-50 dark:bg-[#060D0B] border-slate-200 dark:border-[#1E3E35] text-xs">
           <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 font-mono">
             <Shield className="w-4 h-4 text-emerald-600 dark:text-[#2FD9C4]" />
-            <span>Besys Technologies HDMS v2.4.0 — Secure Workspace Session</span>
+            <span>
+              Besys Technologies HDMS v2.4.0 — Secure Workspace Session
+            </span>
           </div>
           <p className="text-slate-500 dark:text-slate-500">
-            Connected via secure corporate node. All preference modifications are logged for auditing purposes.
+            Connected via secure corporate node. All preference modifications
+            are logged for auditing purposes.
           </p>
         </Card>
 
@@ -289,7 +362,11 @@ export default function SettingsPage() {
               Settings updated successfully!
             </span>
           )}
-          <Button type="submit" variant="primary" className="bg-emerald-600 hover:bg-emerald-700 dark:bg-[#2FD9C4] dark:hover:bg-[#25bca9] text-white dark:text-[#0C1815] font-bold text-xs px-5 py-2.5 rounded-lg flex items-center gap-2 shadow-sm">
+          <Button
+            type="submit"
+            variant="primary"
+            className="bg-emerald-600 hover:bg-emerald-700 dark:bg-[#2FD9C4] dark:hover:bg-[#25bca9] text-white dark:text-[#0C1815] font-bold text-xs px-5 py-2.5 rounded-lg flex items-center gap-2 shadow-sm"
+          >
             <Save className="w-4 h-4" />
             Save Preferences
           </Button>

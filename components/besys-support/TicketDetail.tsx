@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { PAGE_BACKGROUND } from "@/lib/colors";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -11,16 +12,56 @@ import { BackLink } from "./TicketDetail/BackLink";
 import { TicketHeader } from "./TicketDetail/TicketHeader";
 import { TicketDescription } from "./TicketDetail/TicketDescription";
 import { TicketComments } from "./TicketDetail/TicketComments";
-import { mockTickets } from "@/lib/mock-data/tickets";
+import type { Ticket, Comment } from "@/lib/types/ticket";
 
 export function TicketDetail() {
   const params = useParams();
   const ticketId = params.id as string;
   const { profile } = useEmployeeProfile();
+  const [ticket, setTicket] = useState<Ticket | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const ticket = mockTickets[ticketId];
+  useEffect(() => {
+    const loadTicket = async () => {
+      try {
+        const response = await fetch(`/api/tickets/${ticketId}`, {
+          credentials: "include",
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        const comments: Comment[] = (data.comments || []).map(
+          (comment: any) => ({
+            id: comment.id,
+            author: comment.author
+              ? `${comment.author.firstName} ${comment.author.lastName}`
+              : "User",
+            initials: comment.author
+              ? `${comment.author.firstName[0]}${comment.author.lastName[0]}`.toUpperCase()
+              : "U",
+            role: comment.author?.role || "User",
+            timestamp: new Date(comment.createdAt).toLocaleString(),
+            message: comment.content,
+          }),
+        );
+        setTicket({
+          id: data.id,
+          title: data.title,
+          category: data.category?.name || "Uncategorized",
+          priority: data.priority,
+          status: data.status,
+          description: data.description,
+          createdAt: new Date(data.createdAt).toLocaleString(),
+          comments,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  if (!ticket) {
+    void loadTicket();
+  }, [ticketId]);
+
+  if (isLoading || !ticket) {
     return <TicketNotFound />;
   }
 

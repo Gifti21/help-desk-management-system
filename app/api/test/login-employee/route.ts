@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/session";
 import bcrypt from "bcryptjs";
+import { developmentOnly } from "@/lib/development-only";
 
 /**
  * POST /api/test/login-employee - Auto-login as employee for testing (creates employee if needed)
  */
 export async function POST(request: NextRequest) {
+  const blocked = developmentOnly();
+  if (blocked) return blocked;
   try {
     console.log("=== AUTO LOGIN EMPLOYEE TEST ===");
 
@@ -52,7 +55,7 @@ export async function POST(request: NextRequest) {
       employee = await prisma.user.create({
         data: {
           email: "employee@helpdesk.com",
-          password: hashedPassword,
+          passwordHash: hashedPassword,
           firstName: "John",
           lastName: "Employee",
           role: "EMPLOYEE",

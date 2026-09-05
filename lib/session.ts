@@ -1,11 +1,7 @@
-/**
- * Simple session management using cookies
- * Temporary solution until NextAuth v5 migration
- */
-
 import { cookies } from "next/headers";
 import { prisma } from "./prisma";
 import bcrypt from "bcrypt";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 export interface SessionUser {
   id: string;
@@ -19,12 +15,58 @@ export interface SessionUser {
 const SESSION_COOKIE_NAME = "helpdesk-session";
 const SESSION_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 7 days
 
+function getSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (secret) return secret;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("SESSION_SECRET must be configured in production");
+  }
+  return "development-only-session-secret";
+}
+
+function sign(value: string): string {
+  return createHmac("sha256", getSessionSecret())
+    .update(value)
+    .digest("base64url");
+}
+
+function encodeSession(user: SessionUser): string {
+  const payload = Buffer.from(JSON.stringify(user)).toString("base64url");
+  return `${payload}.${sign(payload)}`;
+}
+
+function decodeSession(value: string): SessionUser | null {
+  const [payload, signature] = value.split(".");
+  if (!payload || !signature) return null;
+
+  const expectedSignature = sign(payload);
+  const provided = Buffer.from(signature);
+  const expected = Buffer.from(expectedSignature);
+  if (
+    provided.length !== expected.length ||
+    !timingSafeEqual(provided, expected)
+  ) {
+    return null;
+  }
+
+  try {
+    const user = JSON.parse(
+      Buffer.from(payload, "base64url").toString("utf8"),
+    ) as SessionUser;
+    if (!user.id || !user.email || !user.role || !user.departmentId)
+      return null;
+    return user;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Create a session for a user that has already been authenticated.
  */
 export async function createSession(user: SessionUser): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE_NAME, JSON.stringify(user), {
+  cookieStore.set(SESSION_COOKIE_NAME, encodeSession(user), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -40,49 +82,20 @@ export async function loginUser(
   email: string,
   password: string,
 ): Promise<SessionUser | null> {
-  console.log("[SESSION] ========== LOGIN ATTEMPT ==========");
-  console.log("[SESSION] Email:", email);
-  console.log("[SESSION] Password length:", password.length);
-
   const user = await prisma.user.findUnique({
     where: { email: email.toLowerCase() },
   });
 
-  console.log("[SESSION] User found in DB:", !!user);
-  if (user) {
-    console.log("[SESSION] User details:", {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      isActive: user.isActive,
-      hasPasswordHash: !!user.passwordHash,
-      passwordHashLength: user.passwordHash?.length,
-    });
-  }
-
   if (!user) {
-    console.log("[SESSION] ❌ User not found in database");
     return null;
   }
 
   if (!user.isActive) {
-    console.log("[SESSION] ❌ User exists but is INACTIVE");
     return null;
   }
-
-  console.log("[SESSION] Comparing password with hash...");
-  console.log(
-    "[SESSION] Password hash prefix:",
-    user.passwordHash.substring(0, 20),
-  );
 
   const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-  console.log("[SESSION] Password comparison result:", isPasswordValid);
-
-  if (!isPasswordValid) {
-    console.log("[SESSION] ❌ Password does NOT match");
-    return null;
-  }
+  if (!isPasswordValid) return null;
 
   const sessionUser: SessionUser = {
     id: user.id,
@@ -93,12 +106,7 @@ export async function loginUser(
     departmentId: user.departmentId,
   };
 
-  console.log("[SESSION] ✅ Password matches! Creating session...");
-
   await createSession(sessionUser);
-
-  console.log("[SESSION] ✅ Session created successfully");
-  console.log("[SESSION] ========================================");
   return sessionUser;
 }
 
@@ -113,11 +121,45 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     return null;
   }
 
-  try {
-    return JSON.parse(sessionCookie.value) as SessionUser;
-  } catch {
-    return null;
-  }
+  const sessionUser = decodeSession(sessionCookie.value);
+  if (!sessionUser) return null;
+
+  const currentUser = await prisma.user.findUnique({
+    where: { id: sessionUser.id },
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      role: true,
+      departmentId: true,
+      isActive: true,
+    },
+  });
+
+  if (!currentUser || !currentUser.isActive) return null;
+
+  return {
+    id: currentUser.id,
+    email: currentUser.email,
+    firstName: currentUser.firstName,
+    lastName: currentUser.lastName,
+    role: currentUser.role,
+    departmentId: currentUser.departmentId,
+  };
+}
+
+export async function requireSession(): Promise<SessionUser> {
+  const user = await getSessionUser();
+  if (!user) throw new Error("UNAUTHORIZED");
+  return user;
+}
+
+export function hasRole(
+  user: SessionUser,
+  ...roles: SessionUser["role"][]
+): boolean {
+  return roles.includes(user.role);
 }
 
 /**

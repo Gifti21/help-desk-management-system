@@ -7,10 +7,7 @@ export async function GET() {
     const user = await getSessionUser();
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized - Login required" },
-        { status: 401 },
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const [categories, departments] = await Promise.all([
@@ -24,11 +21,7 @@ export async function GET() {
       }),
     ]);
 
-    return NextResponse.json({
-      success: true,
-      categories,
-      departments,
-    });
+    return NextResponse.json({ success: true, categories, departments });
   } catch (error) {
     console.error("GET /api/ticket-form-data error:", error);
     return NextResponse.json(
