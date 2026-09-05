@@ -5,6 +5,7 @@ import { PAGE_BACKGROUND } from "@/lib/colors";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { ToastProvider } from "@/components/ui/toast";
+import { useEmployeeProfile } from "@/lib/hooks/useEmployeeProfile";
 import { TicketNotFound } from "./TicketDetail/TicketNotFound";
 import { BackLink } from "./TicketDetail/BackLink";
 import { TicketHeader } from "./TicketDetail/TicketHeader";
@@ -15,6 +16,7 @@ import { mockTickets } from "@/lib/mock-data/tickets";
 export function TicketDetail() {
   const params = useParams();
   const ticketId = params.id as string;
+  const { profile } = useEmployeeProfile();
 
   const ticket = mockTickets[ticketId];
 
@@ -32,8 +34,8 @@ export function TicketDetail() {
 
         <div className="flex-1 lg:pl-[280px] flex flex-col">
           <DashboardHeader
-            userName="Jamie Smith"
-            userInitials="JS"
+            userName={profile.fullName}
+            userInitials={profile.initials}
             role="EMPLOYEE"
           />
 

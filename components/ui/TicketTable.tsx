@@ -237,9 +237,9 @@ export function TicketTable({
                   <Badge
                     style={{
                       backgroundColor:
-                        priorityColors[ticket.priority].background,
-                      color: priorityColors[ticket.priority].text,
-                      border: `1px solid ${priorityColors[ticket.priority].border}`,
+                        priorityColors[ticket.priority]?.background || priorityColors.MEDIUM.background,
+                      color: priorityColors[ticket.priority]?.text || priorityColors.MEDIUM.text,
+                      border: `1px solid ${priorityColors[ticket.priority]?.border || priorityColors.MEDIUM.border}`,
                     }}
                   >
                     {ticket.priority}
@@ -248,9 +248,9 @@ export function TicketTable({
                 <td className="py-4">
                   <Badge
                     style={{
-                      backgroundColor: statusColors[ticket.status].background,
-                      color: statusColors[ticket.status].text,
-                      border: `1px solid ${statusColors[ticket.status].border}`,
+                      backgroundColor: statusColors[ticket.status]?.background || statusColors.OPEN.background,
+                      color: statusColors[ticket.status]?.text || statusColors.OPEN.text,
+                      border: `1px solid ${statusColors[ticket.status]?.border || statusColors.OPEN.border}`,
                     }}
                   >
                     {ticket.status}
@@ -342,9 +342,9 @@ export function TicketTable({
               </Badge>
               <Badge
                 style={{
-                  backgroundColor: statusColors[ticket.status].background,
-                  color: statusColors[ticket.status].text,
-                  border: `1px solid ${statusColors[ticket.status].border}`,
+                  backgroundColor: statusColors[ticket.status]?.background || statusColors.OPEN.background,
+                  color: statusColors[ticket.status]?.text || statusColors.OPEN.text,
+                  border: `1px solid ${statusColors[ticket.status]?.border || statusColors.OPEN.border}`,
                 }}
               >
                 {ticket.status}

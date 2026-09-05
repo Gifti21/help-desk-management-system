@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardHeaderSection } from "./EmployeeDashboard/DashboardHeaderSection";
 import { StatCards } from "./EmployeeDashboard/StatCards";
@@ -8,16 +8,36 @@ import { RecentTickets } from "./EmployeeDashboard/RecentTickets";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useTicketPagination } from "@/lib/hooks/useTicketPagination";
 import { useDebounce } from "@/lib/hooks/useDebounce";
+import { useEmployeeProfile } from "@/lib/hooks/useEmployeeProfile";
 import type { TicketStatus } from "@/lib/types/ticket";
-import { mockTicketRows } from "@/lib/mock-data/tickets";
-
-const mockTickets = mockTicketRows;
+import { getEmployeeDashboard, type EmployeeDashboardData, type EmployeeTicket } from "@/lib/api/employee";
+import { getSessionUser } from "@/lib/session";
+import { transformTicketForTable } from "@/lib/utils/transform-ticket-data";
 
 export function EmployeeDashboard() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState<EmployeeDashboardData | null>(null);
+  const { profile } = useEmployeeProfile();
+
+  // Load dashboard data on mount
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  const loadDashboard = async () => {
+    try {
+      setIsLoading(true);
+      const data = await getEmployeeDashboard();
+      setDashboardData(data);
+    } catch (error) {
+      console.error('Failed to load dashboard:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const {
     currentPage,
@@ -27,19 +47,22 @@ export function EmployeeDashboard() {
     statusFilter,
     setStatusFilter,
   } = useTicketPagination({
-    tickets: mockTickets,
+    tickets: dashboardData?.recentTickets.map(ticket => transformTicketForTable(ticket)) || [],
     itemsPerPage: 5,
     searchQuery: debouncedSearchQuery,
   });
 
   const stats = useMemo(() => {
-    return {
-      total: mockTickets.length,
-      open: mockTickets.filter((t) => t.status === "Open").length,
-      inProgress: mockTickets.filter((t) => t.status === "In Progress").length,
-      closed: mockTickets.filter((t) => t.status === "Closed").length,
-    };
-  }, []);
+    if (!dashboardData) {
+      return {
+        total: 0,
+        open: 0,
+        inProgress: 0,
+        closed: 0,
+      };
+    }
+    return dashboardData.stats;
+  }, [dashboardData]);
 
   const handleRowClick = (ticketId: string) => {
     router.push(`/employee/tickets/${ticketId}`);
@@ -56,8 +79,8 @@ export function EmployeeDashboard() {
 
   return (
     <DashboardLayout
-      userName="Jamie Smith"
-      userInitials="JS"
+      userName={profile.fullName}
+      userInitials={profile.initials}
       onSearch={handleHeaderSearch}
       searchValue={searchQuery}
       role="EMPLOYEE"

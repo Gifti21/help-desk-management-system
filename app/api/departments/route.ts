@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -11,9 +10,9 @@ const departmentSchema = z.object({
 // GET /api/departments - Get all departments
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
+    const user = await getSessionUser();
+
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -39,9 +38,9 @@ export async function GET(req: NextRequest) {
 // POST /api/departments - Create a new department (admin only)
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user || session.user.role !== "ADMIN") {
+    const user = await getSessionUser();
+
+    if (!user || user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

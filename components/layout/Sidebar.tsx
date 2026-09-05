@@ -40,56 +40,60 @@ export function Sidebar({ onLogout, role = "TECHNICIAN" }: SidebarProps) {
   const navItems =
     role === "EMPLOYEE"
       ? [
-        {
-          label: "Dashboard",
-          href: "/employee/dashboard",
-          icon: LayoutDashboard,
-        },
-        { label: "My Tickets", href: "/employee/tickets", icon: Ticket },
-        { label: "Create Ticket", href: "/employee/tickets/new", icon: Plus },
-        { label: "Settings", href: "/employee/settings", icon: Settings },
-      ]
+          {
+            label: "Dashboard",
+            href: "/employee/dashboard",
+            icon: LayoutDashboard,
+          },
+          { label: "My Tickets", href: "/employee/tickets", icon: Ticket },
+          { label: "Create Ticket", href: "/employee/tickets/new", icon: Plus },
+          { label: "Settings", href: "/employee/settings", icon: Settings },
+        ]
       : [
-        {
-          label: "Dashboard",
-          href: "/dashboard/technician",
-          icon: LayoutDashboard,
-        },
-        {
-          label: "Assigned Tickets",
-          href: "/dashboard/technician/queue",
-          icon: Inbox,
-        },
-        {
-          label: "Notifications",
-          href: "/dashboard/technician/notifications",
-          icon: Bell,
-        },
-        {
-          label: "Reports",
-          href: "/dashboard/technician/reports",
-          icon: BarChart2,
-        },
-        {
-          label: "Help Center",
-          href: "/dashboard/technician/help",
-          icon: HelpCircle,
-        },
-        {
-          label: "Settings",
-          href: "/dashboard/technician/settings",
-          icon: Settings,
-        },
-      ];
+          {
+            label: "Dashboard",
+            href: "/dashboard/technician",
+            icon: LayoutDashboard,
+          },
+          {
+            label: "Assigned Tickets",
+            href: "/dashboard/technician/queue",
+            icon: Inbox,
+          },
+          {
+            label: "Notifications",
+            href: "/dashboard/technician/notifications",
+            icon: Bell,
+          },
+          {
+            label: "Reports",
+            href: "/dashboard/technician/reports",
+            icon: BarChart2,
+          },
+          {
+            label: "Help Center",
+            href: "/dashboard/technician/help",
+            icon: HelpCircle,
+          },
+          {
+            label: "Settings",
+            href: "/dashboard/technician/settings",
+            icon: Settings,
+          },
+        ];
 
   // For mobile: Employee shows all items, Technician/Admin use More menu
   const mainItems = role === "EMPLOYEE" ? navItems : navItems.slice(0, 4);
   const moreItems = role === "EMPLOYEE" ? [] : navItems.slice(4);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (onLogout) {
       onLogout();
     } else {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
       localStorage.removeItem("isAuthenticated");
       sessionStorage.removeItem("isAuthenticated");
       router.push("/");
@@ -145,10 +149,11 @@ export function Sidebar({ onLogout, role = "TECHNICIAN" }: SidebarProps) {
                   href={item.href}
                   onClick={() => setIsMobileOpen(false)}
                   style={navButtonStyle(isActive)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-colors ${isActive
-                    ? "font-bold shadow-md shadow-[#2FD9C4]/10"
-                    : "hover:text-white hover:bg-[#193831]"
-                    }`}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-colors ${
+                    isActive
+                      ? "font-bold shadow-md shadow-[#2FD9C4]/10"
+                      : "hover:text-white hover:bg-[#193831]"
+                  }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span>{item.label}</span>
@@ -162,15 +167,15 @@ export function Sidebar({ onLogout, role = "TECHNICIAN" }: SidebarProps) {
               onClick={handleLogout}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 hover:shadow-md group"
               style={{
-                color: '#ffffff',
-                backgroundColor: '#7f1d1d',
-                border: '1px solid #991b1b',
+                color: "#ffffff",
+                backgroundColor: "#7f1d1d",
+                border: "1px solid #991b1b",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#991b1b';
+                e.currentTarget.style.backgroundColor = "#991b1b";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#7f1d1d';
+                e.currentTarget.style.backgroundColor = "#7f1d1d";
               }}
               title="Sign out of session"
             >
@@ -226,15 +231,15 @@ export function Sidebar({ onLogout, role = "TECHNICIAN" }: SidebarProps) {
                 onClick={handleLogout}
                 className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-semibold transition-all duration-200"
                 style={{
-                  color: '#ffffff',
-                  backgroundColor: '#7f1d1d',
-                  border: '1px solid #991b1b',
+                  color: "#ffffff",
+                  backgroundColor: "#7f1d1d",
+                  border: "1px solid #991b1b",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#991b1b';
+                  e.currentTarget.style.backgroundColor = "#991b1b";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#7f1d1d';
+                  e.currentTarget.style.backgroundColor = "#7f1d1d";
                 }}
                 title="Logout"
               >
@@ -314,15 +319,15 @@ export function Sidebar({ onLogout, role = "TECHNICIAN" }: SidebarProps) {
                 onClick={handleLogout}
                 className="inline-flex items-center justify-center rounded-md p-2 transition-all duration-200"
                 style={{
-                  color: '#ffffff',
-                  backgroundColor: '#7f1d1d',
-                  border: '1px solid #991b1b',
+                  color: "#ffffff",
+                  backgroundColor: "#7f1d1d",
+                  border: "1px solid #991b1b",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#991b1b';
+                  e.currentTarget.style.backgroundColor = "#991b1b";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#7f1d1d';
+                  e.currentTarget.style.backgroundColor = "#7f1d1d";
                 }}
                 title="Logout"
               >
@@ -392,7 +397,7 @@ export function Sidebar({ onLogout, role = "TECHNICIAN" }: SidebarProps) {
                   className="flex flex-col items-center justify-center gap-1 px-2 py-1 transition-colors min-w-0"
                   style={{
                     color: isActive ? TEAL_PRIMARY : MUTED_GREY_GREEN,
-                    flex: '1 1 0',
+                    flex: "1 1 0",
                   }}
                 >
                   <Icon className="h-5 w-5 shrink-0" />
@@ -410,7 +415,7 @@ export function Sidebar({ onLogout, role = "TECHNICIAN" }: SidebarProps) {
                 className="flex flex-col items-center justify-center gap-1 px-2 py-1 transition-colors min-w-0"
                 style={{
                   color: MUTED_GREY_GREEN,
-                  flex: '1 1 0',
+                  flex: "1 1 0",
                 }}
               >
                 <MoreHorizontal className="h-5 w-5 shrink-0" />

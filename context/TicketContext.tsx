@@ -1,7 +1,20 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
-import { Ticket, Status, Priority, Comment, TimelineEntry } from "@/types/ticket";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import {
+  Ticket,
+  Status,
+  Priority,
+  Comment,
+  TimelineEntry,
+  getReferenceName,
+} from "@/types/ticket";
 
 export interface AppNotification {
   id: string;
@@ -16,7 +29,12 @@ interface TicketContextType {
   tickets: Ticket[];
   notifications: AppNotification[];
   unreadNotificationsCount: number;
-  addTicket: (ticket: Omit<Ticket, "id" | "ticketNumber" | "createdAt" | "updatedAt" | "comments" | "history">) => void;
+  addTicket: (
+    ticket: Omit<
+      Ticket,
+      "id" | "ticketNumber" | "createdAt" | "updatedAt" | "comments" | "history"
+    >,
+  ) => void;
   updateTicket: (ticketId: string, updatedFields: Partial<Ticket>) => void;
   updateTicketStatus: (ticketId: string, status: Status) => void;
   updateTicketPriority: (ticketId: string, priority: Priority) => void;
@@ -31,7 +49,8 @@ const INITIAL_TICKETS: Ticket[] = [
     id: "t1",
     ticketNumber: "TICK-1024",
     title: "VPN connection dropping repeatedly during remote sessions",
-    description: "Whenever I connect to the corporate gateway from home, the connection drops every 5 minutes and requires full re-authentication.",
+    description:
+      "Whenever I connect to the corporate gateway from home, the connection drops every 5 minutes and requires full re-authentication.",
     category: "Network",
     department: "Network",
     priority: "HIGH",
@@ -48,14 +67,16 @@ const INITIAL_TICKETS: Ticket[] = [
         authorName: "Abebe Tesfaye",
         authorRole: "EMPLOYEE",
         timestamp: "2026-07-28T08:30:00.000Z",
-        content: "Issue started happening after yesterday's network firmware patch.",
+        content:
+          "Issue started happening after yesterday's network firmware patch.",
       },
       {
         id: "c2",
         authorName: "Bontu",
         authorRole: "AGENT",
         timestamp: "2026-07-28T09:10:00.000Z",
-        content: "Investigating gateway authentication logs for packet loss and tunnel reset signals.",
+        content:
+          "Investigating gateway authentication logs for packet loss and tunnel reset signals.",
       },
     ],
     history: [
@@ -81,7 +102,8 @@ const INITIAL_TICKETS: Ticket[] = [
     id: "t2",
     ticketNumber: "TICK-1028",
     title: "Request for Figma Pro Team License Access",
-    description: "Newly onboarded UI designer in Product Team requires Figma Pro tier license key for team design system access.",
+    description:
+      "Newly onboarded UI designer in Product Team requires Figma Pro tier license key for team design system access.",
     category: "Software",
     department: "Software",
     priority: "MEDIUM",
@@ -116,7 +138,8 @@ const INITIAL_TICKETS: Ticket[] = [
     id: "t3",
     ticketNumber: "TICK-1025",
     title: "Production DB Cluster High Latency Spikes",
-    description: "Database latency peaking above 1200ms on secondary node during peak morning query execution cycles.",
+    description:
+      "Database latency peaking above 1200ms on secondary node during peak morning query execution cycles.",
     category: "Infrastructure",
     department: "Infrastructure",
     priority: "CRITICAL",
@@ -133,7 +156,8 @@ const INITIAL_TICKETS: Ticket[] = [
         authorName: "Dawit Kebede",
         authorRole: "EMPLOYEE",
         timestamp: "2026-07-30T01:15:00.000Z",
-        content: "Alert triggered automatically from Prometheus/Grafana SLA watchdog.",
+        content:
+          "Alert triggered automatically from Prometheus/Grafana SLA watchdog.",
       },
     ],
     history: [
@@ -151,7 +175,8 @@ const INITIAL_TICKETS: Ticket[] = [
     id: "t4",
     ticketNumber: "TICK-1026",
     title: "Dual Monitor Setup Screen Flicker & HDMI Adapter Replacement",
-    description: "Right monitor intermittently turns black when moving window frames between displays.",
+    description:
+      "Right monitor intermittently turns black when moving window frames between displays.",
     category: "Hardware",
     department: "Hardware",
     priority: "LOW",
@@ -175,7 +200,8 @@ const INITIAL_TICKETS: Ticket[] = [
         authorName: "Bontu",
         authorRole: "AGENT",
         timestamp: "2026-07-26T16:30:00.000Z",
-        content: "Replaced DisplayPort docking adapter with active converter. Confirmed stable display resolution.",
+        content:
+          "Replaced DisplayPort docking adapter with active converter. Confirmed stable display resolution.",
       },
     ],
     history: [
@@ -201,7 +227,8 @@ const INITIAL_TICKETS: Ticket[] = [
     id: "t5",
     ticketNumber: "TICK-1027",
     title: "Outlook Desktop Sync Failure & Exchange Authentication Error",
-    description: "Exchange credentials fail to synchronize on desktop client while webmail functions properly.",
+    description:
+      "Exchange credentials fail to synchronize on desktop client while webmail functions properly.",
     category: "IT Support",
     department: "IT Support",
     priority: "HIGH",
@@ -225,7 +252,8 @@ const INITIAL_TICKETS: Ticket[] = [
         authorName: "Bontu",
         authorRole: "AGENT",
         timestamp: "2026-07-29T16:00:00.000Z",
-        content: "Clearing local OST profile cache and regenerating OAuth tokens.",
+        content:
+          "Clearing local OST profile cache and regenerating OAuth tokens.",
       },
     ],
     history: [
@@ -243,7 +271,8 @@ const INITIAL_TICKETS: Ticket[] = [
     id: "t6",
     ticketNumber: "TICK-1029",
     title: "Shared Floor 3 Printer Spooler Paper Jam & Offline Alert",
-    description: "Print jobs queued to 3F-HP-LaserJet remain stuck in spooling state.",
+    description:
+      "Print jobs queued to 3F-HP-LaserJet remain stuck in spooling state.",
     category: "Hardware",
     department: "Hardware",
     priority: "MEDIUM",
@@ -314,12 +343,61 @@ const INITIAL_NOTIFICATIONS: AppNotification[] = [
 const TicketContext = createContext<TicketContextType | undefined>(undefined);
 
 export const TicketProvider = ({ children }: { children: ReactNode }) => {
-  const [tickets, setTickets] = useState<Ticket[]>(INITIAL_TICKETS);
-  const [notifications, setNotifications] = useState<AppNotification[]>(INITIAL_NOTIFICATIONS);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>(
+    INITIAL_NOTIFICATIONS,
+  );
+
+  useEffect(() => {
+    const loadTickets = async () => {
+      try {
+        const response = await fetch("/api/tickets", {
+          credentials: "include",
+        });
+        if (!response.ok) throw new Error("Failed to load tickets");
+
+        const data = await response.json();
+        setTickets(
+          data.map((ticket: any) => ({
+            ...ticket,
+            ticketNumber: ticket.ticketNumber || ticket.id,
+            category: getReferenceName(ticket.category),
+            department: getReferenceName(ticket.department),
+            creatorName: ticket.requester
+              ? `${ticket.requester.firstName} ${ticket.requester.lastName}`
+              : "Employee",
+            creatorEmail: ticket.requester?.email,
+            assigneeName: ticket.assignee
+              ? `${ticket.assignee.firstName} ${ticket.assignee.lastName}`
+              : undefined,
+            comments: (ticket.comments || []).map((comment: any) => ({
+              id: comment.id,
+              content: comment.content,
+              authorId: comment.authorId,
+              authorName: comment.author
+                ? `${comment.author.firstName} ${comment.author.lastName}`
+                : "User",
+              authorRole: comment.author?.role || "USER",
+              timestamp: comment.createdAt,
+            })),
+            history: [],
+          })),
+        );
+      } catch (error) {
+        console.error("Failed to load technician tickets:", error);
+      }
+    };
+
+    loadTickets();
+  }, []);
 
   const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
 
-  const triggerUpdateNotification = (ticketNumber: string, title: string, message: string) => {
+  const triggerUpdateNotification = (
+    ticketNumber: string,
+    title: string,
+    message: string,
+  ) => {
     const newNotification: AppNotification = {
       id: `notif_${Date.now()}`,
       ticketNumber,
@@ -337,40 +415,41 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
 
   const markSingleNotificationAsRead = (id: string) => {
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
     );
   };
 
-  const addTicket = (
-    newTicketData: Omit<Ticket, "id" | "ticketNumber" | "createdAt" | "updatedAt" | "comments" | "history">
+  const addTicket = async (
+    newTicketData: Omit<
+      Ticket,
+      "id" | "ticketNumber" | "createdAt" | "updatedAt" | "comments" | "history"
+    >,
   ) => {
-    const nextNumber = 1030 + tickets.length;
-    const ticketNumber = `TICK-${nextNumber}`;
-    const timestamp = new Date().toISOString();
-    
-    const newTicket: Ticket = {
-      ...newTicketData,
-      id: `t_${Date.now()}`,
-      ticketNumber,
-      assigneeId: newTicketData.assigneeId || "agent_bontu",
-      assigneeName: newTicketData.assigneeName || "Bontu (Support Agent)",
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      comments: [],
-      history: [
-        {
-          id: `h_${Date.now()}`,
-          timestamp,
-          title: "Ticket Logged",
-          description: `Ticket logged by ${newTicketData.creatorName || "Support Agent Bontu"}`,
-          type: "CREATED",
-          actor: "Bontu",
-        },
-      ],
-    };
+    const formDataResponse = await fetch("/api/ticket-form-data", {
+      credentials: "include",
+    });
+    if (!formDataResponse.ok) throw new Error("Failed to load ticket options");
+    const formData = await formDataResponse.json();
+    const category = formData.categories.find((item: { name: string }) => item.name === newTicketData.category);
+    const department = formData.departments.find((item: { name: string }) => item.name === newTicketData.department);
+    if (!category || !department) throw new Error("Ticket category or department is no longer available");
 
-    setTickets((prev) => [newTicket, ...prev]);
-    triggerUpdateNotification(ticketNumber, "New Ticket Registered", newTicket.title);
+    const response = await fetch("/api/tickets", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        title: newTicketData.title,
+        description: newTicketData.description,
+        priority: newTicketData.priority,
+        categoryId: category.id,
+        departmentId: department.id,
+        requesterEmail: newTicketData.creatorEmail,
+      }),
+    });
+    if (!response.ok) throw new Error((await response.json()).error || "Failed to create ticket");
+    const createdTicket = await response.json();
+    setTickets((prev) => [createdTicket, ...prev]);
   };
 
   const updateTicket = (ticketId: string, updatedFields: Partial<Ticket>) => {
@@ -382,15 +461,27 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
             ...updatedFields,
             updatedAt: new Date().toISOString(),
           };
-          triggerUpdateNotification(updated.ticketNumber, "Ticket Updated", updated.title);
+          triggerUpdateNotification(
+            updated.ticketNumber,
+            "Ticket Updated",
+            updated.title,
+          );
           return updated;
         }
         return t;
-      })
+      }),
     );
   };
 
-  const updateTicketStatus = (ticketId: string, status: Status) => {
+  const updateTicketStatus = async (ticketId: string, status: Status) => {
+    const response = await fetch(`/api/tickets/${ticketId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ status }),
+    });
+    if (!response.ok) throw new Error("Failed to update ticket status");
+
     setTickets((prev) =>
       prev.map((t) => {
         if (t.id === ticketId) {
@@ -398,27 +489,43 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
           const statusHistory: TimelineEntry = {
             id: `h_${Date.now()}`,
             timestamp,
-            title: status === "CLOSED" ? "Ticket Closed" : `Status updated to ${status}`,
+            title:
+              status === "CLOSED"
+                ? "Ticket Closed"
+                : `Status updated to ${status}`,
             description: `Ticket status transitioned from ${t.status} to ${status}`,
             type: "STATUS_CHANGE",
             actor: "Bontu",
           };
 
-          triggerUpdateNotification(t.ticketNumber, "Status Changed", `Status updated to ${status}`);
+          triggerUpdateNotification(
+            t.ticketNumber,
+            "Status Changed",
+            `Status updated to ${status}`,
+          );
           return {
             ...t,
             status,
             updatedAt: timestamp,
-            closedAt: status === "CLOSED" || status === "RESOLVED" ? timestamp : null,
+            closedAt:
+              status === "CLOSED" || status === "RESOLVED" ? timestamp : null,
             history: [...(t.history || []), statusHistory],
           };
         }
         return t;
-      })
+      }),
     );
   };
 
-  const updateTicketPriority = (ticketId: string, priority: Priority) => {
+  const updateTicketPriority = async (ticketId: string, priority: Priority) => {
+    const response = await fetch(`/api/tickets/${ticketId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ priority }),
+    });
+    if (!response.ok) throw new Error("Failed to update ticket priority");
+
     setTickets((prev) =>
       prev.map((t) => {
         if (t.id === ticketId) {
@@ -432,7 +539,11 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
             actor: "Bontu",
           };
 
-          triggerUpdateNotification(t.ticketNumber, "Priority Adjusted", `Priority set to ${priority}`);
+          triggerUpdateNotification(
+            t.ticketNumber,
+            "Priority Adjusted",
+            `Priority set to ${priority}`,
+          );
           return {
             ...t,
             priority,
@@ -441,11 +552,19 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
           };
         }
         return t;
-      })
+      }),
     );
   };
 
-  const reopenTicket = (ticketId: string) => {
+  const reopenTicket = async (ticketId: string) => {
+    const response = await fetch(`/api/tickets/${ticketId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ status: "IN_PROGRESS" }),
+    });
+    if (!response.ok) throw new Error("Failed to reopen ticket");
+
     setTickets((prev) =>
       prev.map((t) => {
         if (t.id === ticketId) {
@@ -454,7 +573,8 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
             id: `h_${Date.now()}`,
             timestamp,
             title: "Ticket Re-opened",
-            description: "Ticket re-opened for further investigation and triage.",
+            description:
+              "Ticket re-opened for further investigation and triage.",
             type: "STATUS_CHANGE",
             actor: "Bontu",
           };
@@ -464,10 +584,15 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
             authorName: "Bontu",
             authorRole: "AGENT",
             timestamp,
-            content: "Ticket re-opened by Support Agent. Restoring to active queue.",
+            content:
+              "Ticket re-opened by Support Agent. Restoring to active queue.",
           };
 
-          triggerUpdateNotification(t.ticketNumber, "Ticket Re-opened", "Ticket has been returned to active queue.");
+          triggerUpdateNotification(
+            t.ticketNumber,
+            "Ticket Re-opened",
+            "Ticket has been returned to active queue.",
+          );
           return {
             ...t,
             status: "IN_PROGRESS",
@@ -478,11 +603,23 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
           };
         }
         return t;
-      })
+      }),
     );
   };
 
-  const addComment = (ticketId: string, content: string, authorName = "Bontu") => {
+  const addComment = async (
+    ticketId: string,
+    content: string,
+    authorName = "Bontu",
+  ) => {
+    const response = await fetch(`/api/tickets/${ticketId}/comments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ content }),
+    });
+    if (!response.ok) throw new Error("Failed to add comment");
+
     const timestamp = new Date().toISOString();
     const newComment: Comment = {
       id: `c_${Date.now()}`,
@@ -504,7 +641,11 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
     setTickets((prev) =>
       prev.map((t) => {
         if (t.id === ticketId) {
-          triggerUpdateNotification(t.ticketNumber, "New Response Posted", content.substring(0, 40) + "...");
+          triggerUpdateNotification(
+            t.ticketNumber,
+            "New Response Posted",
+            content.substring(0, 40) + "...",
+          );
           return {
             ...t,
             comments: [...(t.comments || []), newComment],
@@ -513,7 +654,7 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
           };
         }
         return t;
-      })
+      }),
     );
   };
 
@@ -540,6 +681,7 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
 
 export const useTickets = () => {
   const context = useContext(TicketContext);
-  if (!context) throw new Error("useTickets must be used within a TicketProvider");
+  if (!context)
+    throw new Error("useTickets must be used within a TicketProvider");
   return context;
 };

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -17,13 +16,13 @@ const updateTicketSchema = z.object({
 // GET /api/tickets/[id] - Get a specific ticket
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getSessionUser();
     const { id } = await params;
-    
-    if (!session?.user) {
+
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -37,16 +36,16 @@ export async function GET(
             id: true,
             firstName: true,
             lastName: true,
-            email: true
-          }
+            email: true,
+          },
         },
         assignee: {
           select: {
             id: true,
             firstName: true,
             lastName: true,
-            email: true
-          }
+            email: true,
+          },
         },
         comments: {
           include: {
@@ -54,13 +53,13 @@ export async function GET(
               select: {
                 id: true,
                 firstName: true,
-                lastName: true
-              }
-            }
+                lastName: true,
+              },
+            },
           },
-          orderBy: { createdAt: "asc" }
-        }
-      }
+          orderBy: { createdAt: "asc" },
+        },
+      },
     });
 
     if (!ticket) {
@@ -68,27 +67,30 @@ export async function GET(
     }
 
     // Check access permissions
-    if (session.user.role === "EMPLOYEE" && ticket.requesterId !== session.user.id) {
+    if (user.role === "EMPLOYEE" && ticket.requesterId !== user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     return NextResponse.json(ticket);
   } catch (error) {
     console.error("Error fetching ticket:", error);
-    return NextResponse.json({ error: "Failed to fetch ticket" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch ticket" },
+      { status: 500 },
+    );
   }
 }
 
 // PATCH /api/tickets/[id] - Update a ticket
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getSessionUser();
     const { id } = await params;
-    
-    if (!session?.user) {
+
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -96,7 +98,7 @@ export async function PATCH(
     const validatedData = updateTicketSchema.parse(body);
 
     const ticket = await prisma.ticket.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!ticket) {
@@ -104,12 +106,12 @@ export async function PATCH(
     }
 
     // Check permissions
-    if (session.user.role === "EMPLOYEE" && ticket.requesterId !== session.user.id) {
+    if (user.role === "EMPLOYEE" && ticket.requesterId !== user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const updateData: any = validatedData;
-    
+
     // Set closedAt when status changes to CLOSED
     if (validatedData.status === "CLOSED" && ticket.status !== "CLOSED") {
       updateData.closedAt = new Date();
@@ -128,50 +130,59 @@ export async function PATCH(
             id: true,
             firstName: true,
             lastName: true,
-            email: true
-          }
+            email: true,
+          },
         },
         assignee: {
           select: {
             id: true,
             firstName: true,
             lastName: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json(updatedTicket);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Invalid data", details: error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid data", details: error.issues },
+        { status: 400 },
+      );
     }
     console.error("Error updating ticket:", error);
-    return NextResponse.json({ error: "Failed to update ticket" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update ticket" },
+      { status: 500 },
+    );
   }
 }
 
 // DELETE /api/tickets/[id] - Delete a ticket (admin only)
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getSessionUser();
     const { id } = await params;
-    
-    if (!session?.user || session.user.role !== "ADMIN") {
+
+    if (!user || user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await prisma.ticket.delete({
-      where: { id }
+      where: { id },
     });
 
     return NextResponse.json({ message: "Ticket deleted" });
   } catch (error) {
     console.error("Error deleting ticket:", error);
-    return NextResponse.json({ error: "Failed to delete ticket" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete ticket" },
+      { status: 500 },
+    );
   }
 }

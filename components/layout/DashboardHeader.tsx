@@ -114,45 +114,26 @@ export function DashboardHeader({
 
         <NotificationBell role={role} />
 
-        {role === "EMPLOYEE" ? (
-          <Link
-            href="/employee/settings"
-            aria-label="Open profile settings"
-            className="flex items-center gap-2 rounded-lg sm:gap-3"
+        <Link
+          href={role === "EMPLOYEE" ? "/employee/profile" : "/admin/profile"}
+          aria-label="Open profile"
+          className="flex items-center gap-2 rounded-lg sm:gap-3 transition hover:opacity-80"
+        >
+          <Avatar initials={userInitials} size="md" />
+          <span
+            className="hidden sm:block"
+            style={{
+              fontFamily: FONT_FAMILY.primary,
+              fontSize: BODY_REGULAR.size,
+              lineHeight: BODY_REGULAR.lineHeight,
+              fontWeight: FONT_WEIGHT.medium,
+              letterSpacing: BODY_REGULAR.letterSpacing,
+              color: DARK_GREEN,
+            }}
           >
-            <Avatar initials={userInitials} size="md" />
-            <span
-              className="hidden sm:block"
-              style={{
-                fontFamily: FONT_FAMILY.primary,
-                fontSize: BODY_REGULAR.size,
-                lineHeight: BODY_REGULAR.lineHeight,
-                fontWeight: FONT_WEIGHT.medium,
-                letterSpacing: BODY_REGULAR.letterSpacing,
-                color: DARK_GREEN,
-              }}
-            >
-              {userName}
-            </span>
-          </Link>
-        ) : (
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Avatar initials={userInitials} size="md" />
-            <span
-              className="hidden sm:block"
-              style={{
-                fontFamily: FONT_FAMILY.primary,
-                fontSize: BODY_REGULAR.size,
-                lineHeight: BODY_REGULAR.lineHeight,
-                fontWeight: FONT_WEIGHT.medium,
-                letterSpacing: BODY_REGULAR.letterSpacing,
-                color: DARK_GREEN,
-              }}
-            >
-              {userName}
-            </span>
-          </div>
-        )}
+            {userName}
+          </span>
+        </Link>
       </div>
     </header>
   );

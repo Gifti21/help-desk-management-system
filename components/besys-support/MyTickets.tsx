@@ -1,21 +1,41 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MyTicketsHeaderSection } from "./MyTickets/MyTicketsHeaderSection";
 import { TicketsSection } from "./MyTickets/TicketsSection";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useTicketPagination } from "@/lib/hooks/useTicketPagination";
 import { useDebounce } from "@/lib/hooks/useDebounce";
+import { useEmployeeProfile } from "@/lib/hooks/useEmployeeProfile";
 import type { TicketStatus } from "@/lib/types/ticket";
-import { mockTicketRows } from "@/lib/mock-data/tickets";
-
-const mockTickets = mockTicketRows;
+import { getEmployeeTickets, type EmployeeTicket } from "@/lib/api/employee";
+import { transformTicketForTable } from "@/lib/utils/transform-ticket-data";
 
 export function MyTickets() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const [tickets, setTickets] = useState<EmployeeTicket[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { profile } = useEmployeeProfile();
+
+  // Load tickets on mount
+  useEffect(() => {
+    loadTickets();
+  }, []);
+
+  const loadTickets = async () => {
+    try {
+      setIsLoading(true);
+      const data = await getEmployeeTickets();
+      setTickets(data);
+    } catch (error) {
+      console.error('Failed to load tickets:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const {
     currentPage,
@@ -25,7 +45,7 @@ export function MyTickets() {
     statusFilter,
     setStatusFilter,
   } = useTicketPagination({
-    tickets: mockTickets,
+    tickets: tickets.map(ticket => transformTicketForTable(ticket)),
     itemsPerPage: 5,
     searchQuery: debouncedSearchQuery,
   });
@@ -45,8 +65,8 @@ export function MyTickets() {
 
   return (
     <DashboardLayout
-      userName="Jamie Smith"
-      userInitials="JS"
+      userName={profile.fullName}
+      userInitials={profile.initials}
       onSearch={handleHeaderSearch}
       searchValue={searchQuery}
       role="EMPLOYEE"
@@ -68,6 +88,8 @@ export function MyTickets() {
         }
         onClearSearch={handleClearSearch}
         onPageChange={setCurrentPage}
+        isLoading={isLoading}
+        onRefresh={loadTickets}
       />
     </DashboardLayout>
   );

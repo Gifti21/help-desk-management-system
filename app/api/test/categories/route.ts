@@ -1,34 +1,83 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 /**
- * GET /api/test/categories - Get all categories (NO AUTH - For testing only)
+ * GET /api/test/categories - Test categories retrieval (no auth required)
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
+        console.log('=== TESTING CATEGORIES ===');
+
+        // Get all categories
         const categories = await prisma.category.findMany({
-            include: {
-                _count: {
-                    select: {
-                        tickets: true,
-                    }
-                }
-            },
-            orderBy: {
-                name: 'asc',
-            }
+            select: { id: true, name: true },
+            orderBy: { name: 'asc' }
         });
+
+        console.log(`Found ${categories.length} categories:`, categories);
 
         return NextResponse.json({
             success: true,
-            count: categories.length,
-            data: categories,
+            message: `Found ${categories.length} categories`,
+            data: {
+                categories,
+                count: categories.length
+            }
         });
-    } catch (error) {
-        console.error('GET /api/test/categories error:', error);
-        return NextResponse.json(
-            { error: 'Failed to fetch categories' },
-            { status: 500 }
-        );
+    } catch (error: any) {
+        console.error('❌ Categories test failed:', error);
+        return NextResponse.json({
+            success: false,
+            error: 'Failed to fetch categories',
+            details: error.message
+        }, { status: 500 });
+    }
+}
+
+/**
+ * POST /api/test/categories - Create test categories
+ */
+export async function POST(request: NextRequest) {
+    try {
+        console.log('=== CREATING TEST CATEGORIES ===');
+
+        const testCategories = [
+            { name: 'Hardware Issue' },
+            { name: 'Software Issue' },
+            { name: 'Network Issue' },
+            { name: 'Account Access' },
+            { name: 'Other' }
+        ];
+
+        // Create categories (using upsert to avoid duplicates)
+        const results = [];
+        for (const categoryData of testCategories) {
+            const category = await prisma.category.upsert({
+                where: { name: categoryData.name },
+                update: {},
+                create: categoryData,
+                select: { id: true, name: true }
+            });
+            results.push(category);
+            console.log(`✅ Category: ${category.name} (${category.id})`);
+        }
+
+        console.log(`Created/verified ${results.length} categories`);
+
+        return NextResponse.json({
+            success: true,
+            message: `Created/verified ${results.length} categories`,
+            data: {
+                categories: results,
+                count: results.length
+            }
+        });
+    } catch (error: any) {
+        console.error('❌ Create categories failed:', error);
+        return NextResponse.json({
+            success: false,
+            error: 'Failed to create categories',
+            details: error.message
+        }, { status: 500 });
     }
 }

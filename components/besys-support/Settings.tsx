@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DARK_GREEN, PAGE_BACKGROUND, BODY_TEXT_GREY } from "@/lib/colors";
 import { HEADING_LG, BODY_REGULAR, FONT_FAMILY } from "@/lib/fonts";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -11,11 +11,20 @@ import { QuickActions } from "./Settings/QuickActions";
 import { ChangePasswordModal } from "./Settings/ChangePasswordModal";
 import { NotificationPreferencesModal } from "./Settings/NotificationPreferencesModal";
 import { SuccessToast } from "./Settings/SuccessToast";
+import {
+  getEmployeeProfile,
+  updateEmployeeProfile,
+  changeEmployeePassword,
+} from "@/lib/api/employee";
 
 export function Settings() {
-  const [name, setName] = useState("Jamie Smith");
-  const [email, setEmail] = useState("jamie.smith@besys.com");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Modal states
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -23,29 +32,97 @@ export function Settings() {
     useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Load profile data on mount
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const profile = await getEmployeeProfile();
+      setFirstName(profile.firstName);
+      setLastName(profile.lastName);
+      setFullName(profile.fullName);
+      setEmail(profile.email);
+    } catch (err) {
+      console.error("Failed to load profile:", err);
+      setError(err instanceof Error ? err.message : "Failed to load profile");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const showSuccessToast = (message: string) => {
     setSuccessMessage(message);
     setTimeout(() => setSuccessMessage(null), 3000);
   };
 
-  const handleSaveProfile = () => {
-    // TODO: connect to backend endpoint
-    showSuccessToast("Profile updated successfully");
+  const handleSaveProfile = async () => {
+    try {
+      setError(null);
+      await updateEmployeeProfile({
+        firstName,
+        lastName,
+        email,
+      });
+      setFullName(`${firstName} ${lastName}`);
+      showSuccessToast("Profile updated successfully");
+    } catch (err) {
+      console.error("Failed to update profile:", err);
+      setError(err instanceof Error ? err.message : "Failed to update profile");
+    }
   };
 
-  const handleChangePassword = (
+  const handleChangePassword = async (
     currentPassword: string,
     newPassword: string,
     confirmPassword: string,
   ) => {
-    // TODO: connect to backend endpoint
-    showSuccessToast("Password updated successfully");
+    try {
+      setError(null);
+      await changeEmployeePassword({
+        currentPassword,
+        newPassword,
+        confirmPassword,
+      });
+      setIsPasswordModalOpen(false);
+      showSuccessToast("Password changed successfully");
+    } catch (err) {
+      console.error("Failed to change password:", err);
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to change password";
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    }
   };
 
   const handleSaveNotificationPreferences = (preferences: any) => {
-    // TODO: connect to backend endpoint
+    // Notification preferences - placeholder for future implementation
     showSuccessToast("Notification preferences saved");
   };
+
+  if (isLoading) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: PAGE_BACKGROUND }}
+      >
+        <p
+          style={{
+            fontFamily: FONT_FAMILY.primary,
+            fontSize: BODY_REGULAR.size,
+            color: BODY_TEXT_GREY,
+          }}
+        >
+          Loading profile...
+        </p>
+      </div>
+    );
+  }
+
+  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 
   return (
     <div
@@ -56,8 +133,8 @@ export function Settings() {
 
       <div className="flex-1 lg:pl-[280px] flex flex-col">
         <DashboardHeader
-          userName="Jamie Smith"
-          userInitials="JS"
+          userName={fullName}
+          userInitials={initials}
           role="EMPLOYEE"
         />
 
@@ -90,10 +167,23 @@ export function Settings() {
             </p>
           </div>
 
+          {error && (
+            <div
+              className="mb-4 p-4 rounded"
+              style={{ backgroundColor: "#fee", color: "#c00" }}
+            >
+              {error}
+            </div>
+          )}
+
           <ProfileSection
-            name={name}
+            name={`${firstName} ${lastName}`}
             email={email}
-            onNameChange={setName}
+            onNameChange={(name) => {
+              const [first, ...rest] = name.split(" ");
+              setFirstName(first || "");
+              setLastName(rest.join(" ") || "");
+            }}
             onEmailChange={setEmail}
             onSave={handleSaveProfile}
           />

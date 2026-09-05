@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
+import { useEmployeeProfile } from "@/lib/hooks/useEmployeeProfile";
 import {
     Bell,
     CheckCheck,
@@ -70,6 +71,7 @@ const mockEmployeeNotifications = [
 ];
 
 export default function EmployeeNotificationsPage() {
+    const { profile } = useEmployeeProfile();
     const [notifications, setNotifications] = useState(mockEmployeeNotifications);
     const [activeTab, setActiveTab] = useState<"ALL" | "UNREAD">("ALL");
 
@@ -122,8 +124,8 @@ export default function EmployeeNotificationsPage() {
 
             <div className="flex-1 lg:pl-64 flex flex-col">
                 <DashboardHeader
-                    userName="Jamie Smith"
-                    userInitials="JS"
+                    userName={profile.fullName}
+                    userInitials={profile.initials}
                     role="EMPLOYEE"
                 />
 
@@ -169,8 +171,8 @@ export default function EmployeeNotificationsPage() {
                                     color: activeTab === "ALL" ? BUTTONS.primaryText : "#475569",
                                 }}
                                 className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-colors ${activeTab === "ALL"
-                                        ? ""
-                                        : "hover:text-slate-900 bg-white border border-slate-200"
+                                    ? ""
+                                    : "hover:text-slate-900 bg-white border border-slate-200"
                                     }`}
                             >
                                 All Notifications ({notifications.length})
@@ -183,8 +185,8 @@ export default function EmployeeNotificationsPage() {
                                     color: activeTab === "UNREAD" ? BUTTONS.primaryText : "#475569",
                                 }}
                                 className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-colors ${activeTab === "UNREAD"
-                                        ? ""
-                                        : "hover:text-slate-900 bg-white border border-slate-200"
+                                    ? ""
+                                    : "hover:text-slate-900 bg-white border border-slate-200"
                                     }`}
                             >
                                 Unread ({unreadCount})
@@ -202,8 +204,8 @@ export default function EmployeeNotificationsPage() {
                                         key={item.id}
                                         onClick={() => markSingleAsRead(item.id)}
                                         className={`p-4 transition-all duration-200 cursor-pointer shadow-xs hover:shadow-md ${!item.read
-                                                ? "bg-emerald-50/50 border-emerald-300 hover:border-emerald-500"
-                                                : "bg-white border-slate-200 opacity-90 hover:opacity-100"
+                                            ? "bg-emerald-50/50 border-emerald-300 hover:border-emerald-500"
+                                            : "bg-white border-slate-200 opacity-90 hover:opacity-100"
                                             }`}
                                     >
                                         <div className="flex items-start gap-4">

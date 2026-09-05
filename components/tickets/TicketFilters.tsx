@@ -3,7 +3,6 @@
 import React from "react";
 import { Search, RotateCcw, UserCheck, Layers } from "lucide-react";
 import { BUTTONS } from "@/lib/colors";
-import { DEPARTMENTS } from "@/types/ticket";
 
 interface TicketFiltersProps {
   searchValue: string;
@@ -13,6 +12,7 @@ interface TicketFiltersProps {
   priority: string;
   onPriorityChange: React.Dispatch<React.SetStateAction<string>> | ((val: string) => void);
   department: string;
+  departments?: Array<{ id: string; name: string }>;
   onDepartmentChange: React.Dispatch<React.SetStateAction<string>> | ((val: string) => void);
   scope?: "ALL" | "ASSIGNED_TO_ME";
   onScopeChange?: (scope: "ALL" | "ASSIGNED_TO_ME") => void;
@@ -27,6 +27,7 @@ export const TicketFilters: React.FC<TicketFiltersProps> = ({
   priority,
   onPriorityChange,
   department,
+  departments = [],
   onDepartmentChange,
   scope = "ALL",
   onScopeChange,
@@ -101,9 +102,9 @@ export const TicketFilters: React.FC<TicketFiltersProps> = ({
             className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:outline-none cursor-pointer"
           >
             <option value="ALL">All Departments</option>
-            {DEPARTMENTS.map((dept) => (
-              <option key={dept} value={dept}>
-                {dept}
+            {departments.map((dept) => (
+              <option key={dept.id} value={dept.name}>
+                {dept.name}
               </option>
             ))}
           </select>
