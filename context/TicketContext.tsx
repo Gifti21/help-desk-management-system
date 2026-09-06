@@ -474,13 +474,38 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateTicketStatus = async (ticketId: string, status: Status) => {
-    const response = await fetch(`/api/tickets/${ticketId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ status }),
-    });
-    if (!response.ok) throw new Error("Failed to update ticket status");
+    try {
+      console.log('Attempting to update ticket:', ticketId, 'to status:', status);
+
+      const response = await fetch(`/api/tickets/${ticketId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ status }),
+      });
+
+      console.log('Response status:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+        }
+
+        throw new Error(errorData.error || `Failed to update ticket status (${response.status})`);
+      }
+
+      const updatedTicket = await response.json();
+      console.log('Successfully updated ticket:', updatedTicket);
+    } catch (error) {
+      console.error('Update ticket failed:', error);
+      throw error;
+    }
 
     setTickets((prev) =>
       prev.map((t) => {
@@ -524,7 +549,13 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
       credentials: "include",
       body: JSON.stringify({ priority }),
     });
-    if (!response.ok) throw new Error("Failed to update ticket priority");
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+      throw new Error(errorData.error || `Failed to update ticket priority (${response.status})`);
+    }
+
+    const updatedTicket = await response.json();
 
     setTickets((prev) =>
       prev.map((t) => {

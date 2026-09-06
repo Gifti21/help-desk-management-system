@@ -94,29 +94,44 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    console.log('[PATCH] Starting ticket update...');
+
     const user = await getSessionUser();
+    console.log('[PATCH] User session:', user ? { id: user.id, role: user.role } : 'No user');
+
     const { id } = await params;
+    console.log('[PATCH] Ticket ID:', id);
 
     if (!user) {
+      console.log('[PATCH] No user session found');
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await req.json();
-    const validatedData = updateTicketSchema.parse(body);
+    console.log('[PATCH] Request body:', body);
 
+    const validatedData = updateTicketSchema.parse(body);
+    console.log('[PATCH] Validated data:', validatedData);
+
+    console.log('[PATCH] Finding ticket...');
     const ticket = await prisma.ticket.findUnique({
       where: { id },
     });
 
     if (!ticket) {
+      console.log('[PATCH] Ticket not found');
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
     }
 
+    console.log('[PATCH] Found ticket:', { id: ticket.id, status: ticket.status, requesterId: ticket.requesterId, assigneeId: ticket.assigneeId });
+
     if (user.role === "EMPLOYEE" && ticket.requesterId !== user.id) {
+      console.log('[PATCH] Employee access denied');
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     if (user.role === "EMPLOYEE" && ticket.status === "CLOSED") {
+      console.log('[PATCH] Employee trying to edit closed ticket');
       return NextResponse.json(
         { error: "Closed tickets can only be edited by an admin" },
         { status: 403 },
@@ -124,6 +139,7 @@ export async function PATCH(
     }
 
     if (user.role === "AGENT" && ticket.assigneeId !== user.id) {
+      console.log('[PATCH] Agent access denied');
       return NextResponse.json(
         { error: "Only the assigned agent can update this ticket" },
         { status: 403 },
@@ -134,6 +150,7 @@ export async function PATCH(
       validatedData.status &&
       !canTransitionStatus(ticket.status, validatedData.status, user.role)
     ) {
+      console.log('[PATCH] Invalid status transition');
       return NextResponse.json(
         {
           error: `Invalid status transition from ${ticket.status} to ${validatedData.status}`,
@@ -224,17 +241,21 @@ export async function PATCH(
         validatedData.assigneeId !== undefined &&
         validatedData.assigneeId !== ticket.assigneeId
       ) {
-        await createTicketNotifications(tx, {
-          ticketId: id,
-          title: updated.title,
-          requesterId: updated.requesterId,
-          assigneeId: updated.assigneeId,
-          actorId: user.id,
-          type: "TICKET_ASSIGNED",
-          message: updated.assigneeId
-            ? `${updated.title} was assigned to you.`
-            : `${updated.title} is now unassigned.`,
-        });
+        try {
+          await createTicketNotifications(tx, {
+            ticketId: id,
+            title: updated.title,
+            requesterId: updated.requesterId,
+            assigneeId: updated.assigneeId,
+            actorId: user.id,
+            type: "TICKET_ASSIGNED",
+            message: updated.assigneeId
+              ? `${updated.title} was assigned to you.`
+              : `${updated.title} is now unassigned.`,
+          });
+        } catch (notifError) {
+          console.warn('Failed to create assignment notification:', notifError);
+        }
       }
 
       if (validatedData.status && validatedData.status !== ticket.status) {
@@ -242,30 +263,38 @@ export async function PATCH(
           validatedData.status === "CLOSED"
             ? "TICKET_CLOSED"
             : "TICKET_STATUS_CHANGED";
-        await createTicketNotifications(tx, {
-          ticketId: id,
-          title: updated.title,
-          requesterId: updated.requesterId,
-          assigneeId: updated.assigneeId,
-          actorId: user.id,
-          type,
-          message: `${updated.title} status changed to ${validatedData.status}.`,
-        });
+        try {
+          await createTicketNotifications(tx, {
+            ticketId: id,
+            title: updated.title,
+            requesterId: updated.requesterId,
+            assigneeId: updated.assigneeId,
+            actorId: user.id,
+            type,
+            message: `${updated.title} status changed to ${validatedData.status}.`,
+          });
+        } catch (notifError) {
+          console.warn('Failed to create status notification:', notifError);
+        }
       }
 
       if (
         validatedData.priority &&
         validatedData.priority !== ticket.priority
       ) {
-        await createTicketNotifications(tx, {
-          ticketId: id,
-          title: updated.title,
-          requesterId: updated.requesterId,
-          assigneeId: updated.assigneeId,
-          actorId: user.id,
-          type: "TICKET_PRIORITY_CHANGED",
-          message: `${updated.title} priority changed to ${validatedData.priority}.`,
-        });
+        try {
+          await createTicketNotifications(tx, {
+            ticketId: id,
+            title: updated.title,
+            requesterId: updated.requesterId,
+            assigneeId: updated.assigneeId,
+            actorId: user.id,
+            type: "TICKET_PRIORITY_CHANGED",
+            message: `${updated.title} priority changed to ${validatedData.priority}.`,
+          });
+        } catch (notifError) {
+          console.warn('Failed to create priority notification:', notifError);
+        }
       }
 
       return updated;
@@ -279,9 +308,33 @@ export async function PATCH(
         { status: 400 },
       );
     }
+
     console.error("Error updating ticket:", error);
+
+    // Return more specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes('DATABASE_URL')) {
+        return NextResponse.json(
+          { error: "Database connection error" },
+          { status: 500 },
+        );
+      }
+      if (error.message.includes('not found')) {
+        return NextResponse.json(
+          { error: "Resource not found" },
+          { status: 404 },
+        );
+      }
+      if (error.message.includes('permission') || error.message.includes('access')) {
+        return NextResponse.json(
+          { error: "Permission denied" },
+          { status: 403 },
+        );
+      }
+    }
+
     return NextResponse.json(
-      { error: "Failed to update ticket" },
+      { error: `Failed to update ticket: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 },
     );
   }

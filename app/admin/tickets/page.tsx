@@ -160,6 +160,25 @@ export default function TicketsPage() {
     }
   };
 
+  const handleAssign = async (ticketId: string, agentId: string) => {
+    try {
+      setIsSubmitting(true);
+      const updatedTicket = await updateTicket(ticketId, {
+        assigneeId: agentId,
+      });
+      setTickets((prev) =>
+        prev.map((t) => (t.id === ticketId ? updatedTicket : t)),
+      );
+      setAssignModal({ isOpen: false, ticket: null });
+      setReassignModal({ isOpen: false, ticket: null });
+      toast("Ticket assigned successfully", "success");
+    } catch (error: any) {
+      toast(error.message || "Failed to assign ticket", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteDialog.ticket) return;
     try {
@@ -525,6 +544,15 @@ export default function TicketsPage() {
     (t) => t.status === "IN_PROGRESS",
   ).length;
   const unassignedTickets = tickets.filter((t) => !t.assignee).length;
+
+  // Get agents for assignment modals
+  const agentOptions = users
+    .filter((user) => user.role === "AGENT")
+    .map((agent) => ({
+      id: agent.id,
+      name: `${agent.firstName} ${agent.lastName}`,
+      department: agent.department?.name || "Unknown",
+    }));
 
   const filteredTickets = tickets.filter((ticket) => {
     const query = searchTerm.trim().toLowerCase();
@@ -959,8 +987,8 @@ export default function TicketsPage() {
 
             {/* Check if ticket can be assigned/reassigned */}
             {assignModal.ticket.assignee &&
-            assignModal.ticket.status !== "CLOSED" &&
-            assignModal.ticket.status !== "RESOLVED" ? (
+              assignModal.ticket.status !== "CLOSED" &&
+              assignModal.ticket.status !== "RESOLVED" ? (
               <div>
                 <div
                   className="mb-4 p-3 rounded-lg"
@@ -1282,17 +1310,17 @@ export default function TicketsPage() {
                 (agent) =>
                   agent.department === reassignModal.ticket.department?.name &&
                   agent.name !==
-                    reassignModal.ticket.assignee?.firstName +
-                      " " +
-                      reassignModal.ticket.assignee?.lastName,
+                  reassignModal.ticket.assignee?.firstName +
+                  " " +
+                  reassignModal.ticket.assignee?.lastName,
               );
               const otherAgents = agentOptions.filter(
                 (agent) =>
                   agent.department !== reassignModal.ticket.department?.name &&
                   agent.name !==
-                    reassignModal.ticket.assignee?.firstName +
-                      " " +
-                      reassignModal.ticket.assignee?.lastName,
+                  reassignModal.ticket.assignee?.firstName +
+                  " " +
+                  reassignModal.ticket.assignee?.lastName,
               );
 
               return (
