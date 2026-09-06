@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { PageLayout } from "@/components/admin/PageLayout";
+import { TopBar } from "@/components/admin/TopBar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
@@ -86,7 +87,12 @@ export default function AdminNotificationsPage() {
     };
 
     return (
-        <PageLayout title="Notifications" subtitle="System alerts and administrative updates">
+        <PageLayout>
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-slate-900">Notifications</h1>
+                <p className="text-sm text-slate-600 mt-1">System alerts and administrative updates</p>
+            </div>
+
             {isLoading ? (
                 <div className="flex items-center justify-center h-64">
                     <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
