@@ -5,21 +5,26 @@ import { TicketFilters } from "@/components/tickets/TicketFilters";
 import { TicketTable } from "@/components/tickets/TicketTable";
 import { TicketDrawer } from "@/components/dashboard/TicketDrawer";
 import { TicketProvider, useTickets } from "@/context/TicketContext";
+import { useAuth } from "@/hooks/useAuth";
 import { Ticket } from "@/types/ticket";
 
 function AssignedQueueContent() {
-  const { tickets, updateTicketStatus, updateTicketPriority, addComment } = useTickets();
+  const { tickets, updateTicketStatus, updateTicketPriority, addComment } =
+    useTickets();
+  const { user } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [priorityFilter, setPriorityFilter] = useState("ALL");
   const [departmentFilter, setDepartmentFilter] = useState("ALL");
-  const [scopeFilter, setScopeFilter] = useState<"ALL" | "ASSIGNED_TO_ME">("ASSIGNED_TO_ME");
+  const [scopeFilter, setScopeFilter] = useState<"ALL" | "ASSIGNED_TO_ME">(
+    "ASSIGNED_TO_ME",
+  );
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
 
   const filteredTickets = useMemo(() => {
     return tickets.filter((t) => {
-      const matchesScope = scopeFilter === "ALL" || t.assigneeId === "agent_bontu";
+      const matchesScope = scopeFilter === "ALL" || t.assigneeId === user?.id;
       const matchesSearch =
         searchQuery === "" ||
         t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -27,14 +32,32 @@ function AssignedQueueContent() {
         t.creatorName.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesStatus = statusFilter === "ALL" || t.status === statusFilter;
-      const matchesPriority = priorityFilter === "ALL" || t.priority === priorityFilter;
+      const matchesPriority =
+        priorityFilter === "ALL" || t.priority === priorityFilter;
       const matchesDepartment =
         departmentFilter === "ALL" ||
-        (t.category || t.department || "").toString().toLowerCase().includes(departmentFilter.toLowerCase());
+        (t.category || t.department || "")
+          .toString()
+          .toLowerCase()
+          .includes(departmentFilter.toLowerCase());
 
-      return matchesScope && matchesSearch && matchesStatus && matchesPriority && matchesDepartment;
+      return (
+        matchesScope &&
+        matchesSearch &&
+        matchesStatus &&
+        matchesPriority &&
+        matchesDepartment
+      );
     });
-  }, [tickets, scopeFilter, searchQuery, statusFilter, priorityFilter, departmentFilter]);
+  }, [
+    tickets,
+    scopeFilter,
+    searchQuery,
+    statusFilter,
+    priorityFilter,
+    departmentFilter,
+    user?.id,
+  ]);
 
   const selectedTicket = useMemo(() => {
     return tickets.find((t) => t.id === selectedTicketId) || null;
@@ -49,7 +72,8 @@ function AssignedQueueContent() {
             Assigned Ticket Queue
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
-            Support Agent dashboard view for filtering, inspecting, and managing tickets.
+            Support Agent dashboard view for filtering, inspecting, and managing
+            tickets.
           </p>
         </div>
       </div>
@@ -79,7 +103,7 @@ function AssignedQueueContent() {
 
       {/* Ticket Table Wrapper Card */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden p-6">
-        <TicketTable 
+        <TicketTable
           tickets={filteredTickets}
           onSelectTicket={(ticket: Ticket) => setSelectedTicketId(ticket.id)}
         />
@@ -92,7 +116,7 @@ function AssignedQueueContent() {
         onUpdateStatus={(id, status) => updateTicketStatus(id, status)}
         onUpdatePriority={(id, priority) => updateTicketPriority(id, priority)}
         onAddComment={(id, content) => {
-          addComment(id, content, "Bontu");
+          addComment(id, content, user?.name || "Support Agent");
         }}
       />
     </div>

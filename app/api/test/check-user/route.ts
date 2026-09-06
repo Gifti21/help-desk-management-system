@@ -50,8 +50,7 @@ export async function POST(request: NextRequest) {
         isActive: user.isActive,
         departmentId: user.departmentId,
       },
-      passwordMatches,
-      passwordHashPrefix: user.passwordHash.substring(0, 10) + "...",
+      passwordVerified: passwordMatches,
     });
   } catch (error) {
     console.error("[CHECK USER] Error:", error);

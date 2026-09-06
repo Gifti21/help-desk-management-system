@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { AlertTriangle, X } from 'lucide-react';
-import { useTheme } from '../providers/ThemeProvider';
-import { colors } from '@/lib/colors';
+import React, { useEffect, useRef } from "react";
+import { AlertTriangle, X } from "lucide-react";
+import { useTheme } from "../providers/ThemeProvider";
+import { colors } from "@/lib/colors";
 
 interface ConfirmationDialogProps {
   isOpen: boolean;
@@ -13,52 +13,79 @@ interface ConfirmationDialogProps {
   message?: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  variant?: 'danger' | 'warning' | 'default';
+  variant?: "danger" | "warning" | "default";
 }
 
 export function ConfirmationDialog({
   isOpen,
   onClose,
   onConfirm,
-  title = 'Are you sure?',
-  message = 'This action cannot be undone.',
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
-  variant = 'danger',
+  title = "Are you sure?",
+  message = "This action cannot be undone.",
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  variant = "danger",
 }: ConfirmationDialogProps) {
   const { colors: theme } = useTheme();
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+
+      if (event.key === "Tab" && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    dialogRef.current?.querySelector<HTMLElement>("button")?.focus();
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
   const getVariantStyles = () => {
     switch (variant) {
-      case 'danger':
+      case "danger":
         return {
-          iconBg: '#FEE2E2',
-          iconColor: '#DC2626',
-          buttonBg: '#EF4444',
-          buttonText: '#FFFFFF',
+          iconBg: "#FEE2E2",
+          iconColor: "#DC2626",
+          buttonBg: "#EF4444",
+          buttonText: "#FFFFFF",
         };
-      case 'warning':
+      case "warning":
         return {
-          iconBg: '#FEF3C7',
-          iconColor: '#D97706',
-          buttonBg: '#F59E0B',
-          buttonText: '#000000',
+          iconBg: "#FEF3C7",
+          iconColor: "#D97706",
+          buttonBg: "#F59E0B",
+          buttonText: "#000000",
         };
-      case 'default':
+      case "default":
         return {
-          iconBg: '#DBEAFE',
+          iconBg: "#DBEAFE",
           iconColor: colors.tealPrimary,
           buttonBg: colors.tealPrimary,
-          buttonText: '#16332B',
+          buttonText: "#16332B",
         };
       default:
         return {
-          iconBg: '#FEE2E2',
-          iconColor: '#DC2626',
-          buttonBg: '#EF4444',
-          buttonText: '#FFFFFF',
+          iconBg: "#FEE2E2",
+          iconColor: "#DC2626",
+          buttonBg: "#EF4444",
+          buttonText: "#FFFFFF",
         };
     }
   };
@@ -75,12 +102,17 @@ export function ConfirmationDialog({
 
       {/* Dialog */}
       <div
+        ref={dialogRef}
         className="relative rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 animate-[scaleIn_0.2s_ease-out]"
         style={{
           backgroundColor: theme.card,
           borderColor: theme.cardBorder,
-          border: '1px solid',
+          border: "1px solid",
         }}
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="confirmation-dialog-title"
+        aria-describedby="confirmation-dialog-message"
       >
         <button
           onClick={onClose}
@@ -88,6 +120,7 @@ export function ConfirmationDialog({
           style={{
             color: colors.bodyTextGrey,
           }}
+          aria-label="Close confirmation dialog"
         >
           <X className="w-5 h-5" />
         </button>
@@ -104,12 +137,14 @@ export function ConfirmationDialog({
           </div>
 
           <h3
+            id="confirmation-dialog-title"
             className="text-lg font-bold mb-2"
             style={{ color: theme.foreground }}
           >
             {title}
           </h3>
           <p
+            id="confirmation-dialog-message"
             className="text-sm mb-6 max-w-sm"
             style={{ color: colors.bodyTextGrey }}
           >

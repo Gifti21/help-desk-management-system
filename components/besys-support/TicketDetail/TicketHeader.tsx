@@ -25,12 +25,12 @@ export function TicketHeader({ ticket }: TicketHeaderProps) {
   return (
     <Card
       variant="elevated"
-      className="p-6 mb-6"
+      className="mb-6 p-4 sm:p-6"
       style={{ borderColor: BORDER_GREY }}
     >
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
             <span
               style={{
                 fontFamily: FONT_FAMILY.primary,
@@ -54,7 +54,7 @@ export function TicketHeader({ ticket }: TicketHeaderProps) {
             </Badge>
           </div>
           <h1
-            className="mb-3"
+            className="mb-3 wrap-break-word text-2xl sm:text-3xl"
             style={{
               fontFamily: FONT_FAMILY.primary,
               fontSize: BODY_XL.size,
@@ -94,7 +94,7 @@ export function TicketHeader({ ticket }: TicketHeaderProps) {
           </div>
         </div>
         <p
-          className="text-sm"
+          className="shrink-0 text-sm sm:text-right"
           style={{
             fontFamily: FONT_FAMILY.primary,
             fontSize: BODY_SM.size,

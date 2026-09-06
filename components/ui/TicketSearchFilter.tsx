@@ -1,5 +1,9 @@
 import { Search, X } from "lucide-react";
-import { TEAL_PRIMARY, BODY_TEXT_GREY, SECONDARY_BACKGROUND } from "@/lib/colors";
+import {
+  TEAL_PRIMARY,
+  BODY_TEXT_GREY,
+  SECONDARY_BACKGROUND,
+} from "@/lib/colors";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/Select";
 import type { TicketStatus } from "@/lib/types/ticket";
@@ -36,9 +40,7 @@ export function TicketSearchFilter({
           className="w-full"
           style={{ paddingRight: searchQuery ? "36px" : undefined }}
         />
-        {searchQuery && (
-          <ClearButton onClick={onClearSearch} />
-        )}
+        {searchQuery && <ClearButton onClick={onClearSearch} />}
       </div>
       <Select
         value={statusFilter}
@@ -61,11 +63,22 @@ export function TicketSearchFilter({
 function ClearButton({ onClick }: { onClick: () => void }) {
   return (
     <button
+      type="button"
+      aria-label="Clear ticket search"
       onClick={onClick}
       className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded transition focus-visible:outline-none focus-visible:ring-2"
-      style={{ color: BODY_TEXT_GREY, '--tw-ring-color': TEAL_PRIMARY } as React.CSSProperties}
-      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = SECONDARY_BACKGROUND}
-      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+      style={
+        {
+          color: BODY_TEXT_GREY,
+          "--tw-ring-color": TEAL_PRIMARY,
+        } as React.CSSProperties
+      }
+      onMouseEnter={(e) =>
+        (e.currentTarget.style.backgroundColor = SECONDARY_BACKGROUND)
+      }
+      onMouseLeave={(e) =>
+        (e.currentTarget.style.backgroundColor = "transparent")
+      }
     >
       <X className="h-4 w-4" />
     </button>

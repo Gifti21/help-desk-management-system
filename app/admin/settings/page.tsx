@@ -114,8 +114,7 @@ export default function SettingsPage() {
   const handleResetSettings = async () => {
     setIsLoading(true);
 
-    // Simulate reset
-    setTimeout(() => {
+    try {
       setGeneralSettings({
         siteName: "Help Desk Management System",
         siteUrl: "https://helpdesk.company.com",
@@ -131,9 +130,10 @@ export default function SettingsPage() {
       });
 
       toast("All settings have been restored to default values.", "info");
+    } finally {
       setIsLoading(false);
       setResetDialog(false);
-    }, 1500);
+    }
   };
 
   const topBarActions = (

@@ -54,7 +54,6 @@ export const TicketStatusForm: React.FC<TicketStatusFormProps> = ({
         >
           <option value="OPEN">OPEN</option>
           <option value="IN_PROGRESS">IN_PROGRESS</option>
-          <option value="PENDING">PENDING</option>
           <option value="RESOLVED">RESOLVED</option>
           <option value="CLOSED">CLOSED</option>
         </select>

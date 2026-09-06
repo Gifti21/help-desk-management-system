@@ -31,9 +31,7 @@ export function TicketSummaryCard({ ticket }: TicketSummaryCardProps) {
     (ticket.requester ? getUserDisplayName(ticket.requester) : "Employee");
   const assigneeName =
     ticket.assigneeName ||
-    (ticket.assignee
-      ? getUserDisplayName(ticket.assignee)
-      : "Bontu (Support Agent)");
+    (ticket.assignee ? getUserDisplayName(ticket.assignee) : "Unassigned");
 
   const details = [
     { label: "Requester", value: requesterName },

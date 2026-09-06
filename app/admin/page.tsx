@@ -35,7 +35,9 @@ export default function AdminDashboard() {
   const { toast } = useToast();
 
   // Data states
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   // Load dashboard data on mount
@@ -49,8 +51,8 @@ export default function AdminDashboard() {
       const data = await getDashboardData();
       setDashboardData(data);
     } catch (error) {
-      console.error('Failed to load dashboard data:', error);
-      toast('Failed to load dashboard data', 'error');
+      console.error("Failed to load dashboard data:", error);
+      toast("Failed to load dashboard data", "error");
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +68,10 @@ export default function AdminDashboard() {
     return (
       <PageLayout>
         <div className="flex items-center justify-center h-screen">
-          <Loader2 className="h-8 w-8 animate-spin" style={{ color: theme.primary }} />
+          <Loader2
+            className="h-8 w-8 animate-spin"
+            style={{ color: theme.primary }}
+          />
         </div>
       </PageLayout>
     );
@@ -345,7 +350,10 @@ export default function AdminDashboard() {
       ["Overdue", dashboardData.stats.overdueTickets.toString()],
       ["", ""],
       ["Department", "Tickets"],
-      ...dashboardData.charts.ticketsByDepartment.map(d => [d.department, d.count.toString()])
+      ...dashboardData.charts.ticketsByDepartment.map((d) => [
+        d.department,
+        d.count.toString(),
+      ]),
     ]
       .map((row) => row.join(","))
       .join("\n");
@@ -461,7 +469,8 @@ export default function AdminDashboard() {
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.borderColor = "var(--card-border)";
-              e.currentTarget.style.boxShadow = "0 1px 3px 0 rgba(0, 0, 0, 0.1)";
+              e.currentTarget.style.boxShadow =
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1)";
             }}
           >
             <div className="p-6">
@@ -478,10 +487,10 @@ export default function AdminDashboard() {
               <PieChart
                 series={[
                   dashboardData.charts.ticketsByStatus.resolved,
-                  dashboardData.charts.ticketsByStatus.pending,
-                  dashboardData.charts.ticketsByStatus.overdue
+                  dashboardData.charts.ticketsByStatus.active,
+                  dashboardData.charts.ticketsByStatus.overdue,
                 ]}
-                labels={["Resolved", "Pending", "Overdue"]}
+                labels={["Resolved", "Active", "Overdue"]}
                 colors={[theme.primary, "#f59e0b", "#ef4444"]}
                 height={240}
               />
@@ -520,7 +529,7 @@ export default function AdminDashboard() {
                         color: theme.foregroundMuted,
                       }}
                     >
-                      Pending
+                      Active
                     </span>
                   </div>
                   <span
@@ -530,7 +539,7 @@ export default function AdminDashboard() {
                       color: theme.foreground,
                     }}
                   >
-                    {dashboardData.charts.ticketsByStatus.pending}
+                    {dashboardData.charts.ticketsByStatus.active}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -574,7 +583,8 @@ export default function AdminDashboard() {
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.borderColor = "var(--card-border)";
-              e.currentTarget.style.boxShadow = "0 1px 3px 0 rgba(0, 0, 0, 0.1)";
+              e.currentTarget.style.boxShadow =
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1)";
             }}
           >
             <div className="p-6">
@@ -589,11 +599,17 @@ export default function AdminDashboard() {
                 Tickets by Department
               </h3>
               <BarChart
-                categories={dashboardData.charts.ticketsByDepartment.map(d => d.department)}
-                series={[{
-                  name: "Tickets",
-                  data: dashboardData.charts.ticketsByDepartment.map(d => d.count)
-                }]}
+                categories={dashboardData.charts.ticketsByDepartment.map(
+                  (d) => d.department,
+                )}
+                series={[
+                  {
+                    name: "Tickets",
+                    data: dashboardData.charts.ticketsByDepartment.map(
+                      (d) => d.count,
+                    ),
+                  },
+                ]}
                 height={240}
                 horizontal={false}
                 xAxisTitle="Department"
@@ -617,7 +633,8 @@ export default function AdminDashboard() {
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.borderColor = "var(--card-border)";
-              e.currentTarget.style.boxShadow = "0 1px 3px 0 rgba(0, 0, 0, 0.1)";
+              e.currentTarget.style.boxShadow =
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1)";
             }}
           >
             <div className="p-6">
@@ -633,10 +650,12 @@ export default function AdminDashboard() {
               </h3>
               <LineChart
                 categories={dashboardData.charts.monthlyTickets.labels}
-                series={[{
-                  name: "Tickets",
-                  data: dashboardData.charts.monthlyTickets.data
-                }]}
+                series={[
+                  {
+                    name: "Tickets",
+                    data: dashboardData.charts.monthlyTickets.data,
+                  },
+                ]}
                 height={240}
                 xAxisTitle="Month"
                 yAxisTitle="Tickets"
@@ -713,7 +732,7 @@ export default function AdminDashboard() {
                         fontSize: fonts.body.sm.size,
                         color: theme.foreground,
                         fontWeight: fonts.fontWeight.medium,
-                        padding: '0 12px'
+                        padding: "0 12px",
                       }}
                     >
                       Page {currentPage} of {totalPages}

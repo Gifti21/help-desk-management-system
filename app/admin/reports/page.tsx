@@ -73,21 +73,22 @@ export default function ReportsPage() {
   const loadData = async () => {
     try {
       setIsLoadingData(true);
-      const [reportsResult, usersData, deptData, catData, ticketsData] = await Promise.all([
-        getReports(),
-        getUsers(),
-        getDepartments(),
-        getCategories(),
-        getTickets()
-      ]);
+      const [reportsResult, usersData, deptData, catData, ticketsData] =
+        await Promise.all([
+          getReports(),
+          getUsers(),
+          getDepartments(),
+          getCategories(),
+          getTickets(),
+        ]);
       setReportsData(reportsResult);
       setUsers(usersData);
       setDepartments(deptData);
       setCategories(catData);
       setTickets(ticketsData);
     } catch (error) {
-      console.error('Failed to load reports data:', error);
-      toast('Failed to load reports data', 'error');
+      console.error("Failed to load reports data:", error);
+      toast("Failed to load reports data", "error");
     } finally {
       setIsLoadingData(false);
     }
@@ -98,7 +99,10 @@ export default function ReportsPage() {
     return (
       <PageLayout>
         <div className="flex items-center justify-center h-screen">
-          <Loader2 className="h-8 w-8 animate-spin" style={{ color: theme.colors.primary }} />
+          <Loader2
+            className="h-8 w-8 animate-spin"
+            style={{ color: theme.colors.primary }}
+          />
         </div>
       </PageLayout>
     );
@@ -502,9 +506,7 @@ export default function ReportsPage() {
 
   const handleRefresh = () => {
     toast("Refreshing reports...", "info");
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000); // Wait 1 second to show toast before refresh
+    void loadData();
   };
 
   const renderPagination = (
@@ -688,7 +690,11 @@ export default function ReportsPage() {
         {activeTab === "overview" && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <StatCard title="Total Users" value={totalUsers} icon={UsersIcon} />
+              <StatCard
+                title="Total Users"
+                value={totalUsers}
+                icon={UsersIcon}
+              />
               <StatCard
                 title="Active Users"
                 value={activeUsers}
@@ -812,7 +818,11 @@ export default function ReportsPage() {
         {activeTab === "users" && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <StatCard title="Total Users" value={totalUsers} icon={UsersIcon} />
+              <StatCard
+                title="Total Users"
+                value={totalUsers}
+                icon={UsersIcon}
+              />
               <StatCard
                 title="Active Users"
                 value={activeUsers}

@@ -24,10 +24,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: "Employee user already exists",
-        credentials: {
-          email: "employee@helpdesk.com",
-          password: "employee123",
-        },
         user: {
           id: existingEmployee.id,
           email: existingEmployee.email,
@@ -81,10 +77,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "Employee user created successfully",
-      credentials: {
-        email: "employee@helpdesk.com",
-        password: "employee123",
-      },
       user: {
         id: employee.id,
         email: employee.email,
@@ -141,13 +133,6 @@ export async function GET(request: NextRequest) {
           email: emp.email,
           name: `${emp.firstName} ${emp.lastName}`,
           department: emp.department?.name || "No department",
-          credentials:
-            emp.email === "employee@helpdesk.com"
-              ? {
-                  email: "employee@helpdesk.com",
-                  password: "employee123",
-                }
-              : null,
         })),
         count: employees.length,
       },

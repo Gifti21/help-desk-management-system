@@ -103,7 +103,7 @@ export function TicketCard({ ticket, showAssignee = true }: TicketCardProps) {
                 {ticket.assigneeName ||
                   (ticket.assignee
                     ? getUserDisplayName(ticket.assignee)
-                    : "Bontu")}
+                    : "Unassigned")}
               </span>
             ) : null}
             <ArrowRight size={18} style={{ color: "#0E2621" }} />

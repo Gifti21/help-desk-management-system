@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { canTransitionStatus, isActiveAgent } from "@/lib/ticket-rules";
+import { createTicketNotifications } from "@/lib/notifications";
 
 const updateTicketSchema = z.object({
   title: z.string().min(1).optional(),
@@ -66,12 +68,11 @@ export async function GET(
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
     }
 
+    // Check access permissions - STRICT "own portal only" rules
     const canAccess =
       user.role === "ADMIN" ||
       (user.role === "EMPLOYEE" && ticket.requesterId === user.id) ||
-      (user.role === "AGENT" &&
-        (ticket.assigneeId === user.id ||
-          ticket.departmentId === user.departmentId));
+      (user.role === "AGENT" && ticket.assigneeId === user.id);
 
     if (!canAccess) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -129,11 +130,36 @@ export async function PATCH(
       );
     }
 
+    if (
+      validatedData.status &&
+      !canTransitionStatus(ticket.status, validatedData.status, user.role)
+    ) {
+      return NextResponse.json(
+        {
+          error: `Invalid status transition from ${ticket.status} to ${validatedData.status}`,
+        },
+        { status: 409 },
+      );
+    }
+
     if (user.role !== "ADMIN" && validatedData.assigneeId !== undefined) {
       return NextResponse.json(
         { error: "Only admins can assign tickets" },
         { status: 403 },
       );
+    }
+
+    if (user.role === "ADMIN" && validatedData.assigneeId) {
+      const assignee = await prisma.user.findUnique({
+        where: { id: validatedData.assigneeId },
+        select: { role: true, isActive: true },
+      });
+      if (!assignee || !isActiveAgent(assignee.role, assignee.isActive)) {
+        return NextResponse.json(
+          { error: "Tickets can only be assigned to active agents" },
+          { status: 400 },
+        );
+      }
     }
 
     if (
@@ -168,29 +194,81 @@ export async function PATCH(
       updateData.closedAt = null;
     }
 
-    const updatedTicket = await prisma.ticket.update({
-      where: { id },
-      data: updateData,
-      include: {
-        category: true,
-        department: true,
-        requester: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+    const updatedTicket = await prisma.$transaction(async (tx) => {
+      const updated = await tx.ticket.update({
+        where: { id },
+        data: updateData,
+        include: {
+          category: true,
+          department: true,
+          requester: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+          assignee: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
           },
         },
-        assignee: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-      },
+      });
+
+      if (
+        validatedData.assigneeId !== undefined &&
+        validatedData.assigneeId !== ticket.assigneeId
+      ) {
+        await createTicketNotifications(tx, {
+          ticketId: id,
+          title: updated.title,
+          requesterId: updated.requesterId,
+          assigneeId: updated.assigneeId,
+          actorId: user.id,
+          type: "TICKET_ASSIGNED",
+          message: updated.assigneeId
+            ? `${updated.title} was assigned to you.`
+            : `${updated.title} is now unassigned.`,
+        });
+      }
+
+      if (validatedData.status && validatedData.status !== ticket.status) {
+        const type =
+          validatedData.status === "CLOSED"
+            ? "TICKET_CLOSED"
+            : "TICKET_STATUS_CHANGED";
+        await createTicketNotifications(tx, {
+          ticketId: id,
+          title: updated.title,
+          requesterId: updated.requesterId,
+          assigneeId: updated.assigneeId,
+          actorId: user.id,
+          type,
+          message: `${updated.title} status changed to ${validatedData.status}.`,
+        });
+      }
+
+      if (
+        validatedData.priority &&
+        validatedData.priority !== ticket.priority
+      ) {
+        await createTicketNotifications(tx, {
+          ticketId: id,
+          title: updated.title,
+          requesterId: updated.requesterId,
+          assigneeId: updated.assigneeId,
+          actorId: user.id,
+          type: "TICKET_PRIORITY_CHANGED",
+          message: `${updated.title} priority changed to ${validatedData.priority}.`,
+        });
+      }
+
+      return updated;
     });
 
     return NextResponse.json(updatedTicket);

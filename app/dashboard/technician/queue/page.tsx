@@ -89,7 +89,8 @@ export default function AssignedQueuePage() {
               Support Agent Assigned Tickets
             </h1>
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" /> Bontu
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />{" "}
+              {user?.name || "Support Agent"}
               Queue
             </span>
           </div>
@@ -194,7 +195,7 @@ export default function AssignedQueuePage() {
           updateTicketPriority(ticketId, priority)
         }
         onAddComment={(ticketId, content) => {
-          addComment(ticketId, content, "Bontu");
+          addComment(ticketId, content, user?.name || "Support Agent");
         }}
       />
     </div>

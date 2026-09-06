@@ -34,80 +34,99 @@ export function Sidebar({
       name: "Dashboard",
       href: userRole === "EMPLOYEE" ? "/employee/dashboard" : "/admin",
       icon: LayoutDashboard,
-      current: userRole === "EMPLOYEE"
-        ? pathname === "/employee/dashboard"
-        : pathname === "/admin",
+      current:
+        userRole === "EMPLOYEE"
+          ? pathname === "/employee/dashboard"
+          : pathname === "/admin",
     },
     // Employees get "My Tickets"
     ...(userRole === "EMPLOYEE"
       ? [
-        {
-          name: "My Tickets",
-          href: "/employee/tickets",
-          icon: Ticket,
-          current: pathname === "/employee/tickets" || pathname.startsWith("/employee/tickets/"),
-        },
-      ]
+          {
+            name: "My Tickets",
+            href: "/employee/tickets",
+            icon: Ticket,
+            current:
+              pathname === "/employee/tickets" ||
+              pathname.startsWith("/employee/tickets/"),
+          },
+        ]
       : []),
     // Admin gets "All Tickets"
     ...(userRole === "ADMIN" || userRole === "AGENT"
       ? [
-        {
-          name: "All Tickets",
-          href: "/admin/tickets",
-          icon: FolderOpen,
-          current: pathname === "/admin/tickets",
-        },
-      ]
+          {
+            name: "All Tickets",
+            href: "/admin/tickets",
+            icon: FolderOpen,
+            current: pathname === "/admin/tickets",
+          },
+        ]
       : []),
     ...(userRole === "ADMIN"
       ? [
-        {
-          name: "Users",
-          href: "/admin/users",
-          icon: Users,
-          current: pathname === "/admin/users",
-        },
-        {
-          name: "Departments",
-          href: "/admin/departments",
-          icon: Building2,
-          current: pathname === "/admin/departments",
-        },
-        {
-          name: "Categories",
-          href: "/admin/categories",
-          icon: FolderOpen,
-          current: pathname === "/admin/categories",
-        },
-      ]
+          {
+            name: "Users",
+            href: "/admin/users",
+            icon: Users,
+            current: pathname === "/admin/users",
+          },
+          {
+            name: "Departments",
+            href: "/admin/departments",
+            icon: Building2,
+            current: pathname === "/admin/departments",
+          },
+          {
+            name: "Categories",
+            href: "/admin/categories",
+            icon: FolderOpen,
+            current: pathname === "/admin/categories",
+          },
+        ]
       : []),
     ...(userRole === "ADMIN" || userRole === "AGENT"
       ? [
-        {
-          name: "Reports",
-          href: "/admin/reports",
-          icon: BarChart3,
-          current: pathname === "/admin/reports",
-        },
-      ]
+          {
+            name: "Reports",
+            href: "/admin/reports",
+            icon: BarChart3,
+            current: pathname === "/admin/reports",
+          },
+        ]
       : []),
     // Profile link for all users
     {
       name: "Profile",
-      href: userRole === "EMPLOYEE" ? "/employee/profile" : "/admin/profile",
+      href:
+        userRole === "EMPLOYEE"
+          ? "/employee/profile"
+          : userRole === "AGENT"
+            ? "/dashboard/technician/profile"
+            : "/admin/profile",
       icon: UserCircle,
-      current: userRole === "EMPLOYEE"
-        ? pathname === "/employee/profile"
-        : pathname === "/admin/profile",
+      current:
+        userRole === "EMPLOYEE"
+          ? pathname === "/employee/profile"
+          : userRole === "AGENT"
+            ? pathname === "/dashboard/technician/profile"
+            : pathname === "/admin/profile",
     },
     {
       name: "Settings",
-      href: userRole === "EMPLOYEE" ? "/employee/settings" : "/admin/settings",
+      href:
+        userRole === "EMPLOYEE"
+          ? "/employee/settings"
+          : userRole === "AGENT"
+            ? "/dashboard/technician/settings"
+            : "/admin/settings",
       icon: Settings,
-      current: userRole === "EMPLOYEE"
-        ? pathname === "/employee/settings"
-        : pathname === "/admin/settings",
+      current:
+        userRole === "EMPLOYEE"
+          ? pathname === "/employee/settings"
+          : userRole === "AGENT"
+            ? pathname === "/dashboard/technician/settings"
+            : pathname === "/admin/settings",
     },
   ];
 

@@ -159,6 +159,8 @@ export const DataTable: React.FC<DataTableProps> = ({ tickets, onInspect }) => {
         </span>
         <div className="flex items-center gap-2">
           <button
+            type="button"
+            aria-label="Previous page"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             className="p-1.5 rounded-lg bg-white border border-slate-300 disabled:opacity-50 hover:bg-slate-50"
@@ -166,6 +168,8 @@ export const DataTable: React.FC<DataTableProps> = ({ tickets, onInspect }) => {
             <ChevronLeft className="w-4 h-4 text-slate-700" />
           </button>
           <button
+            type="button"
+            aria-label="Next page"
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             className="p-1.5 rounded-lg bg-white border border-slate-300 disabled:opacity-50 hover:bg-slate-50"

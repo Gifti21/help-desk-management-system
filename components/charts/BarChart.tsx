@@ -251,5 +251,18 @@ export function BarChart({
     );
   }
 
-  return <Chart options={options} series={series} type="bar" height={height} />;
+  const summary = series
+    .flatMap((item) =>
+      item.data.map(
+        (value, index) =>
+          `${item.name} ${categories[index] || index + 1}: ${value}`,
+      ),
+    )
+    .join(", ");
+
+  return (
+    <div role="img" aria-label={`Bar chart. ${summary || "No data"}`}>
+      <Chart options={options} series={series} type="bar" height={height} />
+    </div>
+  );
 }

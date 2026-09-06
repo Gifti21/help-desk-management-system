@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { createTicketNotifications } from "@/lib/notifications";
 
 const commentSchema = z.object({
   content: z.string().min(1),
@@ -22,7 +23,7 @@ export async function GET(
 
     const ticket = await prisma.ticket.findUnique({
       where: { id },
-      select: { requesterId: true },
+      select: { title: true, requesterId: true, assigneeId: true },
     });
 
     if (!ticket) {
@@ -112,22 +113,36 @@ export async function POST(
     const body = await req.json();
     const validatedData = commentSchema.parse(body);
 
-    const comment = await prisma.comment.create({
-      data: {
-        ...validatedData,
-        ticketId: id,
-        authorId: user.id,
-      },
-      include: {
-        author: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+    const comment = await prisma.$transaction(async (tx) => {
+      const createdComment = await tx.comment.create({
+        data: {
+          ...validatedData,
+          ticketId: id,
+          authorId: user.id,
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
           },
         },
-      },
+      });
+
+      await createTicketNotifications(tx, {
+        ticketId: id,
+        title: ticket.title,
+        requesterId: ticket.requesterId,
+        assigneeId: ticket.assigneeId,
+        actorId: user.id,
+        type: "TICKET_COMMENT",
+        message: `A new comment was added to ${ticket.title}.`,
+      });
+
+      return createdComment;
     });
 
     return NextResponse.json(comment, { status: 201 });

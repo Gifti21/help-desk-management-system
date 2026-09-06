@@ -114,15 +114,10 @@ export async function POST(request: NextRequest) {
         role: employee.role,
         department: employee.department?.name,
       },
-      credentials: {
-        email: "employee@helpdesk.com",
-        password: "employee123",
-      },
       instructions: [
         "1. Go to the main login page (http://localhost:3000)",
-        "2. Use email: employee@helpdesk.com",
-        "3. Use password: employee123",
-        "4. After login, navigate to employee/tickets/new",
+        "2. Sign in with an account configured for this development environment",
+        "3. After login, navigate to employee/tickets/new",
       ],
     });
   } catch (error: any) {
@@ -177,10 +172,6 @@ export async function GET() {
         name: `${employee.firstName} ${employee.lastName}`,
         role: employee.role,
         department: employee.department?.name || "No department",
-      },
-      credentials: {
-        email: "employee@helpdesk.com",
-        password: "employee123",
       },
     });
   } catch (error: any) {

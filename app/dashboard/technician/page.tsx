@@ -85,11 +85,7 @@ export default function TechnicianDashboard() {
     () =>
       tickets.filter((t) => {
         const s = (t.status || "").toUpperCase().replace(/_/g, " ");
-        return (
-          s.includes("OPEN") ||
-          s.includes("IN PROGRESS") ||
-          s.includes("PENDING")
-        );
+        return s.includes("OPEN") || s.includes("IN PROGRESS");
       }).length,
     [tickets],
   );
@@ -399,7 +395,7 @@ export default function TechnicianDashboard() {
         <div className="space-y-1">
           <div className="flex items-center gap-2.5 flex-wrap">
             <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-              <span>Welcome back, Bontu</span>
+              <span>Welcome back, {user?.name || "Support Agent"}</span>
               <span className="text-xl">👋</span>
             </h1>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60 shadow-xs">
@@ -669,7 +665,7 @@ export default function TechnicianDashboard() {
             updateTicketPriority(id, priority)
           }
           onAddComment={(id, content) => {
-            addComment(id, content, "Bontu");
+            addComment(id, content, user?.name || "Support Agent");
           }}
         />
       )}

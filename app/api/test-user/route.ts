@@ -34,7 +34,7 @@ export async function GET() {
         role: user.role,
         isActive: user.isActive,
       },
-      passwordTest: isValid ? "Password matches" : "Password does not match",
+      passwordVerified: isValid,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

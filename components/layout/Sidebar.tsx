@@ -12,6 +12,7 @@ import {
   HelpCircle,
   Settings,
   LogOut,
+  User,
   Ticket,
   Plus,
   Menu,

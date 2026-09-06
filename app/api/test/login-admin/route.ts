@@ -91,11 +91,6 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({
       success: true,
       message: "Logged in as admin successfully",
-      credentials: {
-        email: admin.email,
-        password:
-          admin.email === "admin@helpdesk.com" ? "admin123" : "Check database",
-      },
       user: {
         id: admin.id,
         email: admin.email,

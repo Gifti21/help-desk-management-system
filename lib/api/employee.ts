@@ -10,6 +10,16 @@ export interface EmployeeDashboardData {
   recentTickets: EmployeeTicket[];
 }
 
+export interface EmployeeTicketPage {
+  data: EmployeeTicket[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 export interface EmployeeTicket {
   id: string;
   title: string;
@@ -83,6 +93,27 @@ export async function getEmployeeTickets(
 
   const result = await response.json();
   return result.data;
+}
+
+export async function getEmployeeTicketPage(
+  page = 1,
+  pageSize = 25,
+  status?: string,
+  search?: string,
+): Promise<EmployeeTicketPage> {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+  if (status) params.set("status", status);
+  if (search?.trim()) params.set("search", search.trim());
+  const response = await fetch(`/api/employee/tickets?${params}`, {
+    credentials: "include",
+  });
+  const result = await response.json();
+  if (!response.ok)
+    throw new Error(result.error || "Failed to fetch ticket page");
+  return result;
 }
 
 /**

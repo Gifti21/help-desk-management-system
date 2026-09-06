@@ -12,6 +12,7 @@ import type { TicketTableRow } from "@/lib/types/ticket";
 interface TicketsSectionProps {
   paginatedTickets: TicketTableRow[];
   filteredTickets: TicketTableRow[];
+  totalItems?: number;
   searchQuery: string;
   statusFilter: TicketStatus | "All";
   currentPage: number;
@@ -26,6 +27,7 @@ interface TicketsSectionProps {
 export function TicketsSection({
   paginatedTickets,
   filteredTickets,
+  totalItems,
   searchQuery,
   statusFilter,
   currentPage,
@@ -80,7 +82,7 @@ export function TicketsSection({
       <TicketPagination
         currentPage={currentPage}
         itemsPerPage={itemsPerPage}
-        totalItems={filteredTickets.length}
+        totalItems={totalItems ?? filteredTickets.length}
         onPageChange={onPageChange}
       />
     </Card>

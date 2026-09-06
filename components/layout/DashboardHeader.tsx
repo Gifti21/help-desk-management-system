@@ -46,10 +46,10 @@ export function DashboardHeader({
 
   return (
     <header
-      className="flex items-center justify-between px-4 sm:px-6 py-4 border-b"
+      className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4 border-b"
       style={{ borderColor: BORDER_GREY, backgroundColor: PAGE_BACKGROUND }}
     >
-      <div className="flex items-center gap-4 flex-1">
+      <div className="flex min-w-0 flex-1 items-center gap-4">
         <div className="relative flex-1 max-w-md hidden sm:block">
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"
@@ -100,7 +100,7 @@ export function DashboardHeader({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-4">
+      <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-4">
         {showCreateTicketButton && (
           <Link
             href="/employee/tickets/new"
@@ -115,7 +115,13 @@ export function DashboardHeader({
         <NotificationBell role={role} />
 
         <Link
-          href={role === "EMPLOYEE" ? "/employee/profile" : "/admin/profile"}
+          href={
+            role === "EMPLOYEE"
+              ? "/employee/profile"
+              : role === "ADMIN"
+                ? "/admin/profile"
+                : "/dashboard/technician/profile"
+          }
           aria-label="Open profile"
           className="flex items-center gap-2 rounded-lg sm:gap-3 transition hover:opacity-80"
         >
