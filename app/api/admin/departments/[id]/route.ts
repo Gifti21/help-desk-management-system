@@ -88,8 +88,6 @@ export async function PATCH(
 
         const { id } = await params;
 
-        const { id } = await params;
-
         const existingDepartment = await prisma.department.findUnique({
             where: { id }
         });
