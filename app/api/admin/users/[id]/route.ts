@@ -81,7 +81,7 @@ export async function GET(
  */
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const sessionUser = await getSessionUser();
@@ -104,9 +104,11 @@ export async function PATCH(
             );
         }
 
+        const { id } = await params;
+
         // Check if user exists
         const existingUser = await prisma.user.findUnique({
-            where: { id: params.id }
+            where: { id }
         });
 
         if (!existingUser) {
@@ -160,7 +162,7 @@ export async function PATCH(
 
         // Update user
         const updatedUser = await prisma.user.update({
-            where: { id: params.id },
+            where: { id },
             data: updateData,
             include: {
                 department: {
@@ -194,7 +196,7 @@ export async function PATCH(
  */
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const sessionUser = await getSessionUser();
@@ -206,9 +208,11 @@ export async function DELETE(
             );
         }
 
+        const { id } = await params;
+
         // Check if user exists
         const userToDelete = await prisma.user.findUnique({
-            where: { id: params.id },
+            where: { id },
             include: {
                 _count: {
                     select: {
@@ -240,7 +244,7 @@ export async function DELETE(
 
         // Delete user
         await prisma.user.delete({
-            where: { id: params.id }
+            where: { id }
         });
 
         return NextResponse.json({
