@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { X, PlusCircle } from "lucide-react";
-import { Priority, DEPARTMENTS, CATEGORIES, Category, Department } from "@/types/ticket";
+import { Priority } from "@/types/ticket";
 import { useTickets } from "@/context/TicketContext";
 import { BUTTONS } from "@/lib/colors";
 
@@ -19,28 +19,41 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
   const [priority, setPriority] = useState<Priority>("MEDIUM");
   
   // Cleanly using initial values directly from centralized exported constants
-  const [category, setCategory] = useState<Category>(CATEGORIES[0]);
-  const [department, setDepartment] = useState<Department>(DEPARTMENTS[0]);
+  const [category, setCategory] = useState("");
+  const [department, setDepartment] = useState("");
+  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
+  const [departments, setDepartments] = useState<Array<{ id: string; name: string }>>([]);
+  const [error, setError] = useState("");
   
   const [creatorName, setCreatorName] = useState("");
   const [creatorEmail, setCreatorEmail] = useState("");
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title || !description) return;
+  React.useEffect(() => {
+    if (!isOpen) return;
+    fetch("/api/ticket-form-data", { credentials: "include" })
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error("Failed to load ticket options")))
+      .then((data) => {
+        setCategories(data.categories);
+        setDepartments(data.departments);
+        setCategory((current) => current || data.categories[0]?.name || "");
+        setDepartment((current) => current || data.departments[0]?.name || "");
+      })
+      .catch((loadError: Error) => setError(loadError.message));
+  }, [isOpen]);
 
-    addTicket({
-      title,
-      description,
-      priority,
-      category,
-      department,
-      creatorName: creatorName || "Employee",
-      creatorEmail: creatorEmail || "user@besys.tech",
-      status: "OPEN",
-    });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title || !description || !category || !department) return;
+
+    try {
+      setError("");
+      await addTicket({ title, description, priority, category, department, creatorName, creatorEmail, status: "OPEN" });
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "Failed to create ticket");
+      return;
+    }
 
     if (onCreate) {
       onCreate({ title, description, priority, category, department, creatorName, creatorEmail });
@@ -50,8 +63,8 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
     setDescription("");
     setCreatorName("");
     setCreatorEmail("");
-    setCategory(CATEGORIES[0]);
-    setDepartment(DEPARTMENTS[0]);
+    setCategory(categories[0]?.name || "");
+    setDepartment(departments[0]?.name || "");
     setPriority("MEDIUM");
     onClose();
   };
@@ -119,9 +132,9 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
                 onChange={(e) => setCategory(e.target.value as Category)}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-900 focus:outline-none focus:border-[#0E2621]"
               >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.name}>
+                    {cat.name}
                   </option>
                 ))}
               </select>
@@ -134,9 +147,9 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
                 onChange={(e) => setDepartment(e.target.value as Department)}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-900 focus:outline-none focus:border-[#0E2621]"
               >
-                {DEPARTMENTS.map((dept) => (
-                  <option key={dept} value={dept}>
-                    {dept}
+                {departments.map((dept) => (
+                  <option key={dept.id} value={dept.name}>
+                    {dept.name}
                   </option>
                 ))}
               </select>
@@ -156,6 +169,8 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
               <option value="CRITICAL">Critical</option>
             </select>
           </div>
+
+          {error && <p className="text-sm text-rose-600">{error}</p>}
 
           <div>
             <label className="block text-slate-700 font-semibold mb-1">Issue Details & Steps</label>

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import bcrypt from "bcrypt";
@@ -11,19 +10,19 @@ const userSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   departmentId: z.string(),
-  role: z.enum(["ADMIN", "AGENT", "EMPLOYEE"])
+  role: z.enum(["ADMIN", "AGENT", "EMPLOYEE"]),
 });
 
 // GET /api/users - Get all users (admin/agent only)
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
+    const session = await getSessionUser();
+
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role === "EMPLOYEE") {
+    if (session.role === "EMPLOYEE") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -47,33 +46,36 @@ export async function GET(req: NextRequest) {
         department: {
           select: {
             id: true,
-            name: true
-          }
+            name: true,
+          },
         },
         createdAt: true,
         _count: {
           select: {
             requestedTickets: true,
-            assignedTickets: true
-          }
-        }
+            assignedTickets: true,
+          },
+        },
       },
-      orderBy: { createdAt: "desc" }
+      orderBy: { createdAt: "desc" },
     });
 
     return NextResponse.json(users);
   } catch (error) {
     console.error("Error fetching users:", error);
-    return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch users" },
+      { status: 500 },
+    );
   }
 }
 
 // POST /api/users - Create a new user (admin only)
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user || session.user.role !== "ADMIN") {
+    const session = await getSessionUser();
+
+    if (!session || session.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -81,11 +83,14 @@ export async function POST(req: NextRequest) {
     const validatedData = userSchema.parse(body);
 
     const existingUser = await prisma.user.findUnique({
-      where: { email: validatedData.email }
+      where: { email: validatedData.email },
     });
 
     if (existingUser) {
-      return NextResponse.json({ error: "Email already exists" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Email already exists" },
+        { status: 400 },
+      );
     }
 
     const passwordHash = await bcrypt.hash(validatedData.password, 10);
@@ -95,7 +100,7 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.create({
       data: {
         ...userData,
-        passwordHash
+        passwordHash,
       },
       select: {
         id: true,
@@ -107,18 +112,24 @@ export async function POST(req: NextRequest) {
         department: {
           select: {
             id: true,
-            name: true
-          }
-        }
-      }
+            name: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json(user, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Invalid data", details: error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid data", details: error.issues },
+        { status: 400 },
+      );
     }
     console.error("Error creating user:", error);
-    return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create user" },
+      { status: 500 },
+    );
   }
 }

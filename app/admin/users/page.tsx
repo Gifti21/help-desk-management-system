@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PageLayout } from '../../../components/admin/PageLayout';
 import { TopBar } from '../../../components/admin/TopBar';
 import { StatCard } from '../../../components/admin/StatCard';
@@ -24,128 +24,75 @@ import {
     Plus,
     MoreVertical,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Loader2
 } from 'lucide-react';
-
-// Type definitions matching database schema
-type Role = 'ADMIN' | 'AGENT' | 'EMPLOYEE';
-
-// Mock user data matching database schema exactly
-const initialMockUsers = [
-    {
-        id: 'user-1',
-        firstName: 'Alemayehu',
-        lastName: 'Tadesse',
-        email: 'alemayehu.tadesse@besys.com',
-        role: 'ADMIN',
-        departmentId: 'dept-1',
-        department: { id: 'dept-1', name: 'IT Support' },
-        isActive: true,
-        createdAt: '2024-01-15T10:00:00Z',
-        updatedAt: '2024-01-15T10:00:00Z'
-    },
-    {
-        id: 'user-2',
-        firstName: 'Selam',
-        lastName: 'Yohannes',
-        email: 'selam.yohannes@besys.com',
-        role: 'AGENT',
-        departmentId: 'dept-1',
-        department: { id: 'dept-1', name: 'IT Support' },
-        isActive: true,
-        createdAt: '2024-01-20T09:30:00Z',
-        updatedAt: '2024-01-20T09:30:00Z'
-    },
-    {
-        id: 'user-3',
-        firstName: 'Dawit',
-        lastName: 'Hailu',
-        email: 'dawit.hailu@besys.com',
-        role: 'AGENT',
-        departmentId: 'dept-4',
-        department: { id: 'dept-4', name: 'Operations' },
-        isActive: true,
-        createdAt: '2024-02-10T11:15:00Z',
-        updatedAt: '2024-02-10T11:15:00Z'
-    },
-    {
-        id: 'user-4',
-        firstName: 'Tigist',
-        lastName: 'Bekele',
-        email: 'tigist.bekele@besys.com',
-        role: 'EMPLOYEE',
-        departmentId: 'dept-4',
-        department: { id: 'dept-4', name: 'Operations' },
-        isActive: true,
-        createdAt: '2024-03-05T14:20:00Z',
-        updatedAt: '2024-03-05T14:20:00Z'
-    },
-    {
-        id: 'user-5',
-        firstName: 'Bereket',
-        lastName: 'Mekonnen',
-        email: 'bereket.mekonnen@besys.com',
-        role: 'EMPLOYEE',
-        departmentId: 'dept-1',
-        department: { id: 'dept-1', name: 'IT Support' },
-        isActive: false,
-        createdAt: '2024-02-28T08:45:00Z',
-        updatedAt: '2024-02-28T08:45:00Z'
-    },
-    {
-        id: 'user-6',
-        firstName: 'Meseret',
-        lastName: 'Kebede',
-        email: 'meseret.kebede@besys.com',
-        role: 'AGENT',
-        departmentId: 'dept-2',
-        department: { id: 'dept-2', name: 'Human Resources' },
-        isActive: true,
-        createdAt: '2024-01-25T10:30:00Z',
-        updatedAt: '2024-01-25T10:30:00Z'
-    },
-    {
-        id: 'user-7',
-        firstName: 'Yonas',
-        lastName: 'Desta',
-        email: 'yonas.desta@besys.com',
-        role: 'EMPLOYEE',
-        departmentId: 'dept-6',
-        department: { id: 'dept-6', name: 'Security' },
-        isActive: true,
-        createdAt: '2024-03-12T13:00:00Z',
-        updatedAt: '2024-03-12T13:00:00Z'
-    }
-];
+import {
+    getUsers,
+    createUser,
+    updateUser,
+    deleteUser,
+    type User
+} from '@/lib/api/users';
+import { getDepartments, type Department } from '@/lib/api/departments';
 
 export default function UsersPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('ALL');
     const [departmentFilter, setDepartmentFilter] = useState('ALL');
     const [statusFilter, setStatusFilter] = useState('ALL');
-    const [users, setUsers] = useState(initialMockUsers);
+    const [users, setUsers] = useState<User[]>([]);
+    const [departments, setDepartments] = useState<Department[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [actionsMenuOpen, setActionsMenuOpen] = useState<string | null>(null);
-    const itemsPerPage = 5; // Consistent pagination: 5 items per page
+    const [isLoadingData, setIsLoadingData] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const itemsPerPage = 5;
 
     // Modals state
-    const [viewModal, setViewModal] = useState<{ isOpen: boolean; user: any }>({ isOpen: false, user: null });
-    const [editModal, setEditModal] = useState<{ isOpen: boolean; user: any }>({ isOpen: false, user: null });
-    const [roleModal, setRoleModal] = useState<{ isOpen: boolean; user: any }>({ isOpen: false, user: null });
-    const [disableDialog, setDisableDialog] = useState<{ isOpen: boolean; user: any }>({ isOpen: false, user: null });
-    const [enableDialog, setEnableDialog] = useState<{ isOpen: boolean; user: any }>({ isOpen: false, user: null });
+    const [viewModal, setViewModal] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
+    const [editModal, setEditModal] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
+    const [roleModal, setRoleModal] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
+    const [disableDialog, setDisableDialog] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
+    const [enableDialog, setEnableDialog] = useState<{ isOpen: boolean; user: User | null }>({ isOpen: false, user: null });
     const [addModal, setAddModal] = useState(false);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         email: '',
-        role: 'EMPLOYEE',
-        departmentId: 'dept-1', // Use departmentId, not department
+        password: '',
+        role: 'employee' as 'admin' | 'agent' | 'employee',
+        departmentId: '',
         isActive: true
     });
 
     const { colors: theme } = useTheme();
     const { toast } = useToast();
+
+    // Load data from API on mount
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadData = async () => {
+        try {
+            setIsLoadingData(true);
+            const [usersData, deptData] = await Promise.all([
+                getUsers(),
+                getDepartments()
+            ]);
+            setUsers(usersData);
+            setDepartments(deptData);
+            if (deptData.length > 0) {
+                setFormData(prev => ({ ...prev, departmentId: deptData[0].id }));
+            }
+        } catch (error) {
+            console.error('Failed to load data:', error);
+            toast('Failed to load data', 'error');
+        } finally {
+            setIsLoadingData(false);
+        }
+    };
 
     // Filter users
     const filteredUsers = users.filter(user => {
@@ -154,7 +101,7 @@ export default function UsersPage() {
             user.email.toLowerCase().includes(searchTerm.toLowerCase());
 
         const matchesRole = roleFilter === 'ALL' || user.role === roleFilter;
-        const matchesDepartment = departmentFilter === 'ALL' || user.department.name === departmentFilter;
+        const matchesDepartment = departmentFilter === 'ALL' || user.department?.name === departmentFilter;
         const matchesStatus = statusFilter === 'ALL' ||
             (statusFilter === 'ACTIVE' && user.isActive) ||
             (statusFilter === 'INACTIVE' && !user.isActive);
@@ -173,87 +120,124 @@ export default function UsersPage() {
         setCurrentPage(1);
     };
 
-    // Handler functions
-    const handleAddUser = () => {
-        // Map departmentId to full department object
-        const departmentMap: Record<string, { id: string, name: string }> = {
-            'dept-1': { id: 'dept-1', name: 'IT Support' },
-            'dept-2': { id: 'dept-2', name: 'Human Resources' },
-            'dept-4': { id: 'dept-4', name: 'Operations' },
-            'dept-6': { id: 'dept-6', name: 'Security' }
-        };
+    // Handler functions - Connected to Backend API
+    const handleAddUser = async () => {
+        if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.departmentId) {
+            toast('Please fill in all required fields', 'error');
+            return;
+        }
 
-        const newUser = {
-            id: `user-${Date.now()}`,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            email: formData.email,
-            passwordHash: 'hashed_password', // This would be set by backend
-            role: formData.role as Role,
-            isActive: formData.isActive,
-            departmentId: formData.departmentId,
-            department: departmentMap[formData.departmentId],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
-        setUsers(prev => [...prev, newUser]);
-        setAddModal(false);
-        setFormData({ firstName: '', lastName: '', email: '', role: 'EMPLOYEE', departmentId: 'dept-1', isActive: true });
-        toast(`User ${newUser.firstName} ${newUser.lastName} created successfully`, 'success');
-    };
+        if (formData.password.length < 6) {
+            toast('Password must be at least 6 characters', 'error');
+            return;
+        }
 
-    const handleEditUser = () => {
-        if (!editModal.user) return;
+        if (departments.length === 0) {
+            toast('Departments not loaded. Please refresh the page.', 'error');
+            return;
+        }
 
-        // Map departmentId to full department object
-        const departmentMap: Record<string, { id: string, name: string }> = {
-            'dept-1': { id: 'dept-1', name: 'IT Support' },
-            'dept-2': { id: 'dept-2', name: 'Human Resources' },
-            'dept-4': { id: 'dept-4', name: 'Operations' },
-            'dept-6': { id: 'dept-6', name: 'Security' }
-        };
+        try {
+            setIsSubmitting(true);
+            console.log('Creating user with data:', {
+                ...formData,
+                password: '[HIDDEN]'
+            });
 
-        setUsers(prev => prev.map(u =>
-            u.id === editModal.user.id ? {
-                ...u,
+            const newUser = await createUser({
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 email: formData.email,
-                role: formData.role as Role,
-                isActive: formData.isActive,
+                password: formData.password,
+                role: formData.role,
                 departmentId: formData.departmentId,
-                department: departmentMap[formData.departmentId],
-                updatedAt: new Date().toISOString()
-            } : u
-        ));
-        setEditModal({ isOpen: false, user: null });
-        toast(`User ${formData.firstName} ${formData.lastName} updated successfully`, 'success');
+                isActive: formData.isActive
+            });
+
+            setUsers(prev => [...prev, newUser]);
+            setAddModal(false);
+            setFormData({ firstName: '', lastName: '', email: '', password: '', role: 'employee', departmentId: departments[0]?.id || '', isActive: true });
+            toast(`User ${newUser.firstName} ${newUser.lastName} registered successfully`, 'success');
+        } catch (error: any) {
+            console.error('Failed to create user:', error);
+            toast(error.message || 'Failed to register user', 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handleRoleChange = (userId: string, newRole: string) => {
-        setUsers(prev => prev.map(u =>
-            u.id === userId ? { ...u, role: newRole } : u
-        ));
-        setRoleModal({ isOpen: false, user: null });
-        toast(`User role updated to ${newRole}`, 'success');
+    const handleEditUser = async () => {
+        if (!editModal.user) return;
+
+        try {
+            setIsSubmitting(true);
+            const updateData: any = {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                email: formData.email,
+                role: formData.role,
+                departmentId: formData.departmentId,
+                isActive: formData.isActive
+            };
+            if (formData.password) {
+                updateData.password = formData.password;
+            }
+
+            const updatedUser = await updateUser(editModal.user.id, updateData);
+            setUsers(prev => prev.map(u => u.id === editModal.user!.id ? updatedUser : u));
+            setEditModal({ isOpen: false, user: null });
+            toast(`User ${updatedUser.firstName} ${updatedUser.lastName} updated successfully`, 'success');
+        } catch (error: any) {
+            toast(error.message || 'Failed to update user', 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handleDisable = () => {
+    const handleRoleChange = async (userId: string, newRole: string) => {
+        try {
+            setIsSubmitting(true);
+            const updatedUser = await updateUser(userId, { role: newRole.toLowerCase() as 'admin' | 'agent' | 'employee' });
+            setUsers(prev => prev.map(u => u.id === userId ? updatedUser : u));
+            setRoleModal({ isOpen: false, user: null });
+            toast(`User role updated to ${newRole}`, 'success');
+        } catch (error: any) {
+            toast(error.message || 'Failed to update role', 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleDisable = async () => {
         if (!disableDialog.user) return;
-        setUsers(prev => prev.map(u =>
-            u.id === disableDialog.user.id ? { ...u, isActive: false } : u
-        ));
-        setDisableDialog({ isOpen: false, user: null });
-        toast(`User ${disableDialog.user.firstName} ${disableDialog.user.lastName} disabled successfully`, 'success');
+
+        try {
+            setIsSubmitting(true);
+            const updatedUser = await updateUser(disableDialog.user.id, { isActive: false });
+            setUsers(prev => prev.map(u => u.id === disableDialog.user!.id ? updatedUser : u));
+            setDisableDialog({ isOpen: false, user: null });
+            toast(`User ${updatedUser.firstName} ${updatedUser.lastName} disabled successfully`, 'success');
+        } catch (error: any) {
+            toast(error.message || 'Failed to disable user', 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handleEnable = () => {
+    const handleEnable = async () => {
         if (!enableDialog.user) return;
-        setUsers(prev => prev.map(u =>
-            u.id === enableDialog.user.id ? { ...u, isActive: true } : u
-        ));
-        setEnableDialog({ isOpen: false, user: null });
-        toast(`User ${enableDialog.user.firstName} ${enableDialog.user.lastName} enabled successfully`, 'success');
+
+        try {
+            setIsSubmitting(true);
+            const updatedUser = await updateUser(enableDialog.user.id, { isActive: true });
+            setUsers(prev => prev.map(u => u.id === enableDialog.user!.id ? updatedUser : u));
+            setEnableDialog({ isOpen: false, user: null });
+            toast(`User ${updatedUser.firstName} ${updatedUser.lastName} enabled successfully`, 'success');
+        } catch (error: any) {
+            toast(error.message || 'Failed to enable user', 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleExport = () => {
@@ -390,7 +374,8 @@ export default function UsersPage() {
                                             firstName: row.firstName,
                                             lastName: row.lastName,
                                             email: row.email,
-                                            role: row.role,
+                                            password: '',
+                                            role: row.role.toLowerCase() as 'admin' | 'agent' | 'employee',
                                             departmentId: row.departmentId,
                                             isActive: row.isActive
                                         });
@@ -458,10 +443,7 @@ export default function UsersPage() {
             onChange: setDepartmentFilter,
             options: [
                 { label: 'All Departments', value: 'ALL' },
-                { label: 'IT Support', value: 'IT Support' },
-                { label: 'Operations', value: 'Operations' },
-                { label: 'HR', value: 'HR' },
-                { label: 'Security', value: 'Security' }
+                ...departments.map(dept => ({ label: dept.name, value: dept.name }))
             ]
         },
         {
@@ -481,6 +463,17 @@ export default function UsersPage() {
     const inactiveUsers = users.filter(u => !u.isActive).length;
     const adminUsers = users.filter(u => u.role === 'ADMIN').length;
 
+    // Show loading state
+    if (isLoadingData) {
+        return (
+            <PageLayout>
+                <div className="flex items-center justify-center h-screen">
+                    <Loader2 className="h-8 w-8 animate-spin" style={{ color: theme.primary }} />
+                </div>
+            </PageLayout>
+        );
+    }
+
     return (
         <PageLayout>
             <TopBar
@@ -488,8 +481,11 @@ export default function UsersPage() {
                 subtitle="Add, edit, disable, and assign roles to system users"
                 actions={
                     <div className="flex gap-2">
-                        <ActionButton variant="primary" size="sm" icon={Plus} onClick={() => setAddModal(true)}>
-                            Add User
+                        <ActionButton variant="primary" size="sm" icon={Plus} onClick={() => {
+                            setFormData({ firstName: '', lastName: '', email: '', password: '', role: 'employee', departmentId: departments[0]?.id || '', isActive: true });
+                            setAddModal(true);
+                        }}>
+                            Register User
                         </ActionButton>
                         <ActionButton variant="outline" size="sm" icon={Download} onClick={handleExport}>
                             Export
@@ -585,7 +581,7 @@ export default function UsersPage() {
                                     </div>
                                     <div>
                                         <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Department</p>
-                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.user.department.name}</p>
+                                        <p style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>{viewModal.user.department?.name || 'N/A'}</p>
                                     </div>
                                     <div>
                                         <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>User ID</p>
@@ -599,22 +595,27 @@ export default function UsersPage() {
                             </div>
                             <div className="flex gap-3">
                                 <ActionButton variant="outline" size="md" icon={Edit} onClick={() => {
-                                    setFormData({
-                                        firstName: viewModal.user.firstName,
-                                        lastName: viewModal.user.lastName,
-                                        email: viewModal.user.email,
-                                        role: viewModal.user.role,
-                                        departmentId: viewModal.user.departmentId,
-                                        isActive: viewModal.user.isActive
-                                    });
-                                    setViewModal({ isOpen: false, user: null });
-                                    setEditModal({ isOpen: true, user: viewModal.user });
+                                    if (viewModal.user) {
+                                        setFormData({
+                                            firstName: viewModal.user.firstName,
+                                            lastName: viewModal.user.lastName,
+                                            email: viewModal.user.email,
+                                            password: '',
+                                            role: viewModal.user.role.toLowerCase() as 'admin' | 'agent' | 'employee',
+                                            departmentId: viewModal.user.departmentId,
+                                            isActive: viewModal.user.isActive
+                                        });
+                                        setViewModal({ isOpen: false, user: null });
+                                        setEditModal({ isOpen: true, user: viewModal.user });
+                                    }
                                 }}>
                                     Edit User
                                 </ActionButton>
                                 <ActionButton variant="outline" size="md" icon={Shield} onClick={() => {
-                                    setViewModal({ isOpen: false, user: null });
-                                    setRoleModal({ isOpen: true, user: viewModal.user });
+                                    if (viewModal.user) {
+                                        setViewModal({ isOpen: false, user: null });
+                                        setRoleModal({ isOpen: true, user: viewModal.user });
+                                    }
                                 }}>
                                     Change Role
                                 </ActionButton>
@@ -628,39 +629,73 @@ export default function UsersPage() {
             {addModal && (
                 <div className="fixed inset-0 z-[9998] flex items-center justify-center">
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setAddModal(false)} />
-                    <div className="relative rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder, border: '1px solid' }}>
+                    <div className="relative rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder, border: '1px solid' }}>
                         <button onClick={() => setAddModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors" style={{ color: theme.foregroundMuted }}>
                             <X className="w-5 h-5" />
                         </button>
-                        <h3 className="text-lg font-bold mb-4 flex items-center" style={{ color: theme.foreground }}>
+                        <h3 className="text-lg font-bold mb-2 flex items-center" style={{ color: theme.foreground }}>
                             <Plus className="h-5 w-5 mr-2" />
-                            Add New User
+                            Register New User
                         </h3>
+                        <p className="mb-4" style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>
+                            Create a new user account with login credentials. The email and password will be used for system login.
+                        </p>
+
                         <div className="space-y-4 mb-6">
                             <Input
                                 label="First Name"
                                 value={formData.firstName}
                                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                                 placeholder="Enter first name"
+                                required
                             />
                             <Input
                                 label="Last Name"
                                 value={formData.lastName}
                                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                                 placeholder="Enter last name"
+                                required
                             />
-                            <Input
-                                label="Email"
-                                type="email"
-                                value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                placeholder="Enter email address"
-                            />
+
+                            {/* Login Credentials Section */}
+                            <div className="p-3 rounded-lg" style={{ backgroundColor: theme.backgroundSecondary, border: `1px solid ${theme.cardBorder}` }}>
+                                <p className="font-medium mb-2" style={{ fontSize: fonts.body.sm.size, color: theme.foreground }}>
+                                    🔐 Login Credentials (Required)
+                                </p>
+                                <p style={{ fontSize: fonts.body.xs.size, color: theme.foregroundMuted, marginBottom: '12px' }}>
+                                    These credentials will be used to log into the system
+                                </p>
+
+                                <div className="space-y-3">
+                                    <Input
+                                        label="Email Address"
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        placeholder="user@besys.com"
+                                        required
+                                    />
+                                    <Input
+                                        label="Password"
+                                        type="password"
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        placeholder="Minimum 6 characters"
+                                        required
+                                    />
+                                    {formData.password && formData.password.length < 6 && (
+                                        <p style={{ fontSize: fonts.body.xs.size, color: '#EF4444' }}>
+                                            Password must be at least 6 characters
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
                             <div>
                                 <label style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, marginBottom: '8px', display: 'block' }}>Role</label>
                                 <select
                                     value={formData.role}
-                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                    onChange={(e) => setFormData({ ...formData, role: e.target.value as 'admin' | 'agent' | 'employee' })}
                                     className="w-full px-3 py-2 rounded-lg"
                                     style={{
                                         backgroundColor: theme.backgroundSecondary,
@@ -669,42 +704,72 @@ export default function UsersPage() {
                                         fontSize: fonts.body.regular.size
                                     }}
                                 >
-                                    <option value="EMPLOYEE">Employee</option>
-                                    <option value="AGENT">Agent</option>
-                                    <option value="ADMIN">Admin</option>
+                                    <option value="employee">Employee - Submit and track tickets</option>
+                                    <option value="agent">Agent - Handle and resolve tickets</option>
+                                    <option value="admin">Admin - Full system access</option>
                                 </select>
                             </div>
+
                             <div>
                                 <label style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, marginBottom: '8px', display: 'block' }}>Department</label>
-                                <select
-                                    value={formData.departmentId}
-                                    onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
-                                    className="w-full px-3 py-2 rounded-lg"
-                                    style={{
-                                        backgroundColor: theme.backgroundSecondary,
-                                        color: theme.foreground,
-                                        border: `1px solid ${theme.cardBorder}`,
-                                        fontSize: fonts.body.regular.size
-                                    }}
-                                >
-                                    <option value="dept-1">IT Support</option>
-                                    <option value="dept-2">Human Resources</option>
-                                    <option value="dept-4">Operations</option>
-                                    <option value="dept-6">Security</option>
-                                </select>
+                                {departments.length === 0 ? (
+                                    <div className="p-3 rounded-lg" style={{ backgroundColor: '#FEF3C7', border: '1px solid #F59E0B', color: '#92400E' }}>
+                                        <p style={{ fontSize: fonts.body.sm.size }}>⚠️ No departments available. Please refresh the page.</p>
+                                    </div>
+                                ) : (
+                                    <select
+                                        value={formData.departmentId}
+                                        onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
+                                        className="w-full px-3 py-2 rounded-lg"
+                                        style={{
+                                            backgroundColor: theme.backgroundSecondary,
+                                            color: theme.foreground,
+                                            border: `1px solid ${theme.cardBorder}`,
+                                            fontSize: fonts.body.regular.size
+                                        }}
+                                    >
+                                        {departments.map(dept => (
+                                            <option key={dept.id} value={dept.id}>{dept.name}</option>
+                                        ))}
+                                    </select>
+                                )}
+                            </div>
+
+                            <div className="flex items-center gap-2 p-3 rounded-lg" style={{ backgroundColor: theme.backgroundSecondary }}>
+                                <input
+                                    type="checkbox"
+                                    id="isActive"
+                                    checked={formData.isActive}
+                                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                                    className="w-4 h-4"
+                                    style={{ accentColor: theme.primary }}
+                                />
+                                <label htmlFor="isActive" style={{ fontSize: fonts.body.sm.size, color: theme.foreground }}>
+                                    Active - User can log in immediately
+                                </label>
                             </div>
                         </div>
+
                         <div className="flex gap-3">
-                            <ActionButton variant="outline" size="md" onClick={() => setAddModal(false)}>
+                            <ActionButton variant="outline" size="md" onClick={() => setAddModal(false)} disabled={isSubmitting}>
                                 Cancel
                             </ActionButton>
                             <ActionButton
                                 variant="primary"
                                 size="md"
                                 onClick={handleAddUser}
-                                disabled={!formData.firstName || !formData.lastName || !formData.email}
+                                disabled={
+                                    isSubmitting ||
+                                    !formData.firstName ||
+                                    !formData.lastName ||
+                                    !formData.email ||
+                                    !formData.password ||
+                                    formData.password.length < 6 ||
+                                    !formData.departmentId ||
+                                    departments.length === 0
+                                }
                             >
-                                Add User
+                                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Register User'}
                             </ActionButton>
                         </div>
                     </div>
@@ -728,57 +793,81 @@ export default function UsersPage() {
                                 label="First Name"
                                 value={formData.firstName}
                                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                placeholder="Enter first name"
+                                required
                             />
                             <Input
                                 label="Last Name"
                                 value={formData.lastName}
                                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                placeholder="Enter last name"
+                                required
                             />
                             <Input
                                 label="Email"
                                 type="email"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                placeholder="Enter email address"
+                                required
+                            />
+                            <Input
+                                label="Password (leave blank to keep current)"
+                                type="password"
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                             />
                             <div>
-                                <label style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, marginBottom: '8px', display: 'block' }}>Department</label>
+                                <label style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, display: 'block', marginBottom: '8px' }}>
+                                    Role
+                                </label>
+                                <select
+                                    value={formData.role.toLowerCase()}
+                                    onChange={(e) => setFormData({ ...formData, role: e.target.value as 'admin' | 'agent' | 'employee' })}
+                                    className="w-full px-3 py-2 rounded-lg border"
+                                    style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.cardBorder }}
+                                >
+                                    <option value="employee">Employee</option>
+                                    <option value="agent">Agent</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, display: 'block', marginBottom: '8px' }}>
+                                    Department
+                                </label>
                                 <select
                                     value={formData.departmentId}
                                     onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
-                                    className="w-full px-3 py-2 rounded-lg"
-                                    style={{
-                                        backgroundColor: theme.backgroundSecondary,
-                                        color: theme.foreground,
-                                        border: `1px solid ${theme.cardBorder}`,
-                                        fontSize: fonts.body.regular.size
-                                    }}
+                                    className="w-full px-3 py-2 rounded-lg border"
+                                    style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.cardBorder }}
                                 >
-                                    <option value="dept-1">IT Support</option>
-                                    <option value="dept-2">Human Resources</option>
-                                    <option value="dept-4">Operations</option>
-                                    <option value="dept-6">Security</option>
+                                    {departments.map(dept => (
+                                        <option key={dept.id} value={dept.id}>{dept.name}</option>
+                                    ))}
                                 </select>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.isActive}
+                                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                                    className="w-4 h-4"
+                                />
+                                <label style={{ fontSize: fonts.body.sm.size, color: theme.foreground }}>
+                                    Active User
+                                </label>
                             </div>
                         </div>
                         <div className="flex gap-3">
-                            <ActionButton variant="outline" size="md" onClick={() => setEditModal({ isOpen: false, user: null })}>
+                            <ActionButton variant="outline" size="md" onClick={() => setEditModal({ isOpen: false, user: null })} disabled={isSubmitting}>
                                 Cancel
                             </ActionButton>
-                            <ActionButton
-                                variant="primary"
-                                size="md"
-                                onClick={handleEditUser}
-                                disabled={!formData.firstName || !formData.lastName || !formData.email}
-                            >
-                                Save Changes
+                            <ActionButton variant="primary" size="md" onClick={handleEditUser} disabled={isSubmitting}>
+                                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Changes'}
                             </ActionButton>
                         </div>
                     </div>
                 </div>
-            )}
+            )
+            }
 
             {/* Change Role Modal */}
             {roleModal.isOpen && roleModal.user && (
@@ -799,11 +888,12 @@ export default function UsersPage() {
                             {['ADMIN', 'AGENT', 'EMPLOYEE'].map(role => (
                                 <button
                                     key={role}
-                                    onClick={() => handleRoleChange(roleModal.user.id, role)}
-                                    className="w-full p-3 rounded-lg text-left transition-colors"
+                                    onClick={() => handleRoleChange(roleModal.user!.id, role)}
+                                    disabled={isSubmitting}
+                                    className="w-full p-3 rounded-lg text-left transition-colors disabled:opacity-50"
                                     style={{
-                                        backgroundColor: roleModal.user.role === role ? theme.backgroundSecondary : 'transparent',
-                                        border: `1px solid ${roleModal.user.role === role ? theme.primary : theme.cardBorder}`,
+                                        backgroundColor: roleModal.user!.role === role ? theme.backgroundSecondary : 'transparent',
+                                        border: `1px solid ${roleModal.user!.role === role ? theme.primary : theme.cardBorder}`,
                                         color: theme.foreground
                                     }}
                                 >
@@ -816,7 +906,7 @@ export default function UsersPage() {
                                                 {role === 'EMPLOYEE' && 'Submit and track tickets'}
                                             </div>
                                         </div>
-                                        {roleModal.user.role === role && (
+                                        {roleModal.user!.role === role && (
                                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: theme.primary }} />
                                         )}
                                     </div>
@@ -825,14 +915,15 @@ export default function UsersPage() {
                         </div>
                     </div>
                 </div>
-            )}
+            )
+            }
 
             {/* Disable User Confirmation */}
             <ConfirmationDialog
                 isOpen={disableDialog.isOpen}
                 title="Disable User"
                 message={disableDialog.user ? `Are you sure you want to disable ${disableDialog.user.firstName} ${disableDialog.user.lastName}? This will prevent them from accessing the system.` : ''}
-                confirmText="Disable"
+                confirmLabel="Disable"
                 variant="warning"
                 onConfirm={handleDisable}
                 onClose={() => setDisableDialog({ isOpen: false, user: null })}
@@ -843,11 +934,11 @@ export default function UsersPage() {
                 isOpen={enableDialog.isOpen}
                 title="Enable User"
                 message={enableDialog.user ? `Are you sure you want to enable ${enableDialog.user.firstName} ${enableDialog.user.lastName}? This will allow them to access the system.` : ''}
-                confirmText="Enable"
+                confirmLabel="Enable"
                 variant="default"
                 onConfirm={handleEnable}
                 onClose={() => setEnableDialog({ isOpen: false, user: null })}
             />
-        </PageLayout>
+        </PageLayout >
     );
 }

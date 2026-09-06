@@ -1,6 +1,6 @@
-export type TicketStatus = "Open" | "In Progress" | "Resolved" | "Closed";
-export type TicketPriority = "Low" | "Medium" | "High";
-export type TicketCategory = "Hardware" | "Software" | "Network" | "Account Access" | "Other";
+export type TicketStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "Open" | "In Progress" | "Resolved" | "Closed";
+export type TicketPriority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" | "Low" | "Medium" | "High";
+export type TicketCategory = "Hardware" | "Software" | "Network" | "Account Access" | "Other" | string;
 
 export interface Comment {
   id: string;

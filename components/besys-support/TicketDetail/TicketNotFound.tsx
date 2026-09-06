@@ -10,9 +10,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
+import { useEmployeeProfile } from "@/lib/hooks/useEmployeeProfile";
 
 export function TicketNotFound() {
   const router = useRouter();
+  const { profile } = useEmployeeProfile();
 
   return (
     <div
@@ -22,8 +24,8 @@ export function TicketNotFound() {
       <Sidebar role="EMPLOYEE" />
       <div className="flex-1 lg:pl-[280px] flex flex-col">
         <DashboardHeader
-          userName="Jamie Smith"
-          userInitials="JS"
+          userName={profile.fullName}
+          userInitials={profile.initials}
           role="EMPLOYEE"
         />
         <main className="flex-1 flex items-center justify-center p-6 lg:p-8">

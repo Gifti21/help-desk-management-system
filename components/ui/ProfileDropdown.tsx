@@ -3,15 +3,30 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Settings, LogOut, UserCheck } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+
+  const displayName = user?.name || "Support Agent";
+  const email = user?.email || "agent@besys.tech";
+  const initials =
+    user?.name
+      ?.split(" ")
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "SA";
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -23,11 +38,15 @@ export function ProfileDropdown() {
     <div className="relative" ref={dropdownRef}>
       {/* Clickable Profile Avatar Button */}
       <button
+        type="button"
+        aria-label="Open profile menu"
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 focus:outline-none rounded-full ring-2 ring-transparent hover:ring-emerald-500 dark:hover:ring-[#2FD9C4] transition-all"
       >
         <div className="w-9 h-9 rounded-full bg-emerald-600 dark:bg-[#2FD9C4] text-white dark:text-[#0C1815] font-bold flex items-center justify-center text-sm shadow-sm">
-          B
+          {initials}
         </div>
       </button>
 
@@ -35,11 +54,23 @@ export function ProfileDropdown() {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#0C1815] border border-slate-200 dark:border-[#1E3E35] rounded-xl shadow-lg py-1.5 z-50 text-xs animate-in fade-in zoom-in-95 duration-100">
           <div className="px-4 py-2.5 border-b border-slate-100 dark:border-[#1E3E35]">
-            <p className="font-semibold text-slate-900 dark:text-white">Bontu</p>
-            <p className="text-slate-500 dark:text-slate-400 text-[11px] truncate">bontu@besystech.com</p>
+            <p className="font-semibold text-slate-900 dark:text-white">
+              {displayName}
+            </p>
+            <p className="text-slate-500 dark:text-slate-400 text-[11px] truncate">
+              {email}
+            </p>
           </div>
 
           <div className="py-1">
+            <Link
+              href="/dashboard/technician/profile"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#1E3E35] transition-colors"
+            >
+              <UserCheck className="w-4 h-4 text-emerald-600 dark:text-[#2FD9C4]" />
+              <span>My Profile</span>
+            </Link>
             <Link
               href="/dashboard/technician/settings"
               onClick={() => setIsOpen(false)}

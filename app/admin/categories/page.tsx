@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageLayout } from '../../../components/admin/PageLayout';
 import { TopBar } from '../../../components/admin/TopBar';
 import { StatCard } from '../../../components/admin/StatCard';
@@ -12,6 +12,7 @@ import { Input } from '../../../components/ui/input';
 import { useToast } from '../../../components/ui/toast';
 import { useTheme } from '../../../components/providers/ThemeProvider';
 import { fonts } from '@/lib/fonts';
+import { getCategories, createCategory, updateCategory, deleteCategory, Category } from '@/lib/api/categories';
 import {
     Tag,
     Plus,
@@ -24,68 +25,43 @@ import {
     Save,
     MoreVertical,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Loader2
 } from 'lucide-react';
-
-// Mock category data - matching database schema exactly
-// Database schema: id, name, createdAt (only these fields exist)
-const mockCategories = [
-    {
-        id: 'cat-1',
-        name: 'Hardware',
-        createdAt: '2023-01-15T10:00:00Z'
-    },
-    {
-        id: 'cat-2',
-        name: 'Software',
-        createdAt: '2023-01-15T09:30:00Z'
-    },
-    {
-        id: 'cat-3',
-        name: 'Network',
-        createdAt: '2023-01-15T11:00:00Z'
-    },
-    {
-        id: 'cat-4',
-        name: 'Access Request',
-        createdAt: '2023-02-10T14:00:00Z'
-    },
-    {
-        id: 'cat-5',
-        name: 'Training',
-        createdAt: '2023-03-15T08:30:00Z'
-    },
-    {
-        id: 'cat-6',
-        name: 'Maintenance',
-        createdAt: '2023-04-01T10:15:00Z'
-    },
-    {
-        id: 'cat-7',
-        name: 'Security',
-        createdAt: '2023-04-20T09:45:00Z'
-    },
-    {
-        id: 'cat-8',
-        name: 'Database',
-        createdAt: '2023-05-10T11:20:00Z'
-    }
-];
 
 export default function CategoriesPage() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [categories, setCategories] = useState(mockCategories);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [actionsMenuOpen, setActionsMenuOpen] = useState<string | null>(null);
-    const itemsPerPage = 5; // Consistent pagination: 5 items per page
+    const itemsPerPage = 5;
     const [addModal, setAddModal] = useState(false);
-    const [editModal, setEditModal] = useState<{ isOpen: boolean; category: any }>({ isOpen: false, category: null });
-    const [viewModal, setViewModal] = useState<{ isOpen: boolean; category: any }>({ isOpen: false, category: null });
-    const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; category: any }>({ isOpen: false, category: null });
+    const [editModal, setEditModal] = useState<{ isOpen: boolean; category: Category | null }>({ isOpen: false, category: null });
+    const [viewModal, setViewModal] = useState<{ isOpen: boolean; category: Category | null }>({ isOpen: false, category: null });
+    const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; category: Category | null }>({ isOpen: false, category: null });
     const [formData, setFormData] = useState({ name: '' });
+    const [submitting, setSubmitting] = useState(false);
 
     const { colors: theme } = useTheme();
     const { toast } = useToast();
+
+    // Fetch categories on mount
+    useEffect(() => {
+        loadCategories();
+    }, []);
+
+    const loadCategories = async () => {
+        try {
+            setLoading(true);
+            const data = await getCategories();
+            setCategories(data);
+        } catch (error: any) {
+            toast(error.message || 'Failed to load categories', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Filter categories
     const filteredCategories = categories.filter(cat => {
@@ -100,49 +76,62 @@ export default function CategoriesPage() {
     const paginatedCategories = filteredCategories.slice(startIndex, endIndex);
 
     // Handle CRUD operations
-    const handleAddCategory = () => {
+    const handleAddCategory = async () => {
         if (!formData.name) {
             toast('Please fill the category name', 'error');
             return;
         }
-        const newCategory = {
-            id: `cat-${Date.now()}`,
-            name: formData.name,
-            createdAt: new Date().toISOString()
-        };
-        setCategories(prev => [...prev, newCategory]);
-        setAddModal(false);
-        setFormData({ name: '' });
-        toast(`Category "${formData.name}" created successfully`, 'success');
+        try {
+            setSubmitting(true);
+            await createCategory({ name: formData.name });
+            await loadCategories();
+            setAddModal(false);
+            setFormData({ name: '' });
+            toast(`Category "${formData.name}" created successfully`, 'success');
+        } catch (error: any) {
+            toast(error.message || 'Failed to create category', 'error');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
-    const handleEditCategory = () => {
+    const handleEditCategory = async () => {
         if (!editModal.category || !formData.name) {
             toast('Please fill the category name', 'error');
             return;
         }
-        setCategories(prev => prev.map(cat =>
-            cat.id === editModal.category.id
-                ? { ...cat, name: formData.name }
-                : cat
-        ));
-        setEditModal({ isOpen: false, category: null });
-        toast(`Category "${formData.name}" updated successfully`, 'success');
+        try {
+            setSubmitting(true);
+            await updateCategory(editModal.category.id, { name: formData.name });
+            await loadCategories();
+            setEditModal({ isOpen: false, category: null });
+            toast(`Category "${formData.name}" updated successfully`, 'success');
+        } catch (error: any) {
+            toast(error.message || 'Failed to update category', 'error');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
-    const handleDeleteCategory = () => {
+    const handleDeleteCategory = async () => {
         if (!deleteDialog.category) return;
-        setCategories(prev => prev.filter(cat => cat.id !== deleteDialog.category.id));
-        toast(`Category "${deleteDialog.category.name}" deleted successfully`, 'success');
-        setDeleteDialog({ isOpen: false, category: null });
+        try {
+            await deleteCategory(deleteDialog.category.id);
+            await loadCategories();
+            toast(`Category "${deleteDialog.category.name}" deleted successfully`, 'success');
+            setDeleteDialog({ isOpen: false, category: null });
+        } catch (error: any) {
+            toast(error.message || 'Failed to delete category', 'error');
+        }
     };
 
     const handleExportData = () => {
-        const headers = ['ID', 'Category Name', 'Created Date'];
+        const headers = ['ID', 'Category Name', 'Created Date', 'Ticket Count'];
         const csvData = filteredCategories.map(cat => [
             cat.id,
             cat.name,
-            new Date(cat.createdAt).toLocaleDateString()
+            new Date(cat.createdAt).toLocaleDateString(),
+            cat._count?.tickets || 0
         ]);
         const csvContent = [headers, ...csvData].map(row => row.join(',')).join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -160,7 +149,7 @@ export default function CategoriesPage() {
         setAddModal(true);
     };
 
-    const openEditModal = (category: any) => {
+    const openEditModal = (category: Category) => {
         setFormData({ name: category.name });
         setEditModal({ isOpen: true, category });
     };
@@ -172,7 +161,7 @@ export default function CategoriesPage() {
             title: 'ID',
             render: (value: string) => (
                 <span className="font-mono font-medium" style={{ color: theme.primary, fontSize: fonts.body.sm.size }}>
-                    {value}
+                    {value.substring(0, 8)}...
                 </span>
             )
         },
@@ -183,6 +172,15 @@ export default function CategoriesPage() {
                 <div className="font-medium" style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>
                     {value}
                 </div>
+            )
+        },
+        {
+            key: '_count',
+            title: 'Tickets',
+            render: (value: any) => (
+                <span style={{ fontSize: fonts.body.sm.size, color: theme.foreground }}>
+                    {value?.tickets || 0}
+                </span>
             )
         },
         {
@@ -197,7 +195,7 @@ export default function CategoriesPage() {
         {
             key: 'actions',
             title: 'Actions',
-            render: (value: any, row: any) => (
+            render: (value: any, row: Category) => (
                 <div className="relative">
                     <button
                         onClick={() => setActionsMenuOpen(actionsMenuOpen === row.id ? null : row.id)}
@@ -254,8 +252,17 @@ export default function CategoriesPage() {
         }
     ];
 
-    // Calculate stats
     const totalCategories = categories.length;
+
+    if (loading) {
+        return (
+            <PageLayout>
+                <div className="flex items-center justify-center h-screen">
+                    <Loader2 className="h-8 w-8 animate-spin" style={{ color: theme.primary }} />
+                </div>
+            </PageLayout>
+        );
+    }
 
     return (
         <PageLayout>
@@ -337,9 +344,9 @@ export default function CategoriesPage() {
             {/* Add Category Modal */}
             {addModal && (
                 <div className="fixed inset-0 z-[9998] flex items-center justify-center">
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setAddModal(false)} />
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !submitting && setAddModal(false)} />
                     <div className="relative rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder, border: '1px solid' }}>
-                        <button onClick={() => setAddModal(false)} className="absolute top-4 right-4 p-1 rounded-lg" style={{ color: theme.foregroundMuted }}>
+                        <button onClick={() => !submitting && setAddModal(false)} className="absolute top-4 right-4 p-1 rounded-lg" style={{ color: theme.foregroundMuted }} disabled={submitting}>
                             <X className="w-5 h-5" />
                         </button>
                         <h3 className="text-lg font-bold mb-4 flex items-center" style={{ color: theme.foreground }}>
@@ -351,12 +358,14 @@ export default function CategoriesPage() {
                                 <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
                                     Category Name <span style={{ color: theme.error }}>*</span>
                                 </label>
-                                <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Enter category name" style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} />
+                                <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Enter category name" style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} disabled={submitting} />
                             </div>
                         </div>
                         <div className="flex gap-3 mt-6">
-                            <ActionButton variant="outline" size="md" onClick={() => setAddModal(false)}>Cancel</ActionButton>
-                            <ActionButton variant="primary" size="md" icon={Save} onClick={handleAddCategory}>Add Category</ActionButton>
+                            <ActionButton variant="outline" size="md" onClick={() => setAddModal(false)} disabled={submitting}>Cancel</ActionButton>
+                            <ActionButton variant="primary" size="md" icon={submitting ? Loader2 : Save} onClick={handleAddCategory} disabled={submitting}>
+                                {submitting ? 'Adding...' : 'Add Category'}
+                            </ActionButton>
                         </div>
                     </div>
                 </div>
@@ -365,9 +374,9 @@ export default function CategoriesPage() {
             {/* Edit Category Modal */}
             {editModal.isOpen && editModal.category && (
                 <div className="fixed inset-0 z-[9998] flex items-center justify-center">
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setEditModal({ isOpen: false, category: null })} />
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !submitting && setEditModal({ isOpen: false, category: null })} />
                     <div className="relative rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" style={{ backgroundColor: theme.card, borderColor: theme.cardBorder, border: '1px solid' }}>
-                        <button onClick={() => setEditModal({ isOpen: false, category: null })} className="absolute top-4 right-4 p-1 rounded-lg" style={{ color: theme.foregroundMuted }}>
+                        <button onClick={() => !submitting && setEditModal({ isOpen: false, category: null })} className="absolute top-4 right-4 p-1 rounded-lg" style={{ color: theme.foregroundMuted }} disabled={submitting}>
                             <X className="w-5 h-5" />
                         </button>
                         <h3 className="text-lg font-bold mb-4 flex items-center" style={{ color: theme.foreground }}>
@@ -379,12 +388,14 @@ export default function CategoriesPage() {
                                 <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
                                     Category Name <span style={{ color: theme.error }}>*</span>
                                 </label>
-                                <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} />
+                                <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }} disabled={submitting} />
                             </div>
                         </div>
                         <div className="flex gap-3 mt-6">
-                            <ActionButton variant="outline" size="md" onClick={() => setEditModal({ isOpen: false, category: null })}>Cancel</ActionButton>
-                            <ActionButton variant="primary" size="md" icon={Save} onClick={handleEditCategory}>Save Changes</ActionButton>
+                            <ActionButton variant="outline" size="md" onClick={() => setEditModal({ isOpen: false, category: null })} disabled={submitting}>Cancel</ActionButton>
+                            <ActionButton variant="primary" size="md" icon={submitting ? Loader2 : Save} onClick={handleEditCategory} disabled={submitting}>
+                                {submitting ? 'Saving...' : 'Save Changes'}
+                            </ActionButton>
                         </div>
                     </div>
                 </div>
@@ -406,7 +417,7 @@ export default function CategoriesPage() {
                                 <div>
                                     <h3 className="text-xl font-bold" style={{ color: theme.foreground }}>{viewModal.category.name}</h3>
                                     <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted, marginTop: '4px' }}>
-                                        ID: {viewModal.category.id}
+                                        {viewModal.category._count?.tickets || 0} tickets
                                     </p>
                                 </div>
                             </div>
@@ -424,7 +435,7 @@ export default function CategoriesPage() {
                         </div>
                         <div className="flex justify-end gap-3 mt-6">
                             <ActionButton variant="outline" size="md" onClick={() => setViewModal({ isOpen: false, category: null })}>Close</ActionButton>
-                            <ActionButton variant="primary" size="md" icon={Edit} onClick={() => { openEditModal(viewModal.category); setViewModal({ isOpen: false, category: null }); }}>
+                            <ActionButton variant="primary" size="md" icon={Edit} onClick={() => { openEditModal(viewModal.category!); setViewModal({ isOpen: false, category: null }); }}>
                                 Edit Category
                             </ActionButton>
                         </div>

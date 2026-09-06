@@ -286,7 +286,18 @@ export function LineChart({
     );
   }
 
+  const summary = series
+    .flatMap((item) =>
+      item.data.map(
+        (value, index) =>
+          `${item.name} ${categories[index] || index + 1}: ${value}`,
+      ),
+    )
+    .join(", ");
+
   return (
-    <Chart options={options} series={series} type="area" height={height} />
+    <div role="img" aria-label={`Line chart. ${summary || "No data"}`}>
+      <Chart options={options} series={series} type="area" height={height} />
+    </div>
   );
 }

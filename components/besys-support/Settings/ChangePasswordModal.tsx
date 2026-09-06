@@ -21,7 +21,7 @@ interface ChangePasswordModalProps {
     currentPassword: string,
     newPassword: string,
     confirmPassword: string,
-  ) => void;
+  ) => Promise<void>;
 }
 
 export function ChangePasswordModal({
@@ -36,14 +36,15 @@ export function ChangePasswordModal({
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       setError("All fields are required");
       return;
     }
-    if (newPassword.length < 8) {
-      setError("New password must be at least 8 characters");
+    if (newPassword.length < 6) {
+      setError("New password must be at least 6 characters");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -51,12 +52,18 @@ export function ChangePasswordModal({
       return;
     }
 
-    setError("");
-    onChangePassword(currentPassword, newPassword, confirmPassword);
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    onClose();
+    try {
+      setError("");
+      setIsSubmitting(true);
+      await onChangePassword(currentPassword, newPassword, confirmPassword);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to change password");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
@@ -222,11 +229,20 @@ export function ChangePasswordModal({
         </div>
 
         <div className="flex gap-3 pt-4">
-          <Button variant="secondary" onClick={handleClose} className="flex-1">
+          <Button
+            variant="secondary"
+            onClick={handleClose}
+            className="flex-1"
+            disabled={isSubmitting}
+          >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} className="flex-1">
-            Update Password
+          <Button
+            onClick={handleSubmit}
+            className="flex-1"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Updating..." : "Update Password"}
           </Button>
         </div>
       </div>

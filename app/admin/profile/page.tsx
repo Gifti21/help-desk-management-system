@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageLayout } from '../../../components/admin/PageLayout';
 import { TopBar } from '../../../components/admin/TopBar';
 import { ActionButton } from '../../../components/admin/ActionButton';
@@ -10,24 +10,27 @@ import { useTheme } from '../../../components/providers/ThemeProvider';
 import { useToast } from '../../../components/ui/toast';
 import { fonts } from '@/lib/fonts';
 import {
-    User, Mail, MapPin, Shield, Edit, Save, Lock, X, Eye, EyeOff
+    User, Mail, MapPin, Shield, Edit, Save, Lock, X, Eye, EyeOff, Loader2, Building2
 } from 'lucide-react';
+import { getProfile, updateProfile, changePassword, type UserProfile } from '@/lib/api/profile';
 
 export default function ProfilePage() {
     const { colors: theme } = useTheme();
     const { toast } = useToast();
 
     const [isEditing, setIsEditing] = useState(false);
-    const [originalProfile, setOriginalProfile] = useState({
-        firstName: 'Abebe',
-        lastName: 'Kebede',
-        email: 'abebe.kebede@besys.com.et',
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [originalProfile, setOriginalProfile] = useState<UserProfile | null>(null);
+    const [profile, setProfile] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
         role: 'ADMIN',
-        phone: '+251 91 123 4567',
-        location: 'Addis Ababa, Ethiopia'
+        department: '',
     });
-    const [profile, setProfile] = useState({ ...originalProfile });
     const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -37,22 +40,32 @@ export default function ProfilePage() {
         confirmPassword: ''
     });
 
-    // Load saved profile from localStorage on mount
-    React.useEffect(() => {
-        const savedProfile = localStorage.getItem('adminProfile');
-
-        if (savedProfile) {
-            try {
-                const parsed = JSON.parse(savedProfile);
-                setProfile(parsed);
-                setOriginalProfile(parsed);
-            } catch (e) {
-                console.error('Failed to load profile:', e);
-            }
-        }
+    // Load profile from backend on mount
+    useEffect(() => {
+        loadProfile();
     }, []);
 
-    const handleSave = () => {
+    const loadProfile = async () => {
+        try {
+            setIsLoading(true);
+            const data = await getProfile();
+            setOriginalProfile(data);
+            setProfile({
+                firstName: data.firstName,
+                lastName: data.lastName,
+                email: data.email,
+                role: data.role,
+                department: data.department?.name || 'N/A',
+            });
+        } catch (error) {
+            console.error('Failed to load profile:', error);
+            toast('Failed to load profile', 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSave = async () => {
         if (!profile.firstName.trim()) {
             toast('First name is required', 'error');
             return;
@@ -71,27 +84,47 @@ export default function ProfilePage() {
             toast('Please enter a valid email address', 'error');
             return;
         }
-        if (!profile.phone.trim()) {
-            toast('Phone number is required', 'error');
-            return;
+
+        try {
+            setIsSaving(true);
+            const updated = await updateProfile({
+                firstName: profile.firstName,
+                lastName: profile.lastName,
+                email: profile.email
+            });
+            setOriginalProfile(updated);
+            setProfile({
+                firstName: updated.firstName,
+                lastName: updated.lastName,
+                email: updated.email,
+                role: updated.role,
+                department: updated.department?.name || 'N/A',
+            });
+            setIsEditing(false);
+            toast('Profile updated successfully', 'success');
+        } catch (error: any) {
+            console.error('Failed to update profile:', error);
+            toast(error.message || 'Failed to update profile', 'error');
+        } finally {
+            setIsSaving(false);
         }
-        if (!profile.location.trim()) {
-            toast('Location is required', 'error');
-            return;
-        }
-        setOriginalProfile({ ...profile });
-        localStorage.setItem('adminProfile', JSON.stringify(profile));
-        setIsEditing(false);
-        toast('Profile updated successfully', 'success');
     };
 
     const handleCancel = () => {
-        setProfile({ ...originalProfile });
+        if (originalProfile) {
+            setProfile({
+                firstName: originalProfile.firstName,
+                lastName: originalProfile.lastName,
+                email: originalProfile.email,
+                role: originalProfile.role,
+                department: originalProfile.department?.name || 'N/A',
+            });
+        }
         setIsEditing(false);
         toast('Changes discarded', 'info');
     };
 
-    const handlePasswordChange = () => {
+    const handlePasswordChange = async () => {
         if (!passwordData.currentPassword) {
             toast('Current password is required', 'error');
             return;
@@ -100,27 +133,53 @@ export default function ProfilePage() {
             toast('New password is required', 'error');
             return;
         }
-        if (passwordData.newPassword.length < 8) {
-            toast('Password must be at least 8 characters', 'error');
+        if (passwordData.newPassword.length < 6) {
+            toast('Password must be at least 6 characters', 'error');
             return;
         }
         if (passwordData.newPassword !== passwordData.confirmPassword) {
             toast('Passwords do not match', 'error');
             return;
         }
-        setShowPasswordModal(false);
-        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-        toast('Password changed successfully', 'success');
+
+        try {
+            setIsChangingPassword(true);
+            await changePassword({
+                currentPassword: passwordData.currentPassword,
+                newPassword: passwordData.newPassword
+            });
+            setShowPasswordModal(false);
+            setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+            toast('Password changed successfully', 'success');
+        } catch (error: any) {
+            console.error('Failed to change password:', error);
+            toast(error.message || 'Failed to change password', 'error');
+        } finally {
+            setIsChangingPassword(false);
+        }
     };
 
     const topBarActions = isEditing ? (
         <>
-            <ActionButton variant="outline" size="sm" icon={X} onClick={handleCancel}>Cancel</ActionButton>
-            <ActionButton variant="primary" size="sm" icon={Save} onClick={handleSave}>Save Changes</ActionButton>
+            <ActionButton variant="outline" size="sm" icon={X} onClick={handleCancel} disabled={isSaving}>Cancel</ActionButton>
+            <ActionButton variant="primary" size="sm" icon={Save} onClick={handleSave} disabled={isSaving}>
+                {isSaving ? 'Saving...' : 'Save Changes'}
+            </ActionButton>
         </>
     ) : (
         <ActionButton variant="primary" size="sm" icon={Edit} onClick={() => setIsEditing(true)}>Edit Profile</ActionButton>
     );
+
+    // Show loading state
+    if (isLoading) {
+        return (
+            <PageLayout>
+                <div className="flex items-center justify-center h-screen">
+                    <Loader2 className="h-8 w-8 animate-spin" style={{ color: theme.primary }} />
+                </div>
+            </PageLayout>
+        );
+    }
 
     return (
         <PageLayout>
@@ -149,7 +208,7 @@ export default function ProfilePage() {
                                         <Mail className="h-4 w-4 mr-2" />{profile.email}
                                     </span>
                                     <span className="flex items-center" style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>
-                                        <MapPin className="h-4 w-4 mr-2" />{profile.location}
+                                        <Building2 className="h-4 w-4 mr-2" />{profile.department}
                                     </span>
                                 </div>
                             </div>
@@ -202,33 +261,15 @@ export default function ProfilePage() {
                             </div>
                             <div>
                                 <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
+                                    Department <span style={{ color: theme.foregroundSubtle }}>(Read-only)</span>
+                                </label>
+                                <Input value={profile.department} disabled style={{ backgroundColor: theme.backgroundSecondary, color: theme.foregroundMuted, borderColor: theme.border, cursor: 'not-allowed' }} />
+                            </div>
+                            <div>
+                                <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
                                     Role <span style={{ color: theme.foregroundSubtle }}>(Read-only)</span>
                                 </label>
                                 <Input value={profile.role} disabled style={{ backgroundColor: theme.backgroundSecondary, color: theme.foregroundMuted, borderColor: theme.border, cursor: 'not-allowed' }} />
-                            </div>
-                            <div>
-                                <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
-                                    Phone Number {isEditing && <span style={{ color: theme.error }}>*</span>}
-                                </label>
-                                <Input
-                                    value={profile.phone}
-                                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                                    disabled={!isEditing}
-                                    placeholder="+251 91 123 4567"
-                                    style={{ backgroundColor: isEditing ? theme.background : theme.backgroundSecondary, color: theme.foreground, borderColor: theme.border }}
-                                />
-                            </div>
-                            <div>
-                                <label className="block mb-2" style={{ fontSize: fonts.body.sm.size, fontWeight: fonts.fontWeight.medium, color: theme.foregroundMuted }}>
-                                    Location {isEditing && <span style={{ color: theme.error }}>*</span>}
-                                </label>
-                                <Input
-                                    value={profile.location}
-                                    onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                                    disabled={!isEditing}
-                                    placeholder="City, Country"
-                                    style={{ backgroundColor: isEditing ? theme.background : theme.backgroundSecondary, color: theme.foreground, borderColor: theme.border }}
-                                />
                             </div>
                         </div>
                     </div>
@@ -241,7 +282,7 @@ export default function ProfilePage() {
                         <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: theme.backgroundSecondary }}>
                             <div>
                                 <p className="font-medium mb-1" style={{ fontSize: fonts.body.regular.size, color: theme.foreground }}>Password</p>
-                                <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Last changed 3 months ago</p>
+                                <p style={{ fontSize: fonts.body.sm.size, color: theme.foregroundMuted }}>Change your account password</p>
                             </div>
                             <ActionButton variant="outline" size="sm" icon={Lock} onClick={() => setShowPasswordModal(true)}>Change Password</ActionButton>
                         </div>
@@ -343,16 +384,18 @@ export default function ProfilePage() {
                                     setShowPasswordModal(false);
                                     setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
                                 }}
+                                disabled={isChangingPassword}
                             >
                                 Cancel
                             </ActionButton>
                             <ActionButton
                                 variant="primary"
                                 size="md"
-                                icon={Save}
+                                icon={isChangingPassword ? Loader2 : Save}
                                 onClick={handlePasswordChange}
+                                disabled={isChangingPassword}
                             >
-                                Change Password
+                                {isChangingPassword ? 'Changing...' : 'Change Password'}
                             </ActionButton>
                         </div>
                     </div>

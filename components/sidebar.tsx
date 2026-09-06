@@ -15,6 +15,7 @@ import {
   BarChart3,
   Settings,
   Plus,
+  UserCircle,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -31,60 +32,101 @@ export function Sidebar({
   const navigation = [
     {
       name: "Dashboard",
-      href: "/admin",
+      href: userRole === "EMPLOYEE" ? "/employee/dashboard" : "/admin",
       icon: LayoutDashboard,
-      current: pathname === "/admin",
+      current:
+        userRole === "EMPLOYEE"
+          ? pathname === "/employee/dashboard"
+          : pathname === "/admin",
     },
     // Employees get "My Tickets"
     ...(userRole === "EMPLOYEE"
       ? [
-        {
-          name: "My Tickets",
-          href: "/admin/my-tickets",
-          icon: Ticket,
-          current: pathname === "/admin/my-tickets",
-        },
-      ]
+          {
+            name: "My Tickets",
+            href: "/employee/tickets",
+            icon: Ticket,
+            current:
+              pathname === "/employee/tickets" ||
+              pathname.startsWith("/employee/tickets/"),
+          },
+        ]
       : []),
-    {
-      name: "All Tickets",
-      href: "/admin/tickets",
-      icon: FolderOpen,
-      current: pathname === "/admin/tickets",
-    },
+    // Admin gets "All Tickets"
+    ...(userRole === "ADMIN" || userRole === "AGENT"
+      ? [
+          {
+            name: "All Tickets",
+            href: "/admin/tickets",
+            icon: FolderOpen,
+            current: pathname === "/admin/tickets",
+          },
+        ]
+      : []),
     ...(userRole === "ADMIN"
       ? [
-        {
-          name: "Users",
-          href: "/admin/users",
-          icon: Users,
-          current: pathname === "/admin/users",
-        },
-        {
-          name: "Departments",
-          href: "/admin/departments",
-          icon: Building2,
-          current: pathname === "/admin/departments",
-        },
-        {
-          name: "Categories",
-          href: "/admin/categories",
-          icon: FolderOpen,
-          current: pathname === "/admin/categories",
-        },
-      ]
+          {
+            name: "Users",
+            href: "/admin/users",
+            icon: Users,
+            current: pathname === "/admin/users",
+          },
+          {
+            name: "Departments",
+            href: "/admin/departments",
+            icon: Building2,
+            current: pathname === "/admin/departments",
+          },
+          {
+            name: "Categories",
+            href: "/admin/categories",
+            icon: FolderOpen,
+            current: pathname === "/admin/categories",
+          },
+        ]
       : []),
+    ...(userRole === "ADMIN" || userRole === "AGENT"
+      ? [
+          {
+            name: "Reports",
+            href: "/admin/reports",
+            icon: BarChart3,
+            current: pathname === "/admin/reports",
+          },
+        ]
+      : []),
+    // Profile link for all users
     {
-      name: "Reports",
-      href: "/admin/reports",
-      icon: BarChart3,
-      current: pathname === "/admin/reports",
+      name: "Profile",
+      href:
+        userRole === "EMPLOYEE"
+          ? "/employee/profile"
+          : userRole === "AGENT"
+            ? "/dashboard/technician/profile"
+            : "/admin/profile",
+      icon: UserCircle,
+      current:
+        userRole === "EMPLOYEE"
+          ? pathname === "/employee/profile"
+          : userRole === "AGENT"
+            ? pathname === "/dashboard/technician/profile"
+            : pathname === "/admin/profile",
     },
     {
       name: "Settings",
-      href: "/admin/settings",
+      href:
+        userRole === "EMPLOYEE"
+          ? "/employee/settings"
+          : userRole === "AGENT"
+            ? "/dashboard/technician/settings"
+            : "/admin/settings",
       icon: Settings,
-      current: pathname === "/admin/settings",
+      current:
+        userRole === "EMPLOYEE"
+          ? pathname === "/employee/settings"
+          : userRole === "AGENT"
+            ? pathname === "/dashboard/technician/settings"
+            : pathname === "/admin/settings",
     },
   ];
 
@@ -181,7 +223,7 @@ export function Sidebar({
           style={{ borderTop: `1px solid rgba(47, 217, 196, 0.2)` }}
         >
           <Link
-            href="/tickets/new"
+            href="/employee/tickets/new"
             className="flex items-center justify-center w-full px-4 py-2 rounded-md transition-all duration-200 hover:shadow-md"
             style={{
               fontSize: fonts.button.regular.size,

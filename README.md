@@ -3,9 +3,11 @@
 A help desk system for managing support tickets. Users can create tickets, assign them to team members, and track their progress.
 
 ## What This Project Does
+
 this work
 
 This is a web application where:
+
 - **Employees** can create support tickets when they have problems
 - **Agents** can view and manage tickets assigned to them
 - **Admins** can manage users, departments, and settings
@@ -52,23 +54,24 @@ This downloads all the libraries the project needs:
 npm install
 ```
 
-*This might take a few minutes. You'll see lots of text scrolling by - that's normal!*
+_This might take a few minutes. You'll see lots of text scrolling by - that's normal!_
 
 ### Step 3: Set Up Your Database
 
 You need a PostgreSQL database running. Here are two options:
 
- Use a local PostgreSQL installation**
+Use a local PostgreSQL installation\*\*
+
 1. Install PostgreSQL on your computer
 2. Create a new database called `helpdesk_db`
 3. Remember your username and password
-
 
 ### Step 4: Configure Environment Variables
 
 Environment variables are settings that your app needs but shouldn't be shared publicly (like passwords).
 
 1. Copy the example file:
+
 ```bash
 cp .env.example .env
 ```
@@ -79,18 +82,22 @@ cp .env.example .env
 # Database connection - replace with your actual database details
 DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/helpdesk_db?schema=public"
 
-# NextAuth settings
+# Authentication settings
+SESSION_SECRET="replace-with-a-random-32-byte-secret"
+# Legacy NextAuth settings (only required if the legacy provider is enabled)
 NEXTAUTH_SECRET="any-random-string-here"
 NEXTAUTH_URL="http://localhost:3000"
 ```
 
 **What to put in DATABASE_URL:**
+
 - If using local PostgreSQL: `postgresql://postgres:YOUR_PASSWORD@localhost:5432/helpdesk_db?schema=public`
 - If using Supabase: Copy the connection string from Supabase dashboard
 
-**What to put in NEXTAUTH_SECRET:**
-- Any random string works for development
-- For production, generate a secure one with: `openssl rand -base64 32`
+**What to put in SESSION_SECRET:**
+
+- Use a unique random value and never commit it to source control.
+- For production, generate one with: `openssl rand -base64 32`
 
 ### Step 5: Set Up the Database Tables
 
@@ -100,7 +107,7 @@ Run this command to create all the tables in your database:
 npx prisma migrate dev
 ```
 
-*This reads the `prisma/schema.prisma` file and creates the matching tables in your database.*
+_This reads the `prisma/schema.prisma` file and creates the matching tables in your database._
 
 ### Step 6: Start the Application
 
@@ -109,6 +116,7 @@ npm run dev
 ```
 
 You should see something like:
+
 ```
 ✓ Ready in 2.3s
 ○ Local: http://localhost:3000
@@ -121,11 +129,13 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 The application has API endpoints that the frontend uses to get and send data. Here's what they do:
 
 ### Authentication (Login/Logout)
+
 - `POST /api/auth/signin` - User logs in
 - `POST /api/auth/signout` - User logs out
 - `GET /api/auth/session` - Check if user is logged in
 
 ### Tickets (The main feature)
+
 - `GET /api/tickets` - Get list of tickets (what you see depends on your role)
 - `POST /api/tickets` - Create a new ticket
 - `GET /api/tickets/[id]` - Get details of one specific ticket
@@ -135,6 +145,7 @@ The application has API endpoints that the frontend uses to get and send data. H
 - `POST /api/tickets/[id]/comments` - Add a new comment to a ticket
 
 ### Departments
+
 - `GET /api/departments` - Get all departments
 - `POST /api/departments` - Create a new department (only admins)
 - `GET /api/departments/[id]` - Get details of one department
@@ -142,6 +153,7 @@ The application has API endpoints that the frontend uses to get and send data. H
 - `DELETE /api/departments/[id]` - Delete a department (only admins)
 
 ### Users
+
 - `GET /api/users` - Get all users (only admins and agents)
 - `POST /api/users` - Create a new user (only admins)
 - `GET /api/users/[id]` - Get details of one user
@@ -149,6 +161,7 @@ The application has API endpoints that the frontend uses to get and send data. H
 - `DELETE /api/users/[id]` - Delete a user (only admins)
 
 ### Categories
+
 - `GET /api/categories` - Get all categories
 - `POST /api/categories` - Create a new category (only admins)
 - `GET /api/categories/[id]` - Get details of one category
@@ -178,48 +191,60 @@ You can see the full structure in the `prisma/schema.prisma` file.
 ## Useful Commands for Development
 
 ### View or Edit Database Visually
+
 ```bash
 npx prisma studio
 ```
-*This opens a visual tool where you can see and edit all data in your database.*
+
+_This opens a visual tool where you can see and edit all data in your database._
 
 ### Update Database Structure
+
 If you change the `prisma/schema.prisma` file, run:
+
 ```bash
 npx prisma migrate dev
 ```
-*This updates your database to match the new schema.*
+
+_This updates your database to match the new schema._
 
 ### Reset the Database (Warning: Deletes all data!)
+
 ```bash
 npx prisma migrate reset
 ```
-*Use this only if you want to start fresh with an empty database.*
+
+_Use this only if you want to start fresh with an empty database._
 
 ## Troubleshooting
 
 ### "Database connection failed" error
+
 - Make sure your PostgreSQL database is running
 - Check that your DATABASE_URL in `.env` is correct
 - Verify your database username and password
 
 ### "Module not found" errors
+
 - Run `npm install` again to make sure all dependencies are installed
 
 ### Migration errors
+
 - Make sure your database exists
 - Check that you have the right permissions to create tables
 
 ### Port already in use
+
 If you see "port 3000 is already in use", either:
+
 - Close the other application using port 3000, or
 - Run `npm run dev -- -p 3001` to use port 3001 instead
 
 ## Getting Help
 
 If you're stuck:
+
 1. Check the error message in your terminal
 2. Make sure you followed all the setup steps
 3. Try searching for the error online
 4. Ask a me or fuad
-

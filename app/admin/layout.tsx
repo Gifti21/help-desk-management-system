@@ -1,25 +1,27 @@
-import { ThemeProvider } from '@/components/providers/ThemeProvider';
-import { ToastProvider } from '@/components/ui/toast';
-import { AdminShell } from './shell';
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { ToastProvider } from "@/components/ui/toast";
+import { getSessionUser } from "@/lib/session";
+import { redirect } from "next/navigation";
+import { AdminShell } from "./shell";
 
-export default function AdminLayout({
-    children,
+export default async function AdminLayout({
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-    // Mock user data for frontend-only demo
-    const mockUser = {
-        role: 'ADMIN',
-        name: 'John Admin'
-    };
+  const user = await getSessionUser();
+  if (!user || user.role !== "ADMIN") redirect("/login");
 
-    return (
-        <ThemeProvider>
-            <ToastProvider>
-                <AdminShell role={mockUser.role} userName={mockUser.name}>
-                    {children}
-                </AdminShell>
-            </ToastProvider>
-        </ThemeProvider>
-    );
+  return (
+    <ThemeProvider>
+      <ToastProvider>
+        <AdminShell
+          role={user.role}
+          userName={`${user.firstName} ${user.lastName}`}
+        >
+          {children}
+        </AdminShell>
+      </ToastProvider>
+    </ThemeProvider>
+  );
 }

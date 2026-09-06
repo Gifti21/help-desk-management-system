@@ -1,16 +1,22 @@
-"use client";
-
 import React from "react";
+import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { TicketProvider } from "@/context/TicketContext";
 import { PAGE_BACKGROUND } from "@/lib/colors";
+import { getSessionUser } from "@/lib/session";
 
-export default function TechnicianLayout({
+export default async function TechnicianLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = await getSessionUser();
+
+  if (!user || user.role !== "AGENT") {
+    redirect("/login");
+  }
+
   return (
     <TicketProvider>
       <div

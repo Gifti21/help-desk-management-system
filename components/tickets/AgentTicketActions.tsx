@@ -3,6 +3,7 @@
 import React from "react";
 import { Ticket, Status, Priority } from "@/types/ticket";
 import { useTickets } from "@/context/TicketContext";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AgentTicketActionsProps {
   ticket: Ticket;
@@ -11,9 +12,11 @@ interface AgentTicketActionsProps {
 
 export const AgentTicketActions: React.FC<AgentTicketActionsProps> = ({
   ticket,
-  agentName = "Bontu",
+  agentName,
 }) => {
   const { updateTicket } = useTickets();
+  const { user } = useAuth();
+  const actorName = agentName || user?.name || "Support Agent";
 
   const handleStatusChange = (newStatus: Status) => {
     const timestamp = new Date().toISOString();
@@ -24,7 +27,7 @@ export const AgentTicketActions: React.FC<AgentTicketActionsProps> = ({
       type: "STATUS_CHANGE" as const,
       description: `Status updated from ${ticket.status} to ${newStatus}`,
       timestamp,
-      actor: agentName,
+      actor: actorName,
     };
 
     updateTicket(ticket.id, {
@@ -43,7 +46,7 @@ export const AgentTicketActions: React.FC<AgentTicketActionsProps> = ({
       type: "PRIORITY_CHANGE" as const,
       description: `Priority updated from ${ticket.priority} to ${newPriority}`,
       timestamp,
-      actor: agentName,
+      actor: actorName,
     };
 
     updateTicket(ticket.id, {
@@ -71,7 +74,6 @@ export const AgentTicketActions: React.FC<AgentTicketActionsProps> = ({
           >
             <option value="OPEN">Open</option>
             <option value="IN_PROGRESS">In Progress</option>
-            <option value="PENDING">Pending</option>
             <option value="RESOLVED">Resolved</option>
             <option value="CLOSED">Closed</option>
           </select>
