@@ -20,7 +20,7 @@ const userUpdateSchema = z.object({
  */
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const sessionUser = await getSessionUser();
@@ -32,8 +32,10 @@ export async function GET(
             );
         }
 
+        const { id } = await params;
+
         const foundUser = await prisma.user.findUnique({
-            where: { id: params.id },
+            where: { id },
             include: {
                 department: {
                     select: {

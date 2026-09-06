@@ -13,7 +13,7 @@ const categoryUpdateSchema = z.object({
  */
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const user = await getSessionUser();
@@ -25,8 +25,10 @@ export async function GET(
             );
         }
 
+        const { id } = await params;
+
         const category = await prisma.category.findUnique({
-            where: { id: params.id },
+            where: { id },
             include: {
                 _count: {
                     select: {
@@ -62,7 +64,7 @@ export async function GET(
  */
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const user = await getSessionUser();
@@ -85,9 +87,11 @@ export async function PATCH(
             );
         }
 
+        const { id } = await params;
+
         // Check if category exists
         const existingCategory = await prisma.category.findUnique({
-            where: { id: params.id }
+            where: { id }
         });
 
         if (!existingCategory) {
@@ -108,7 +112,7 @@ export async function PATCH(
                         mode: 'insensitive'
                     },
                     id: {
-                        not: params.id
+                        not: id
                     }
                 }
             });
@@ -123,7 +127,7 @@ export async function PATCH(
 
         // Update category
         const category = await prisma.category.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 ...(name && { name }),
             }
@@ -148,7 +152,7 @@ export async function PATCH(
  */
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const user = await getSessionUser();
@@ -160,9 +164,11 @@ export async function DELETE(
             );
         }
 
+        const { id } = await params;
+
         // Check if category exists
         const category = await prisma.category.findUnique({
-            where: { id: params.id },
+            where: { id },
             include: {
                 _count: {
                     select: {
@@ -192,7 +198,7 @@ export async function DELETE(
 
         // Delete category
         await prisma.category.delete({
-            where: { id: params.id }
+            where: { id }
         });
 
         return NextResponse.json({
