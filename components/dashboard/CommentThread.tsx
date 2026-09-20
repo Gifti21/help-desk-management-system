@@ -41,38 +41,60 @@ export const CommentThread: React.FC<CommentThreadProps> = ({ comments }) => {
     }
   };
 
+  const getAuthorName = (comment: Comment) => {
+    if (comment.authorName) return comment.authorName;
+    if (comment.author) return `${comment.author.firstName} ${comment.author.lastName}`.trim();
+    return "User";
+  };
+
+  const getAuthorRole = (comment: Comment) => {
+    return comment.authorRole || "EMPLOYEE";
+  };
+
+  const getTimestamp = (comment: Comment) => {
+    const rawTime = comment.timestamp || comment.createdAt;
+    if (!rawTime) return new Date().toISOString();
+    return rawTime;
+  };
+
   return (
     <div className="space-y-3 w-full">
       <h3 className="text-[11px] font-mono text-slate-500 uppercase tracking-wider font-bold">
         Chronological Communication History ({comments.length})
       </h3>
       <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
-        {comments.map((comment) => (
-          <div
-            key={comment.id}
-            className={`p-3 rounded-xl border space-y-1.5 shadow-xs ${
-              comment.authorRole === "AGENT"
-                ? "bg-emerald-50/70 border-emerald-200 ml-2"
-                : "bg-white border-slate-200 mr-2"
-            }`}
-          >
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-bold text-xs text-slate-900">{comment.authorName}</span>
-                {getRoleBadge(comment.authorRole)}
+        {comments.map((comment) => {
+          const authorRole = getAuthorRole(comment);
+          const authorName = getAuthorName(comment);
+          const timestamp = getTimestamp(comment);
+
+          return (
+            <div
+              key={comment.id}
+              className={`p-3 rounded-xl border space-y-1.5 shadow-xs ${
+                authorRole === "AGENT"
+                  ? "bg-emerald-50/70 border-emerald-200 ml-2"
+                  : "bg-white border-slate-200 mr-2"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-bold text-xs text-slate-900">{authorName}</span>
+                  {getRoleBadge(authorRole)}
+                </div>
+                <span className="text-[10px] font-mono text-slate-400 shrink-0">
+                  {new Date(timestamp).toLocaleString([], {
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
               </div>
-              <span className="text-[10px] font-mono text-slate-400 shrink-0">
-                {new Date(comment.timestamp).toLocaleString([], {
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
+              <p className="text-xs text-slate-800 leading-relaxed whitespace-pre-wrap">{comment.content}</p>
             </div>
-            <p className="text-xs text-slate-800 leading-relaxed whitespace-pre-wrap">{comment.content}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

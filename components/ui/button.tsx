@@ -2,10 +2,10 @@ import React from 'react';
 import { BUTTONS, ERROR } from '@/lib/colors';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
+  size?: 'sm' | 'md' | 'lg' | 'icon';
   loading?: boolean;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -55,6 +55,12 @@ export const Button: React.FC<ButtonProps> = ({
           color: '#FFFFFF',
           borderColor: 'transparent',
         };
+      case 'ghost':
+        return {
+          backgroundColor: 'transparent',
+          color: BUTTONS.primary,
+          borderColor: 'transparent',
+        };
       default:
         return {};
     }
@@ -64,6 +70,7 @@ export const Button: React.FC<ButtonProps> = ({
     sm: 'px-3 py-1.5 text-xs font-semibold',
     md: 'px-4 py-2 text-sm font-semibold',
     lg: 'px-6 py-3 text-base font-semibold',
+    icon: 'p-2 text-sm font-semibold',
   }[size];
 
   return (

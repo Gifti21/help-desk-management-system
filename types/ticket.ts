@@ -50,21 +50,8 @@ export interface TimelineEntry {
   actor?: string;
 }
 
-export interface Comment {
-  id: string;
-  authorName: string;
-  authorRole: UserRole | string;
-  timestamp: string;
-  content: string;
-  ticketId?: string;
-  authorId?: string;
-  author?: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email?: string;
-  };
-}
+import type { Comment } from "@/types/comment";
+export type { Comment };
 
 export interface TicketReferenceObj {
   id: string;

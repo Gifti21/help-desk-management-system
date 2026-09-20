@@ -3,10 +3,13 @@ import type { TicketUser } from '@/types/ticket';
 export interface Comment {
   id: string;
   content: string;
-  ticketId: string;
-  author: TicketUser;
-  authorId: string;
-  createdAt: string;
+  ticketId?: string;
+  author?: TicketUser;
+  authorId?: string;
+  createdAt?: string;
+  authorName?: string;
+  authorRole?: string;
+  timestamp?: string;
 }
 
 export interface CreateCommentPayload {
