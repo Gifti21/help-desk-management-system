@@ -1,12 +1,11 @@
-import { NextResponse } from "next/server";
-import { getSessionUser } from "@/lib/session";
+import { NextRequest } from "next/server";
+import { AuthController } from "@/src/modules/auth/auth.controller";
 
-export async function GET() {
-  const user = await getSessionUser();
+const controller = new AuthController();
 
-  if (!user) {
-    return NextResponse.json({ user: null }, { status: 401 });
-  }
-
-  return NextResponse.json({ user });
+/**
+ * GET /api/auth/me - Get current user
+ */
+export async function GET(request: NextRequest) {
+  return controller.me(request);
 }

@@ -1,13 +1,5 @@
-import { PrismaClient } from '@prisma/client'
-
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
-
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: ['error', 'warn'],
-})
-
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma
-}
+/**
+ * @deprecated Use @/src/infrastructure/database/prisma instead
+ * This file is kept for backwards compatibility during refactoring
+ */
+export { prisma } from '@/src/infrastructure/database/prisma';

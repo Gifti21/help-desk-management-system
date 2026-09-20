@@ -1,7 +1,11 @@
-import { NextResponse } from "next/server";
-import { logoutUser } from "@/lib/session";
+import { NextRequest } from "next/server";
+import { AuthController } from "@/src/modules/auth/auth.controller";
 
-export async function POST() {
-  await logoutUser();
-  return NextResponse.json({ success: true });
+const controller = new AuthController();
+
+/**
+ * POST /api/auth/logout - Logout user
+ */
+export async function POST(request: NextRequest) {
+  return controller.logout(request);
 }
