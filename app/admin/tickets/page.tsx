@@ -686,7 +686,7 @@ export default function TicketsPage() {
           searchValue={searchTerm}
           onSearchChange={(value) => {
             setSearchTerm(value);
-            handleFilterChange();
+            setCurrentPage(1); // Reset to first page when searching
           }}
           searchPlaceholder="Search by ticket ID, title, or requester..."
           filters={filters}
