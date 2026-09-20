@@ -179,6 +179,42 @@ export default function TicketsPage() {
     }
   };
 
+  const handleStatusChange = async (ticketId: string, status: string) => {
+    try {
+      setIsSubmitting(true);
+      const updatedTicket = await updateTicket(ticketId, {
+        status: status as Ticket["status"],
+      });
+      setTickets((prev) =>
+        prev.map((t) => (t.id === ticketId ? updatedTicket : t)),
+      );
+      setStatusModal({ isOpen: false, ticket: null });
+      toast("Ticket status updated successfully", "success");
+    } catch (error: any) {
+      toast(error.message || "Failed to update ticket status", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handlePriorityChange = async (ticketId: string, priority: string) => {
+    try {
+      setIsSubmitting(true);
+      const updatedTicket = await updateTicket(ticketId, {
+        priority: priority as Ticket["priority"],
+      });
+      setTickets((prev) =>
+        prev.map((t) => (t.id === ticketId ? updatedTicket : t)),
+      );
+      setPriorityModal({ isOpen: false, ticket: null });
+      toast("Ticket priority updated successfully", "success");
+    } catch (error: any) {
+      toast(error.message || "Failed to update ticket priority", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteDialog.ticket) return;
     try {
@@ -812,7 +848,7 @@ export default function TicketsPage() {
                         color: theme.foreground,
                       }}
                     >
-                      {viewModal.ticket.category.name}
+                      {viewModal.ticket.category?.name || "N/A"}
                     </p>
                   </div>
                   <div>
@@ -830,7 +866,7 @@ export default function TicketsPage() {
                         color: theme.foreground,
                       }}
                     >
-                      {viewModal.ticket.department.name}
+                      {viewModal.ticket.department?.name || "N/A"}
                     </p>
                   </div>
                   <div>
@@ -848,8 +884,9 @@ export default function TicketsPage() {
                         color: theme.foreground,
                       }}
                     >
-                      {viewModal.ticket.requester.firstName}{" "}
-                      {viewModal.ticket.requester.lastName}
+                      {viewModal.ticket.requester
+                        ? `${viewModal.ticket.requester.firstName} ${viewModal.ticket.requester.lastName}`
+                        : "N/A"}
                     </p>
                   </div>
                   <div>
@@ -1059,13 +1096,15 @@ export default function TicketsPage() {
 
                 {/* Filter agents by department */}
                 {(() => {
+                  const ticket = assignModal.ticket;
+                  if (!ticket) return null;
                   const matchingAgents = agentOptions.filter(
                     (agent) =>
-                      agent.department === assignModal.ticket.department?.name,
+                      agent.department === ticket.department?.name,
                   );
                   const otherAgents = agentOptions.filter(
                     (agent) =>
-                      agent.department !== assignModal.ticket.department?.name,
+                      agent.department !== ticket.department?.name,
                   );
 
                   return (
@@ -1087,7 +1126,7 @@ export default function TicketsPage() {
                               <button
                                 key={agent.id}
                                 onClick={() =>
-                                  handleAssign(assignModal.ticket.id, agent.id)
+                                  handleAssign(ticket.id, agent.id)
                                 }
                                 className="w-full p-3 rounded-lg text-left transition-all duration-200 flex items-center justify-between hover:opacity-90"
                                 style={{
@@ -1138,7 +1177,7 @@ export default function TicketsPage() {
                               <button
                                 key={agent.id}
                                 onClick={() =>
-                                  handleAssign(assignModal.ticket.id, agent.id)
+                                  handleAssign(ticket.id, agent.id)
                                 }
                                 className="w-full p-3 rounded-lg text-left transition-all duration-200 flex items-center justify-between hover:opacity-90"
                                 style={{
@@ -1205,31 +1244,35 @@ export default function TicketsPage() {
               Change Status - {statusModal.ticket.id}
             </h3>
             <div className="space-y-2">
-              {["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"].map((status) => (
-                <button
-                  key={status}
-                  onClick={() =>
-                    handleStatusChange(statusModal.ticket.id, status)
-                  }
-                  className="w-full p-3 rounded-lg text-left transition-colors flex items-center justify-between"
-                  style={{
-                    backgroundColor:
-                      statusModal.ticket.status === status
-                        ? theme.accent
-                        : theme.backgroundSecondary,
-                  }}
-                >
-                  <span style={{ color: theme.foreground }}>
-                    {status.replace("_", " ")}
-                  </span>
-                  {statusModal.ticket.status === status && (
-                    <Check
-                      className="h-4 w-4"
-                      style={{ color: theme.primary }}
-                    />
-                  )}
-                </button>
-              ))}
+              {(() => {
+                const currentTicket = statusModal.ticket;
+                if (!currentTicket) return null;
+                return ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() =>
+                      handleStatusChange(currentTicket.id, status)
+                    }
+                    className="w-full p-3 rounded-lg text-left transition-colors flex items-center justify-between"
+                    style={{
+                      backgroundColor:
+                        currentTicket.status === status
+                          ? theme.accent
+                          : theme.backgroundSecondary,
+                    }}
+                  >
+                    <span style={{ color: theme.foreground }}>
+                      {status.replace("_", " ")}
+                    </span>
+                    {currentTicket.status === status && (
+                      <Check
+                        className="h-4 w-4"
+                        style={{ color: theme.primary }}
+                      />
+                    )}
+                  </button>
+                ));
+              })()}
             </div>
           </div>
         </div>
@@ -1306,21 +1349,23 @@ export default function TicketsPage() {
 
             {/* Filter agents by department */}
             {(() => {
+              const ticket = reassignModal.ticket;
+              if (!ticket) return null;
               const matchingAgents = agentOptions.filter(
                 (agent) =>
-                  agent.department === reassignModal.ticket.department?.name &&
+                  agent.department === ticket.department?.name &&
                   agent.name !==
-                  reassignModal.ticket.assignee?.firstName +
+                  ticket.assignee?.firstName +
                   " " +
-                  reassignModal.ticket.assignee?.lastName,
+                  ticket.assignee?.lastName,
               );
               const otherAgents = agentOptions.filter(
                 (agent) =>
-                  agent.department !== reassignModal.ticket.department?.name &&
+                  agent.department !== ticket.department?.name &&
                   agent.name !==
-                  reassignModal.ticket.assignee?.firstName +
+                  ticket.assignee?.firstName +
                   " " +
-                  reassignModal.ticket.assignee?.lastName,
+                  ticket.assignee?.lastName,
               );
 
               return (
@@ -1342,7 +1387,7 @@ export default function TicketsPage() {
                           <button
                             key={agent.id}
                             onClick={() =>
-                              handleAssign(reassignModal.ticket.id, agent.id)
+                              handleAssign(ticket.id, agent.id)
                             }
                             className="w-full p-3 rounded-lg text-left transition-all duration-200 flex items-center justify-between hover:opacity-90"
                             style={{
@@ -1393,7 +1438,7 @@ export default function TicketsPage() {
                           <button
                             key={agent.id}
                             onClick={() =>
-                              handleAssign(reassignModal.ticket.id, agent.id)
+                              handleAssign(ticket.id, agent.id)
                             }
                             className="w-full p-3 rounded-lg text-left transition-all duration-200 flex items-center justify-between hover:opacity-90"
                             style={{
@@ -1471,29 +1516,33 @@ export default function TicketsPage() {
               Change Priority - {priorityModal.ticket.id}
             </h3>
             <div className="space-y-2">
-              {["CRITICAL", "HIGH", "MEDIUM", "LOW"].map((priority) => (
-                <button
-                  key={priority}
-                  onClick={() =>
-                    handlePriorityChange(priorityModal.ticket.id, priority)
-                  }
-                  className="w-full p-3 rounded-lg text-left transition-colors flex items-center justify-between"
-                  style={{
-                    backgroundColor:
-                      priorityModal.ticket.priority === priority
-                        ? theme.accent
-                        : theme.backgroundSecondary,
-                  }}
-                >
-                  <span style={{ color: theme.foreground }}>{priority}</span>
-                  {priorityModal.ticket.priority === priority && (
-                    <Check
-                      className="h-4 w-4"
-                      style={{ color: theme.primary }}
-                    />
-                  )}
-                </button>
-              ))}
+              {(() => {
+                const currentTicket = priorityModal.ticket;
+                if (!currentTicket) return null;
+                return ["CRITICAL", "HIGH", "MEDIUM", "LOW"].map((priority) => (
+                  <button
+                    key={priority}
+                    onClick={() =>
+                      handlePriorityChange(currentTicket.id, priority)
+                    }
+                    className="w-full p-3 rounded-lg text-left transition-colors flex items-center justify-between"
+                    style={{
+                      backgroundColor:
+                        currentTicket.priority === priority
+                          ? theme.accent
+                          : theme.backgroundSecondary,
+                    }}
+                  >
+                    <span style={{ color: theme.foreground }}>{priority}</span>
+                    {currentTicket.priority === priority && (
+                      <Check
+                        className="h-4 w-4"
+                        style={{ color: theme.primary }}
+                      />
+                    )}
+                  </button>
+                ));
+              })()}
             </div>
           </div>
         </div>

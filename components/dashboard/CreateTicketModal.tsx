@@ -129,7 +129,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
               <label className="block text-slate-700 font-semibold mb-1">Category (Issue Type)</label>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value as Category)}
+                onChange={(e) => setCategory(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-900 focus:outline-none focus:border-[#0E2621]"
               >
                 {categories.map((cat) => (
@@ -144,7 +144,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
               <label className="block text-slate-700 font-semibold mb-1">Department Allocation</label>
               <select
                 value={department}
-                onChange={(e) => setDepartment(e.target.value as Department)}
+                onChange={(e) => setDepartment(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-900 focus:outline-none focus:border-[#0E2621]"
               >
                 {departments.map((dept) => (
