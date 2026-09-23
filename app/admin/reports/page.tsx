@@ -82,13 +82,18 @@ export default function ReportsPage() {
           getTickets(),
         ]);
       setReportsData(reportsResult);
-      setUsers(usersData);
-      setDepartments(deptData);
-      setCategories(catData);
-      setTickets(ticketsData);
+      setUsers(usersData || []);
+      setDepartments(deptData || []);
+      setCategories(catData || []);
+      setTickets(ticketsData || []);
     } catch (error) {
       console.error("Failed to load reports data:", error);
       toast("Failed to load reports data", "error");
+      // Set empty arrays on error
+      setUsers([]);
+      setDepartments([]);
+      setCategories([]);
+      setTickets([]);
     } finally {
       setIsLoadingData(false);
     }
@@ -108,16 +113,22 @@ export default function ReportsPage() {
     );
   }
 
+  // Ensure arrays are always defined
+  const safeUsers = users || [];
+  const safeDepartments = departments || [];
+  const safeCategories = categories || [];
+  const safeTickets = tickets || [];
+
   // Computed values from real data
   const totalUsers = reportsData.overview.totalUsers;
-  const activeUsers = users.filter((u) => u.isActive).length;
+  const activeUsers = safeUsers.filter((u) => u.isActive).length;
   const totalDepartments = reportsData.overview.totalDepartments;
   const totalCategories = reportsData.overview.totalCategories;
   const totalTickets = reportsData.overview.totalTickets;
   const openTickets = reportsData.overview.openTickets;
 
   // Filtered data
-  const filteredUsers = users.filter((user) => {
+  const filteredUsers = safeUsers.filter((user) => {
     const matchesSearch =
       searchTerm === "" ||
       user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -130,21 +141,21 @@ export default function ReportsPage() {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  const filteredDepartments = departments.filter((dept) => {
+  const filteredDepartments = safeDepartments.filter((dept) => {
     const matchesSearch =
       searchTerm === "" ||
       dept.name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
-  const filteredCategories = categories.filter((cat) => {
+  const filteredCategories = safeCategories.filter((cat) => {
     const matchesSearch =
       searchTerm === "" ||
       cat.name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
-  const filteredTickets = tickets.filter((ticket) => {
+  const filteredTickets = safeTickets.filter((ticket) => {
     const matchesSearch =
       searchTerm === "" ||
       ticket.title.toLowerCase().includes(searchTerm.toLowerCase());

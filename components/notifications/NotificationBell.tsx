@@ -13,19 +13,19 @@ interface NotificationBellProps {
 export function NotificationBell({
   role = "TECHNICIAN",
 }: NotificationBellProps) {
-  // Fallback hook implementation to avoid context errors
-  const mockNotifications = {
+  // Fallback for when context is not available
+  const fallbackNotifications = {
     notifications: [],
     unreadCount: 0,
-    markAsRead: () => {},
+    markAsRead: () => { },
   };
 
   let notificationData;
   try {
     notificationData = useNotifications();
   } catch (error) {
-    // Use mock data if context is not available
-    notificationData = mockNotifications;
+    // Use fallback if context is not available
+    notificationData = fallbackNotifications;
   }
 
   const { notifications, unreadCount, markAsRead } = notificationData;
@@ -51,7 +51,7 @@ export function NotificationBell({
         ? "/employee/notifications"
         : "/admin/notifications";
 
-  const preview = notifications.slice(0, 5);
+  const preview = (notifications || []).slice(0, 5);
 
   return (
     <div ref={containerRef} className="relative">

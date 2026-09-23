@@ -49,4 +49,49 @@ export class CommentController {
             return handleApiError(error);
         }
     }
+
+    async getCommentsForAgent(
+        request: NextRequest,
+        ticketId: string,
+    ): Promise<NextResponse> {
+        try {
+            const user = await requireAuth();
+            if (user.role !== "AGENT") {
+                return NextResponse.json(
+                    { error: "Unauthorized - Agent access required" },
+                    { status: 401 }
+                );
+            }
+
+            const comments = await this.service.getCommentsForAgent(ticketId, user);
+            return successResponse(comments);
+        } catch (error) {
+            return handleApiError(error);
+        }
+    }
+
+    async createCommentForAgent(
+        request: NextRequest,
+        ticketId: string,
+    ): Promise<NextResponse> {
+        try {
+            const user = await requireAuth();
+            if (user.role !== "AGENT") {
+                return NextResponse.json(
+                    { error: "Unauthorized - Agent access required" },
+                    { status: 401 }
+                );
+            }
+
+            const body = await validateBody(request, createCommentSchema);
+            const comment = await this.service.createCommentForAgent(
+                { content: body.content, ticketId, authorId: user.id },
+                user
+            );
+
+            return successResponse(comment, 201);
+        } catch (error) {
+            return handleApiError(error);
+        }
+    }
 }

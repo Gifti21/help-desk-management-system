@@ -95,7 +95,7 @@ export async function getTickets(filters?: {
   }
 
   const result = await response.json();
-  return result.data;
+  return Array.isArray(result) ? result : (result.data ?? []);
 }
 
 export async function getTicketPage(

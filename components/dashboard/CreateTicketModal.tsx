@@ -12,28 +12,38 @@ interface CreateTicketModalProps {
   onCreate?: (ticketData: any) => void;
 }
 
-export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, onClose, onCreate }) => {
+export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
+  isOpen,
+  onClose,
+  onCreate,
+}) => {
   const { addTicket } = useTickets();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<Priority>("MEDIUM");
-  
+
   // Cleanly using initial values directly from centralized exported constants
   const [category, setCategory] = useState("");
   const [department, setDepartment] = useState("");
-  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
-  const [departments, setDepartments] = useState<Array<{ id: string; name: string }>>([]);
+  const [categories, setCategories] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
+  const [departments, setDepartments] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
   const [error, setError] = useState("");
-  
+
   const [creatorName, setCreatorName] = useState("");
   const [creatorEmail, setCreatorEmail] = useState("");
-
-  if (!isOpen) return null;
 
   React.useEffect(() => {
     if (!isOpen) return;
     fetch("/api/ticket-form-data", { credentials: "include" })
-      .then((response) => response.ok ? response.json() : Promise.reject(new Error("Failed to load ticket options")))
+      .then((response) =>
+        response.ok
+          ? response.json()
+          : Promise.reject(new Error("Failed to load ticket options")),
+      )
       .then((data) => {
         setCategories(data.categories);
         setDepartments(data.departments);
@@ -43,20 +53,43 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
       .catch((loadError: Error) => setError(loadError.message));
   }, [isOpen]);
 
+  if (!isOpen) return null;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !description || !category || !department) return;
 
     try {
       setError("");
-      await addTicket({ title, description, priority, category, department, creatorName, creatorEmail, status: "OPEN" });
+      await addTicket({
+        title,
+        description,
+        priority,
+        category,
+        department,
+        creatorName,
+        creatorEmail,
+        status: "OPEN",
+      });
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Failed to create ticket");
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Failed to create ticket",
+      );
       return;
     }
 
     if (onCreate) {
-      onCreate({ title, description, priority, category, department, creatorName, creatorEmail });
+      onCreate({
+        title,
+        description,
+        priority,
+        category,
+        department,
+        creatorName,
+        creatorEmail,
+      });
     }
 
     setTitle("");
@@ -72,14 +105,18 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4">
-        
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <div className="flex items-center gap-2">
             <PlusCircle className="w-5 h-5 text-emerald-700" />
-            <h3 className="text-base font-bold text-slate-900">Log Ticket on Behalf of Employee</h3>
+            <h3 className="text-base font-bold text-slate-900">
+              Log Ticket on Behalf of Employee
+            </h3>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 rounded-lg p-1">
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 rounded-lg p-1"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -88,7 +125,9 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">Requester Full Name</label>
+              <label className="block text-slate-700 font-semibold mb-1">
+                Requester Full Name
+              </label>
               <input
                 type="text"
                 required
@@ -99,7 +138,9 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">Requester Email</label>
+              <label className="block text-slate-700 font-semibold mb-1">
+                Requester Email
+              </label>
               <input
                 type="email"
                 required
@@ -112,7 +153,9 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
           </div>
 
           <div>
-            <label className="block text-slate-700 font-semibold mb-1">Ticket Subject / Title</label>
+            <label className="block text-slate-700 font-semibold mb-1">
+              Ticket Subject / Title
+            </label>
             <input
               type="text"
               required
@@ -126,7 +169,9 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
           {/* Category and Department Dropdowns tied dynamically to CATEGORIES & DEPARTMENTS */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">Category (Issue Type)</label>
+              <label className="block text-slate-700 font-semibold mb-1">
+                Category (Issue Type)
+              </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -141,7 +186,9 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
             </div>
 
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">Department Allocation</label>
+              <label className="block text-slate-700 font-semibold mb-1">
+                Department Allocation
+              </label>
               <select
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
@@ -157,7 +204,9 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
           </div>
 
           <div>
-            <label className="block text-slate-700 font-semibold mb-1">Priority Level</label>
+            <label className="block text-slate-700 font-semibold mb-1">
+              Priority Level
+            </label>
             <select
               value={priority}
               onChange={(e) => setPriority(e.target.value as Priority)}
@@ -173,7 +222,9 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({ isOpen, on
           {error && <p className="text-sm text-rose-600">{error}</p>}
 
           <div>
-            <label className="block text-slate-700 font-semibold mb-1">Issue Details & Steps</label>
+            <label className="block text-slate-700 font-semibold mb-1">
+              Issue Details & Steps
+            </label>
             <textarea
               required
               rows={4}

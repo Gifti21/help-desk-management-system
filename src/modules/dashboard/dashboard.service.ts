@@ -25,6 +25,8 @@ export class DashboardService {
             totalDepartments,
             totalCategories,
             recentTickets,
+            ticketsByDepartment,
+            monthlyTickets,
         ] = await Promise.all([
             this.repository.countAllTickets(),
             this.repository.countTicketsByStatus("OPEN"),
@@ -35,23 +37,45 @@ export class DashboardService {
             this.repository.countActiveUsers(),
             this.repository.countAllDepartments(),
             this.repository.countAllCategories(),
-            this.repository.getRecentTickets(5),
+            this.repository.getRecentTickets(50),
+            this.repository.getTicketsByDepartment(),
+            this.repository.getMonthlyTickets(),
         ]);
 
+        // Calculate closed today
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const closedToday = recentTickets.filter(ticket => {
+            if (!ticket.closedAt) return false;
+            const closedDate = new Date(ticket.closedAt);
+            return closedDate >= today;
+        }).length;
+
+        // Calculate overdue tickets (OPEN or IN_PROGRESS for more than 7 days)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const overdueTickets = recentTickets.filter(ticket => {
+            if (ticket.status === "RESOLVED" || ticket.status === "CLOSED") return false;
+            const createdDate = new Date(ticket.createdAt);
+            return createdDate < sevenDaysAgo;
+        }).length;
+
         return {
-            tickets: {
-                total: totalTickets,
-                open: openTickets,
-                inProgress: inProgressTickets,
-                resolved: resolvedTickets,
-                closed: closedTickets,
+            stats: {
+                totalTickets,
+                openTickets,
+                closedToday,
+                overdueTickets,
             },
-            users: {
-                total: totalUsers,
-                active: activeUsers,
+            charts: {
+                ticketsByStatus: {
+                    resolved: resolvedTickets,
+                    active: openTickets + inProgressTickets,
+                    overdue: overdueTickets,
+                },
+                ticketsByDepartment: ticketsByDepartment || [],
+                monthlyTickets: monthlyTickets || { labels: [], data: [] },
             },
-            departments: totalDepartments,
-            categories: totalCategories,
             recentTickets,
         };
     }

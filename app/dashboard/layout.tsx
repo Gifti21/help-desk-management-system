@@ -1,17 +1,14 @@
-import { AgentShell } from "@/components/layout/AgentShell";
 import { getSessionUser } from "@/lib/session";
 import { redirect } from "next/navigation";
 
-export default async function AgentLayout({
+export default async function DashboardLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}: Readonly<{ children: React.ReactNode }>) {
   const user = await getSessionUser();
 
   if (!user || user.role !== "AGENT") {
     redirect("/login");
   }
 
-  return <AgentShell>{children}</AgentShell>;
+  return children;
 }

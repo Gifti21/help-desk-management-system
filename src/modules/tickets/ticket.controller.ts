@@ -89,4 +89,49 @@ export class TicketController {
             return handleApiError(error);
         }
     }
+
+    async getTicketsForEmployee(request: NextRequest): Promise<NextResponse> {
+        try {
+            const user = await requireAuth();
+            if (user.role !== "EMPLOYEE") {
+                return NextResponse.json(
+                    { error: "Unauthorized - Employee access required" },
+                    { status: 401 }
+                );
+            }
+
+            const { page, pageSize, paginated, filters } = parseQueryParams(request.url);
+            const { tickets, total } = await this.service.getEmployeeTickets(
+                user.id,
+                filters,
+                paginated ? page : undefined,
+                pageSize
+            );
+
+            return paginated
+                ? paginatedResponse(tickets, total, page, pageSize!)
+                : successResponse(tickets);
+        } catch (error) {
+            return handleApiError(error);
+        }
+    }
+
+    async createTicketForEmployee(request: NextRequest): Promise<NextResponse> {
+        try {
+            const user = await requireAuth();
+            if (user.role !== "EMPLOYEE") {
+                return NextResponse.json(
+                    { error: "Unauthorized - Employee access required" },
+                    { status: 401 }
+                );
+            }
+
+            const dto = await validateBody(request, createTicketSchema);
+            const ticket = await this.service.createEmployeeTicket(dto, user);
+
+            return successResponse(ticket, 201);
+        } catch (error) {
+            return handleApiError(error);
+        }
+    }
 }

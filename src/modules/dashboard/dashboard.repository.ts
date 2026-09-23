@@ -58,6 +58,7 @@ export class DashboardRepository {
                         id: true,
                         firstName: true,
                         lastName: true,
+                        email: true,
                     },
                 },
                 assignee: {
@@ -65,6 +66,7 @@ export class DashboardRepository {
                         id: true,
                         firstName: true,
                         lastName: true,
+                        email: true,
                     },
                 },
             },
@@ -107,5 +109,58 @@ export class DashboardRepository {
                 },
             },
         });
+    }
+
+    // Analytics
+    async getTicketsByDepartment() {
+        const tickets = await prisma.ticket.groupBy({
+            by: ['departmentId'],
+            _count: { id: true },
+            orderBy: { _count: { id: 'desc' } },
+        });
+
+        const departments = await prisma.department.findMany({
+            where: { id: { in: tickets.map(t => t.departmentId) } },
+            select: { id: true, name: true },
+        });
+
+        return tickets.map(ticket => {
+            const dept = departments.find(d => d.id === ticket.departmentId);
+            return {
+                department: dept?.name || 'Unknown',
+                count: ticket._count.id,
+            };
+        });
+    }
+
+    async getMonthlyTickets() {
+        const tickets = await prisma.ticket.findMany({
+            select: { createdAt: true },
+            orderBy: { createdAt: 'asc' },
+        });
+
+        // Group by month
+        const monthlyData: Record<string, number> = {};
+        tickets.forEach(ticket => {
+            const date = new Date(ticket.createdAt);
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            monthlyData[monthKey] = (monthlyData[monthKey] || 0) + 1;
+        });
+
+        // Get last 6 months
+        const now = new Date();
+        const labels: string[] = [];
+        const data: number[] = [];
+
+        for (let i = 5; i >= 0; i--) {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            const monthName = date.toLocaleString('default', { month: 'short' });
+
+            labels.push(monthName);
+            data.push(monthlyData[monthKey] || 0);
+        }
+
+        return { labels, data };
     }
 }

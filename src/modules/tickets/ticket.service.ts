@@ -253,4 +253,43 @@ export class TicketService {
 
         return await this.repository.delete(id);
     }
+
+    async getEmployeeTickets(
+        employeeId: string,
+        filters: TicketFilters,
+        page?: number,
+        pageSize?: number,
+    ) {
+        // Force requester filter for employee
+        const employeeFilters = { ...filters, requesterId: employeeId };
+
+        if (pageSize) {
+            const [tickets, total] = await Promise.all([
+                this.repository.findAll(employeeFilters, page, pageSize),
+                this.repository.count(employeeFilters),
+            ]);
+            return { tickets, total };
+        }
+
+        const tickets = await this.repository.findAll(employeeFilters);
+        return { tickets, total: tickets.length };
+    }
+
+    async createEmployeeTicket(dto: CreateTicketDto, user: SessionUser) {
+        // Employee must have a department
+        if (!user.departmentId) {
+            throw new ValidationError("Employee must be assigned to a department");
+        }
+
+        // Employee creates ticket for themselves in their department
+        return await this.repository.create({
+            title: dto.title,
+            description: dto.description,
+            category: { connect: { id: dto.categoryId } },
+            department: { connect: { id: user.departmentId } },
+            priority: dto.priority,
+            status: "OPEN",
+            requester: { connect: { id: user.id } },
+        });
+    }
 }

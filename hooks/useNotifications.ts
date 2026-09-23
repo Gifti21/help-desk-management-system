@@ -25,12 +25,30 @@ export function useNotifications(): UseNotificationsResult {
         cache: "no-store",
       });
       if (!response.ok) throw new Error("Failed to load notifications");
-      const data = (await response.json()) as {
-        notifications: Notification[];
-        unreadCount: number;
+      const result = (await response.json()) as {
+        data?:
+          | Notification[]
+          | { notifications?: Notification[]; unreadCount?: number };
+        notifications?: Notification[];
+        unreadCount?: number;
       };
-      setNotifications(data.notifications);
-      setUnreadCount(data.unreadCount);
+      const payload = result.data;
+      const notifications = Array.isArray(payload)
+        ? payload
+        : Array.isArray(result.notifications)
+          ? result.notifications
+          : Array.isArray(payload?.notifications)
+            ? payload.notifications
+            : [];
+      const unreadCount =
+        typeof result.unreadCount === "number"
+          ? result.unreadCount
+          : typeof payload?.unreadCount === "number"
+            ? payload.unreadCount
+            : notifications.filter((notification) => !notification.read).length;
+
+      setNotifications(notifications);
+      setUnreadCount(unreadCount);
     } catch {
       setNotifications([]);
       setUnreadCount(0);

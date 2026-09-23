@@ -10,13 +10,13 @@ export function getTicketFilterForRole(user: SessionUser): {
     assigneeId?: string;
 } {
     if (user.role === "EMPLOYEE") {
-        // EMPLOYEE: Only tickets where requesterId == currentUserId
+        
         return { requesterId: user.id };
     } else if (user.role === "AGENT") {
-        // AGENT: Only tickets where assigneeId == currentUserId
+       
         return { assigneeId: user.id };
     }
-    // ADMIN: No filter (sees all tickets)
+    
     return {};
 }
 
@@ -62,23 +62,14 @@ export function canDeleteTicket(user: SessionUser): boolean {
     return user.role === "ADMIN";
 }
 
-/**
- * Check if user can assign tickets
- */
 export function canAssignTicket(user: SessionUser): boolean {
     return user.role === "ADMIN";
 }
 
-/**
- * Check if user can create ticket for others
- */
 export function canCreateTicketForOthers(user: SessionUser): boolean {
     return user.role === "ADMIN";
 }
 
-/**
- * Enforce permission - throws if not allowed
- */
 export function enforcePermission(allowed: boolean, message?: string): void {
     if (!allowed) {
         throw new ForbiddenError(message || "Access denied");
