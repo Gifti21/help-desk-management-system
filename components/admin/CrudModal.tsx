@@ -130,7 +130,7 @@ export function CrudModal({
     title
 }: CrudModalProps) {
     const { colors: theme } = useTheme();
-    const { addToast } = useToast();
+    const { toast } = useToast();
     const [formData, setFormData] = useState<Record<string, string>>({});
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
@@ -186,11 +186,7 @@ export function CrudModal({
     // Handle form submission
     const handleSubmit = async () => {
         if (!validateForm()) {
-            addToast({
-                type: 'error',
-                title: 'Validation Error',
-                message: 'Please fix the errors below and try again.'
-            });
+            toast('Please fix the errors below and try again.', 'error');
             return;
         }
 
@@ -198,18 +194,10 @@ export function CrudModal({
 
         try {
             await onSubmit(formData);
-            addToast({
-                type: 'success',
-                title: mode === 'create' ? 'Created Successfully' : 'Updated Successfully',
-                message: `${type.charAt(0).toUpperCase() + type.slice(1)} has been ${mode === 'create' ? 'created' : 'updated'} successfully.`
-            });
+            toast(`${type.charAt(0).toUpperCase() + type.slice(1)} has been ${mode === 'create' ? 'created' : 'updated'} successfully.`, 'success');
             onClose();
         } catch (error) {
-            addToast({
-                type: 'error',
-                title: 'Error',
-                message: `Failed to ${mode} ${type}. Please try again.`
-            });
+            toast(`Failed to ${mode} ${type}. Please try again.`, 'error');
         } finally {
             setIsLoading(false);
         }
