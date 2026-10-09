@@ -62,7 +62,7 @@ export default function TicketDetailPage({ params }: TicketDetailPageProps) {
         fontFamily: FONT_FAMILY.primary,
       }}
     >
-      <main className="mx-auto w-full max-w-[1100px] px-4 py-6 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-275 px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-6">
           <Link href="/tickets">
             <Button variant="ghost" className="px-0">

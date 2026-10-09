@@ -3,17 +3,35 @@
 import React from "react";
 import { Comment } from "@/types/ticket";
 import { MessageSquare, UserCheck, ShieldAlert, User } from "lucide-react";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface CommentThreadProps {
   comments: Comment[];
+  loading?: boolean;
 }
 
-export const CommentThread: React.FC<CommentThreadProps> = ({ comments }) => {
+export const CommentThread: React.FC<CommentThreadProps> = ({
+  comments,
+  loading = false,
+}) => {
+  if (loading) {
+    return (
+      <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl text-center space-y-3">
+        <Spinner className="h-6 w-6 mx-auto" label="Loading comments" />
+        <p className="text-xs text-slate-500 italic">
+          Loading communication history...
+        </p>
+      </div>
+    );
+  }
+
   if (!comments || comments.length === 0) {
     return (
       <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl text-center space-y-2">
         <MessageSquare className="w-6 h-6 text-slate-400 mx-auto" />
-        <p className="text-xs text-slate-500 italic">No communication thread or internal notes yet.</p>
+        <p className="text-xs text-slate-500 italic">
+          No communication thread or internal notes yet.
+        </p>
       </div>
     );
   }
@@ -43,7 +61,8 @@ export const CommentThread: React.FC<CommentThreadProps> = ({ comments }) => {
 
   const getAuthorName = (comment: Comment) => {
     if (comment.authorName) return comment.authorName;
-    if (comment.author) return `${comment.author.firstName} ${comment.author.lastName}`.trim();
+    if (comment.author)
+      return `${comment.author.firstName} ${comment.author.lastName}`.trim();
     return "User";
   };
 
@@ -79,7 +98,9 @@ export const CommentThread: React.FC<CommentThreadProps> = ({ comments }) => {
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-bold text-xs text-slate-900">{authorName}</span>
+                  <span className="font-bold text-xs text-slate-900">
+                    {authorName}
+                  </span>
                   {getRoleBadge(authorRole)}
                 </div>
                 <span className="text-[10px] font-mono text-slate-400 shrink-0">
@@ -91,7 +112,9 @@ export const CommentThread: React.FC<CommentThreadProps> = ({ comments }) => {
                   })}
                 </span>
               </div>
-              <p className="text-xs text-slate-800 leading-relaxed whitespace-pre-wrap">{comment.content}</p>
+              <p className="text-xs text-slate-800 leading-relaxed whitespace-pre-wrap">
+                {comment.content}
+              </p>
             </div>
           );
         })}
