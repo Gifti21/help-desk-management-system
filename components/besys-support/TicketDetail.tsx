@@ -13,6 +13,7 @@ import { TicketHeader } from "./TicketDetail/TicketHeader";
 import { TicketDescription } from "./TicketDetail/TicketDescription";
 import { TicketComments } from "./TicketDetail/TicketComments";
 import type { Ticket, Comment } from "@/lib/types/ticket";
+import { handleJsonResponse } from "@/lib/api-client";
 
 export function TicketDetail() {
   const params = useParams();
@@ -28,7 +29,7 @@ export function TicketDetail() {
           credentials: "include",
         });
         if (!response.ok) return;
-        const data = await response.json();
+        const data = await handleJsonResponse(response);
         const comments: Comment[] = (data.comments || []).map(
           (comment: any) => ({
             id: comment.id,

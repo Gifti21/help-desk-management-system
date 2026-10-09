@@ -1,4 +1,5 @@
 // API service for Settings
+import { handleJsonResponse } from "@/lib/api-client";
 
 export interface SystemInfo {
     version: string;
@@ -26,12 +27,7 @@ export async function getSettings(): Promise<SettingsData> {
         credentials: 'include',
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch settings');
-    }
-
-    const result = await response.json();
+    const result = await handleJsonResponse(response);
     return result.data;
 }
 
@@ -49,8 +45,5 @@ export async function updateAdminProfile(data: {
         body: JSON.stringify(data),
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to update profile');
-    }
+    await handleJsonResponse(response);
 }

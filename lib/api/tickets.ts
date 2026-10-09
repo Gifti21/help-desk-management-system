@@ -1,4 +1,5 @@
 // API service for Ticket operations
+import { handleJsonResponse } from "@/lib/api-client";
 
 export interface Ticket {
   id: string;
@@ -89,12 +90,7 @@ export async function getTickets(filters?: {
     credentials: "include",
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to fetch tickets");
-  }
-
-  const result = await response.json();
+  const result = await handleJsonResponse(response);
   return Array.isArray(result) ? result : (result.data ?? []);
 }
 
@@ -114,10 +110,7 @@ export async function getTicketPage(
   const response = await fetch(`/api/admin/tickets?${params}`, {
     credentials: "include",
   });
-  const result = await response.json();
-  if (!response.ok)
-    throw new Error(result.error || "Failed to fetch ticket page");
-  return result;
+  return await handleJsonResponse<TicketPage>(response);
 }
 
 export async function createTicket(data: TicketCreateData): Promise<Ticket> {
@@ -130,12 +123,7 @@ export async function createTicket(data: TicketCreateData): Promise<Ticket> {
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to create ticket");
-  }
-
-  const result = await response.json();
+  const result = await handleJsonResponse(response);
   return result.data;
 }
 
@@ -152,12 +140,7 @@ export async function updateTicket(
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to update ticket");
-  }
-
-  const result = await response.json();
+  const result = await handleJsonResponse(response);
   return result.data;
 }
 
@@ -167,8 +150,5 @@ export async function deleteTicket(id: string): Promise<void> {
     credentials: "include",
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to delete ticket");
-  }
+  await handleJsonResponse(response);
 }

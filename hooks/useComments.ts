@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { handleJsonResponse } from '@/lib/api-client';
 import type { Comment, CreateCommentPayload } from '@/types/comment';
 
 type UseCommentsResult = {
@@ -26,11 +27,7 @@ export function useComments(ticketId: string): UseCommentsResult {
 
     try {
       const response = await fetch(`/api/tickets/${ticketId}/comments`);
-      if (!response.ok) {
-        throw new Error('Failed to load comments');
-      }
-
-      const data = await response.json();
+      const data = await handleJsonResponse(response);
       setComments(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load comments');
@@ -54,11 +51,7 @@ export function useComments(ticketId: string): UseCommentsResult {
           body: JSON.stringify(payload),
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to add comment');
-        }
-
-        const created = await response.json();
+        const created = await handleJsonResponse(response);
         setComments((current) => [...current, created]);
         return true;
       } catch (err) {

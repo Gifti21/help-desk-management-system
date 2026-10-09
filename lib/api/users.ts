@@ -1,4 +1,5 @@
 // API service for User operations
+import { handleJsonResponse } from "@/lib/api-client";
 
 export interface User {
     id: string;
@@ -56,12 +57,7 @@ export async function getUsers(filters?: {
         credentials: 'include',
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch users');
-    }
-
-    const result = await response.json();
+    const result = await handleJsonResponse(response);
     return result.data;
 }
 
@@ -75,22 +71,7 @@ export async function createUser(data: UserCreateData): Promise<User> {
         body: JSON.stringify(data),
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        console.error('Create user API error:', error);
-
-        // Show detailed validation message if available
-        if (error.message) {
-            throw new Error(error.message);
-        } else if (error.details && Array.isArray(error.details)) {
-            const messages = error.details.map((d: any) => `${d.path?.join('.')}: ${d.message}`).join(', ');
-            throw new Error(messages || 'Validation failed');
-        } else {
-            throw new Error(error.error || 'Failed to create user');
-        }
-    }
-
-    const result = await response.json();
+    const result = await handleJsonResponse(response);
     return result.data;
 }
 
@@ -104,12 +85,7 @@ export async function updateUser(id: string, data: UserUpdateData): Promise<User
         body: JSON.stringify(data),
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to update user');
-    }
-
-    const result = await response.json();
+    const result = await handleJsonResponse(response);
     return result.data;
 }
 
@@ -119,8 +95,5 @@ export async function deleteUser(id: string): Promise<void> {
         credentials: 'include',
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to delete user');
-    }
+    await handleJsonResponse(response);
 }

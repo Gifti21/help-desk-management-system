@@ -1,4 +1,5 @@
 // API service for Category operations
+import { handleJsonResponse } from "@/lib/api-client";
 
 export interface Category {
     id: string;
@@ -23,12 +24,7 @@ export async function getCategories(): Promise<Category[]> {
         credentials: 'include',
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch categories');
-    }
-
-    const result = await response.json();
+    const result = await handleJsonResponse(response);
     return result.data;
 }
 
@@ -42,12 +38,7 @@ export async function createCategory(data: CategoryCreateData): Promise<Category
         body: JSON.stringify(data),
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create category');
-    }
-
-    const result = await response.json();
+    const result = await handleJsonResponse(response);
     return result.data;
 }
 
@@ -61,12 +52,7 @@ export async function updateCategory(id: string, data: CategoryUpdateData): Prom
         body: JSON.stringify(data),
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to update category');
-    }
-
-    const result = await response.json();
+    const result = await handleJsonResponse(response);
     return result.data;
 }
 
@@ -76,8 +62,5 @@ export async function deleteCategory(id: string): Promise<void> {
         credentials: 'include',
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to delete category');
-    }
+    await handleJsonResponse(response);
 }

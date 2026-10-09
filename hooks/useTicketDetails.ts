@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { mapApiTicket } from '@/lib/ticketMapper';
+import { handleJsonResponse } from '@/lib/api-client';
 import type { Ticket, TicketPriority, TicketStatus } from '@/types/ticket';
 
 type UseTicketDetailsResult = {
@@ -27,11 +28,7 @@ export function useTicketDetails(ticketId: string): UseTicketDetailsResult {
 
     try {
       const response = await fetch(`/api/tickets/${ticketId}`);
-      if (!response.ok) {
-        throw new Error('Failed to load ticket');
-      }
-
-      const data = await response.json();
+      const data = await handleJsonResponse(response);
       setTicket(mapApiTicket(data));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load ticket');
@@ -52,11 +49,7 @@ export function useTicketDetails(ticketId: string): UseTicketDetailsResult {
           body: JSON.stringify(payload),
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to update ticket');
-        }
-
-        const data = await response.json();
+        const data = await handleJsonResponse(response);
         setTicket(mapApiTicket(data));
         return true;
       } catch (err) {

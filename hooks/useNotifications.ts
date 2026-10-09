@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { handleJsonResponse } from "@/lib/api-client";
 import type { Notification } from "@/types/notification";
 
 type UseNotificationsResult = {
@@ -24,8 +25,7 @@ export function useNotifications(): UseNotificationsResult {
         credentials: "include",
         cache: "no-store",
       });
-      if (!response.ok) throw new Error("Failed to load notifications");
-      const result = (await response.json()) as {
+      const result = (await handleJsonResponse(response)) as {
         data?:
           | Notification[]
           | { notifications?: Notification[]; unreadCount?: number };
@@ -37,15 +37,15 @@ export function useNotifications(): UseNotificationsResult {
         ? payload
         : Array.isArray(result.notifications)
           ? result.notifications
-          : Array.isArray(payload?.notifications)
-            ? payload.notifications
+          : Array.isArray((payload as any)?.notifications)
+            ? (payload as any).notifications
             : [];
       const unreadCount =
         typeof result.unreadCount === "number"
           ? result.unreadCount
-          : typeof payload?.unreadCount === "number"
-            ? payload.unreadCount
-            : notifications.filter((notification) => !notification.read).length;
+          : typeof (payload as any)?.unreadCount === "number"
+            ? (payload as any).unreadCount
+            : notifications.filter((notification: Notification) => !notification.read).length;
 
       setNotifications(notifications);
       setUnreadCount(unreadCount);
@@ -71,7 +71,7 @@ export function useNotifications(): UseNotificationsResult {
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ notificationId: id }),
-    });
+    }).catch(() => {});
   }, []);
 
   const markAllAsRead = useCallback(async () => {
@@ -84,7 +84,7 @@ export function useNotifications(): UseNotificationsResult {
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ all: true }),
-    });
+    }).catch(() => {});
   }, []);
 
   return {

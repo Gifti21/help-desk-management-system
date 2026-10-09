@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { mapApiTicket } from '@/lib/ticketMapper';
 import { useAuth } from '@/hooks/useAuth';
+import { handleJsonResponse } from '@/lib/api-client';
 import type { Ticket } from '@/types/ticket';
 
 type UseTicketsOptions = {
@@ -30,15 +31,11 @@ export function useTickets(options: UseTicketsOptions = {}): UseTicketsResult {
 
     try {
       const response = await fetch('/api/tickets');
-      if (!response.ok) {
-        throw new Error('Failed to load tickets');
-      }
-
-      const data = await response.json();
-      let mapped = (Array.isArray(data) ? data : []).map(mapApiTicket);
+      const data = await handleJsonResponse(response);
+      let mapped = (Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []).map(mapApiTicket);
 
       if (assignedOnly && user?.id) {
-        mapped = mapped.filter((ticket) => ticket.assigneeId === user.id);
+        mapped = mapped.filter((ticket: Ticket) => ticket.assigneeId === user.id);
       }
 
       setTickets(mapped);

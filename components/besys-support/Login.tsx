@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { PAGE_BACKGROUND, BORDER_GREY, PRIMARY_TEXT } from "@/lib/colors";
 import { LoginLeftPanel } from "./Login/LoginLeftPanel";
 import { LoginForm } from "./Login/LoginForm";
+import { handleJsonResponse } from "@/lib/api-client";
 
 export default function Login() {
   const router = useRouter();
@@ -43,10 +44,10 @@ export default function Login() {
         }),
       });
 
-      const data = await response.json();
+      const data = await handleJsonResponse(response);
       console.log('[LOGIN] Response:', { success: data.success, role: data.user?.role });
 
-      if (!response.ok || !data.success) {
+      if (!data.success) {
         console.error('[LOGIN] Login failed:', data.error);
         setShowError(true);
         setIsLoading(false);

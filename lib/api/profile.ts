@@ -1,4 +1,5 @@
 // API service for Profile
+import { handleJsonResponse } from "@/lib/api-client";
 
 export interface UserProfile {
     id: string;
@@ -33,12 +34,7 @@ export async function getProfile(): Promise<UserProfile> {
         credentials: 'include',
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch profile');
-    }
-
-    const result = await response.json();
+    const result = await handleJsonResponse(response);
     return result.data;
 }
 
@@ -52,12 +48,7 @@ export async function updateProfile(data: ProfileUpdateData): Promise<UserProfil
         body: JSON.stringify(data),
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to update profile');
-    }
-
-    const result = await response.json();
+    const result = await handleJsonResponse(response);
     return result.data;
 }
 
@@ -71,8 +62,5 @@ export async function changePassword(data: PasswordChangeData): Promise<void> {
         body: JSON.stringify(data),
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to change password');
-    }
+    await handleJsonResponse(response);
 }

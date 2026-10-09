@@ -1,4 +1,5 @@
 // API service for Dashboard
+import { handleJsonResponse } from "@/lib/api-client";
 
 export interface DashboardData {
   stats: {
@@ -55,11 +56,6 @@ export async function getDashboardData(): Promise<DashboardData> {
     credentials: "include",
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to fetch dashboard data");
-  }
-
-  const result = await response.json();
+  const result = await handleJsonResponse(response);
   return result.data;
 }

@@ -5,9 +5,10 @@ export interface AgentProfile {
   lastName: string;
 }
 
+import { handleJsonResponse } from "@/lib/api-client";
+
 async function parseResponse(response: Response) {
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.error || "Request failed");
+  const result = await handleJsonResponse(response);
   return result.data;
 }
 

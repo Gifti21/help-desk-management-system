@@ -23,6 +23,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import type { Ticket, Comment } from "@/lib/types/ticket";
+import { handleJsonResponse } from "@/lib/api-client";
 
 interface TicketCommentsProps {
   ticket: Ticket;
@@ -49,12 +50,7 @@ export function TicketComments({ ticket }: TicketCommentsProps) {
           body: JSON.stringify({ content: newComment.trim() }),
         });
 
-        if (!response.ok) {
-          const result = await response.json();
-          throw new Error(result.error || "Failed to post comment");
-        }
-
-        const comment = await response.json();
+        const comment = await handleJsonResponse(response);
         const authorName = comment.author
           ? `${comment.author.firstName} ${comment.author.lastName}`
           : "You";

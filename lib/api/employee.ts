@@ -1,4 +1,5 @@
 // API service for Employee Portal
+import { handleJsonResponse } from "@/lib/api-client";
 
 export interface EmployeeDashboardData {
   stats: {
@@ -61,12 +62,7 @@ export async function getEmployeeDashboard(): Promise<EmployeeDashboardData> {
     credentials: "include",
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to fetch dashboard data");
-  }
-
-  const result = await response.json();
+  const result = await handleJsonResponse(response);
   return result.data;
 }
 
@@ -86,12 +82,7 @@ export async function getEmployeeTickets(
     credentials: "include",
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to fetch tickets");
-  }
-
-  const result = await response.json();
+  const result = await handleJsonResponse(response);
   return result.data;
 }
 
@@ -110,10 +101,7 @@ export async function getEmployeeTicketPage(
   const response = await fetch(`/api/employee/tickets?${params}`, {
     credentials: "include",
   });
-  const result = await response.json();
-  if (!response.ok)
-    throw new Error(result.error || "Failed to fetch ticket page");
-  return result;
+  return await handleJsonResponse<EmployeeTicketPage>(response);
 }
 
 /**
@@ -131,12 +119,7 @@ export async function createEmployeeTicket(
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to create ticket");
-  }
-
-  const result = await response.json();
+  const result = await handleJsonResponse(response);
   return result.data;
 }
 
@@ -159,12 +142,7 @@ export async function getEmployeeProfile(): Promise<{
     credentials: "include",
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to fetch profile");
-  }
-
-  const result = await response.json();
+  const result = await handleJsonResponse(response);
   return result.data;
 }
 
@@ -185,12 +163,7 @@ export async function updateEmployeeProfile(data: {
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to update profile");
-  }
-
-  const result = await response.json();
+  const result = await handleJsonResponse(response);
   return result.data;
 }
 
@@ -211,10 +184,7 @@ export async function changeEmployeePassword(data: {
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to change password");
-  }
+  await handleJsonResponse(response);
 }
 
 /**
@@ -229,11 +199,6 @@ export async function getTicketFormData(): Promise<{
     credentials: "include",
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to fetch form data");
-  }
-
-  const result = await response.json();
+  const result = await handleJsonResponse(response);
   return result.data;
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Ticket } from "@/types/ticket";
 import type { User, UserRole } from "@/types/user";
+import { handleJsonResponse } from "@/lib/api-client";
 
 type UseAuthResult = {
   user: User | null;
@@ -20,9 +21,8 @@ export function useAuth(): UseAuthResult {
 
   useEffect(() => {
     fetch("/api/auth/me", { credentials: "include" })
-      .then(async (response) => {
-        if (!response.ok) return null;
-        const result = await response.json();
+      .then((response) => handleJsonResponse(response))
+      .then((result) => {
         const sessionUser = result.user;
         return sessionUser
           ? {

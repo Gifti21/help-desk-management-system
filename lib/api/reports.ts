@@ -1,4 +1,5 @@
 // API service for Reports
+import { handleJsonResponse } from "@/lib/api-client";
 
 export interface ReportsData {
     overview: {
@@ -28,11 +29,6 @@ export async function getReports(): Promise<ReportsData> {
         credentials: 'include',
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch reports');
-    }
-
-    const result = await response.json();
+    const result = await handleJsonResponse(response);
     return result.data;
 }

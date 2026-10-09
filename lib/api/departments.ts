@@ -2,6 +2,7 @@
  * Department API Service
  * Handles all department-related API calls
  */
+import { handleJsonResponse } from "@/lib/api-client";
 
 export interface Department {
     id: string;
@@ -33,11 +34,7 @@ export async function getDepartments(): Promise<Department[]> {
         credentials: 'include',
     });
 
-    if (!response.ok) {
-        throw new Error('Failed to fetch departments');
-    }
-
-    const data = await response.json();
+    const data = await handleJsonResponse(response);
     return data.data;
 }
 
@@ -53,11 +50,7 @@ export async function getDepartment(id: string): Promise<Department> {
         credentials: 'include',
     });
 
-    if (!response.ok) {
-        throw new Error('Failed to fetch department');
-    }
-
-    const data = await response.json();
+    const data = await handleJsonResponse(response);
     return data.data;
 }
 
@@ -74,12 +67,7 @@ export async function createDepartment(dto: CreateDepartmentDto): Promise<Depart
         body: JSON.stringify(dto),
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create department');
-    }
-
-    const data = await response.json();
+    const data = await handleJsonResponse(response);
     return data.data;
 }
 
@@ -96,12 +84,7 @@ export async function updateDepartment(id: string, dto: UpdateDepartmentDto): Pr
         body: JSON.stringify(dto),
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to update department');
-    }
-
-    const data = await response.json();
+    const data = await handleJsonResponse(response);
     return data.data;
 }
 
@@ -117,8 +100,5 @@ export async function deleteDepartment(id: string): Promise<void> {
         credentials: 'include',
     });
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to delete department');
-    }
+    await handleJsonResponse(response);
 }

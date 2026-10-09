@@ -28,6 +28,7 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import { FONT_FAMILY } from "@/lib/fonts";
+import { handleJsonResponse } from "@/lib/api-client";
 
 export default function TechnicianDashboard() {
   const { user } = useAuth();
@@ -65,11 +66,7 @@ export default function TechnicianDashboard() {
 
   useEffect(() => {
     fetch("/api/ticket-form-data", { credentials: "include" })
-      .then((response) =>
-        response.ok
-          ? response.json()
-          : Promise.reject(new Error("Failed to load departments")),
-      )
+      .then((response) => handleJsonResponse(response))
       .then((data) => setDepartments(data.departments))
       .catch((error) =>
         console.error("Failed to load technician departments:", error),

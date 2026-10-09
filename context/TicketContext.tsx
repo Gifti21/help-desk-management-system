@@ -15,6 +15,7 @@ import {
   TimelineEntry,
   getReferenceName,
 } from "@/types/ticket";
+import { handleJsonResponse } from "@/lib/api-client";
 
 export interface AppNotification {
   id: string;
@@ -354,11 +355,9 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
         const response = await fetch("/api/tickets", {
           credentials: "include",
         });
-        if (!response.ok) throw new Error("Failed to load tickets");
-
-        const data = await response.json();
+        const data = await handleJsonResponse(response);
         setTickets(
-          data.map((ticket: any) => ({
+          (Array.isArray(data) ? data : data?.data || []).map((ticket: any) => ({
             ...ticket,
             ticketNumber: ticket.ticketNumber || ticket.id,
             category: getReferenceName(ticket.category),
@@ -428,8 +427,7 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
     const formDataResponse = await fetch("/api/ticket-form-data", {
       credentials: "include",
     });
-    if (!formDataResponse.ok) throw new Error("Failed to load ticket options");
-    const formData = await formDataResponse.json();
+    const formData = await handleJsonResponse(formDataResponse);
     const category = formData.categories.find((item: { name: string }) => item.name === newTicketData.category);
     const department = formData.departments.find((item: { name: string }) => item.name === newTicketData.department);
     if (!category || !department) throw new Error("Ticket category or department is no longer available");
@@ -447,8 +445,7 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
         requesterEmail: newTicketData.creatorEmail,
       }),
     });
-    if (!response.ok) throw new Error((await response.json()).error || "Failed to create ticket");
-    const createdTicket = await response.json();
+    const createdTicket = await handleJsonResponse(response);
     setTickets((prev) => [createdTicket, ...prev]);
   };
 
@@ -484,23 +481,7 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
         body: JSON.stringify({ status }),
       });
 
-      console.log('Response status:', response.status, response.statusText);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error Response:', errorText);
-
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch {
-          errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
-        }
-
-        throw new Error(errorData.error || `Failed to update ticket status (${response.status})`);
-      }
-
-      const updatedTicket = await response.json();
+      const updatedTicket = await handleJsonResponse(response);
       console.log('Successfully updated ticket:', updatedTicket);
     } catch (error) {
       console.error('Update ticket failed:', error);
@@ -550,12 +531,7 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
       body: JSON.stringify({ priority }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-      throw new Error(errorData.error || `Failed to update ticket priority (${response.status})`);
-    }
-
-    const updatedTicket = await response.json();
+    const updatedTicket = await handleJsonResponse(response);
 
     setTickets((prev) =>
       prev.map((t) => {
@@ -594,7 +570,7 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
       credentials: "include",
       body: JSON.stringify({ status: "IN_PROGRESS" }),
     });
-    if (!response.ok) throw new Error("Failed to reopen ticket");
+    await handleJsonResponse(response);
 
     setTickets((prev) =>
       prev.map((t) => {
@@ -649,7 +625,7 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
       credentials: "include",
       body: JSON.stringify({ content }),
     });
-    if (!response.ok) throw new Error("Failed to add comment");
+    await handleJsonResponse(response);
 
     const timestamp = new Date().toISOString();
     const newComment: Comment = {

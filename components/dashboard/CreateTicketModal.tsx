@@ -5,6 +5,7 @@ import { X, PlusCircle } from "lucide-react";
 import { Priority } from "@/types/ticket";
 import { useTickets } from "@/context/TicketContext";
 import { BUTTONS } from "@/lib/colors";
+import { handleJsonResponse } from "@/lib/api-client";
 
 interface CreateTicketModalProps {
   isOpen: boolean;
@@ -39,11 +40,7 @@ export const CreateTicketModal: React.FC<CreateTicketModalProps> = ({
   React.useEffect(() => {
     if (!isOpen) return;
     fetch("/api/ticket-form-data", { credentials: "include" })
-      .then((response) =>
-        response.ok
-          ? response.json()
-          : Promise.reject(new Error("Failed to load ticket options")),
-      )
+      .then((response) => handleJsonResponse(response))
       .then((data) => {
         setCategories(data.categories);
         setDepartments(data.departments);
